@@ -1,0 +1,18 @@
+.radio-button {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem;
+  cursor: pointer;
+
+  * {
+    color: white;
+    cursor: pointer;
+  }
+
+  &.select {
+    background-color: rgb(0, 174, 255);
+  }
+}

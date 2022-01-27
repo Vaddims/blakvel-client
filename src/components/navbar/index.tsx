@@ -1,4 +1,4 @@
-import { useEffect, useRef, MouseEvent } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRedirection } from '../../utils/hooks/useRedirection';
 import './navbar.scss';
 

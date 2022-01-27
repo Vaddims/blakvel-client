@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import './product-card.scss';
 
 interface ProductCardProps {
@@ -19,18 +18,20 @@ export interface ProductInfo {
 }
 
 function ProductCard(props: ProductCardProps) {
-  const { publicId, name, tags, price, originPrice, urn } = props.product;
+  const { publicId, name, price, originPrice, urn } = props.product;
 
   const hasDiscount = originPrice && originPrice > price;
   const discountPercent = hasDiscount ? Math.round(price / originPrice * 100) : 0;
 
   return (
-    <article className='product-card'>
+    <article className='product-card' title={publicId}>
       <div className='product-image-boundary'>
-        {urn.thumbnail ? <img src={`api/products/${publicId}/thumbnail`} alt='Product thumbnail' /> : <i className="fas fa-3x fa-image product-image-absence"/>}
+        {urn.thumbnail 
+          ? <img src={`api/products/${publicId}/thumbnail`} alt='Product thumbnail' /> 
+          : <i className="fas fa-3x fa-image product-image-absence"/>
+        }
       </div>
       <div className='product-details'>
-        <h5 className='product-type'>Object</h5>
         <h2 className='product-name'>{name}</h2>
         <div className='product-pricing-related'>
           {hasDiscount && 
