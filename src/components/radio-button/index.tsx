@@ -1,24 +1,24 @@
 import { MouseEventHandler } from "react";
 import "./radio-button.scss";
 
-export interface RadioButtonOptions {
+export interface RadioButtonOption {
   title?: string;
   selectable?: boolean;
   defaultSelection?: boolean;
 }
 
 export interface RadioButtonProps {
-  option: RadioButtonOptions;
+  option: RadioButtonOption;
   select?: boolean;
+
   onClick?: MouseEventHandler<HTMLDivElement>;
 }
 
 function RadioButton(props: RadioButtonProps) {
   const { option, select, onClick } = props;
-  const onClickFunction = onClick ?? (_ => void 0);
 
   return (
-    <div className={`radio-button radio-selectable ${select ? 'select' : ''}`} onClick={onClickFunction}>
+    <div className={`radio-button radio-selectable ${select ? 'select' : ''}`} onClick={onClick}>
       <label className="radio-selector-title">{option.title}</label>
     </div>
   );

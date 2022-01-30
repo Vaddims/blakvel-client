@@ -1,6 +1,10 @@
 .app {
+  min-height: 100vh;
   background-color: rgb(30, 30, 30);
-  height: 500vh;
+
+  .page {
+    min-height: 100vh;
+  }
 
   .page-content {
     margin-top: 4rem;

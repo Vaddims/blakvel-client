@@ -1,104 +1,139 @@
-import { useEffect, useState } from "react";
-import ProductCard, { ProductInfo } from '../../components/product-card';
-import RadioSelector from '../../components/radio-selector';
+import { ChangeEventHandler, KeyboardEventHandler, MouseEventHandler, useEffect, useState } from "react";
+import ProductCard, { Product } from '../../components/product-card';
+import { RadioSingleSelector } from '../../components/radio-selector';
 import Navbar from '../../components/navbar';
+import { RadioButtonOption } from "../../components/radio-button";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import sortOptions from './sort.options.json';
+import Footer from '../../components/footer';
 import './catalog.scss';
-import RadioButton, { RadioButtonOptions } from "../../components/radio-button";
 
-const sortOptions: RadioButtonOptions[] = [
-  {
-    title: 'Default',
-    defaultSelection: true,
-  },
-  {
-    title: "Best Selling",
-  },
-  {
-    title: "Most Viewed",
-  },
-  {
-    title: "Name (A - Z)",
-  },
-  {
-    title: "Name (Z - A)",
-  },
-  {
-    title: "Price (Low - High)",
-  },
-  {
-    title: "Price (High - Low)",
-  },
-];
+type SortOptionSpecification = typeof sortOptions[number];
 
-const typeOptions: RadioButtonOptions[] = [
-  {
-    title: "Food",
-  },
-  {
-    title: "Toys",
-  },
-  {
-    title: "Houses",
-  },
-  {
-    title: "Other",
-  },
-]
+const sortOptionMap = new Map<RadioButtonOption, SortOptionSpecification>(
+  sortOptions.map(option => [{ title: option.title, defaultSelection: option.default }, option])
+);
 
-const filterOptions: RadioButtonOptions[] = [
-  {
-    title: "In Stock",
-  },
-]
+interface ProductCatalogState {
+  searchValue: string;
+  filterCollapse: boolean;
+  products: Product[];
+}
 
 function ProductCatalog() {
-  const [products, setProducts] = useState<ProductInfo[] | null>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const manageSearchParameter = (name: string, value: string) => {
+    if (value) {
+      searchParams.set(name, value);
+    } else {
+      searchParams.delete(name);
+    }
+  }
+
+  const getFormatedSearchParameters = () => {
+    const searchParamsString = searchParams.toString();
+    return searchParamsString === '' ? '' : `?${searchParamsString}`;
+  }
+
+  const [state, setState] = useState<ProductCatalogState>({
+    searchValue: searchParams.get('search') ?? '',
+    filterCollapse: false,
+    products: [],
+  });
 
   useEffect(() => {
-    async function requestProducts() {
-      const response = await fetch('/api/products');
-      const productList = await response.json() as ProductInfo[];
-      setProducts(productList);
+    async function updateProducts() {
+      const response = await fetch(`/api/products?${searchParams.toString()}`);
+      const products = await response.json();
+
+      if (typeof products !== 'object' || !Array.isArray(products)) {
+        return;
+      }
+
+      setState({ ...state, products, searchValue: searchParams.get('search') ?? '' });
     }
 
-    if (!products) requestProducts();
-  })
+    updateProducts();
+  }, [searchParams.toString()]);
+
+  const onSearchInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const { value } = event.target;
+    setState({ ...state, searchValue: value });
+  }
+
+  const toggleFilterVisibility = () => setState({ ...state, filterCollapse: !state.filterCollapse });
+  const handleSortChange = (radioButtonOption: RadioButtonOption) => {
+    const specificationOptions = sortOptionMap.get(radioButtonOption);
+    if (!specificationOptions) {
+      return;
+    }
+
+    manageSearchParameter('sort', specificationOptions.type);
+    manageSearchParameter('order', specificationOptions.order);
+    navigate(`/products${getFormatedSearchParameters()}`);
+  };
+
+  const keyup: KeyboardEventHandler<HTMLInputElement> = (event) => {
+    if (event.key !== 'Enter') {
+      return;
+    }
+
+    event.preventDefault();
+    manageSearchParameter('search',  state.searchValue);
+    navigate(`/products${getFormatedSearchParameters()}`);
+  }
+
+  const clearNameSearch: MouseEventHandler<HTMLElement> = (event) => {
+    event.preventDefault();
+    manageSearchParameter('search', '');
+    navigate(`/products${getFormatedSearchParameters()}`);
+  }
+
+  const type = searchParams.get('sort');
+  const order = searchParams.get('order');
+  const targetSortOptions = type && order 
+    ? Array.from(sortOptionMap.entries()).find(([, optionInfo]) => optionInfo.order === order && optionInfo.type === type)?.[0]
+    : undefined;
 
   return (
-    <div className='catalog-page'>
+    <div className='catalog-page page'>
       <Navbar />
       <div className='content'>
         <header className='catalog-header'>
           <div className='catalog-search-specification'>
             <h1 className='catalog-name'>Catalog</h1>
-            {products && <h5 className="catalog-item-quantity">{products.length} items</h5>}
+            <h5 className="catalog-item-quantity">{state.products.length} items</h5>
           </div>
           <div className='catalog-filter'>
-            <div className='catalog-filter-toggler-boundary'>
+            <div className='search-boundary'>
+              <i className="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" placeholder='Search' value={state.searchValue} onKeyUp={keyup} onChange={onSearchInputChange}/>
+              { state.searchValue && <i className="fas fa-times clear-icon" onClick={clearNameSearch}></i> }
+            </div>
+            <div className='catalog-filter-toggler-boundary' onClick={toggleFilterVisibility}>
               <i className="fas fa-filter"></i>
               <h4 className='catalog-filter-toggler-title'>Sort and Filter</h4>
             </div>
           </div>
-          {/* <div className='search-boundary'>
-            <i className="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder='Search'/>
-          </div> */}
         </header>
         <div className='catalog-content'>
           <div className='catalog-products'>
-            {products && products.map(product => <ProductCard key={product.publicId} product={product} />)}
+            {state.products.map(product => <ProductCard key={product.publicId} product={product} />)}
           </div>
-          <div className="catalog-filter-box">
-            <div className='catalog-filter-slidepath'>
-              <div className="catalog-filters">
-                <RadioSelector title="Sort" options={sortOptions} />
-                <RadioSelector title="Type" options={typeOptions} multiple />
-                <RadioSelector title="Filters" options={filterOptions} multiple />
+          {!state.filterCollapse && 
+            <div className="catalog-filter-box">
+              <div className='catalog-filter-slidepath'>
+                <div className="catalog-filters">
+                  <RadioSingleSelector title="Sort" options={Array.from(sortOptionMap.keys())} target={targetSortOptions} onTargetChange={handleSortChange} />
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
       </div>
+      {/* <Footer /> */}
     </div>
   )
 }

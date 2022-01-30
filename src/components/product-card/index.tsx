@@ -1,10 +1,10 @@
 import './product-card.scss';
 
 interface ProductCardProps {
-  product: ProductInfo;
+  product: Product;
 }
 
-export interface ProductInfo {
+export interface Product {
   publicId: string;
   name: string;
   tags: string[];
@@ -21,13 +21,13 @@ function ProductCard(props: ProductCardProps) {
   const { publicId, name, price, originPrice, urn } = props.product;
 
   const hasDiscount = originPrice && originPrice > price;
-  const discountPercent = hasDiscount ? Math.round(price / originPrice * 100) : 0;
+  const discountPercent = hasDiscount ? (100 - Math.round(price / originPrice * 100)) : 0;
 
   return (
     <article className='product-card' title={publicId}>
       <div className='product-image-boundary'>
         {urn.thumbnail 
-          ? <img src={`api/products/${publicId}/thumbnail`} alt='Product thumbnail' /> 
+          ? <img src={`api/products/${publicId}/thumbnail`} loading='lazy' alt='Product thumbnail' /> 
           : <i className="fas fa-3x fa-image product-image-absence"/>
         }
       </div>

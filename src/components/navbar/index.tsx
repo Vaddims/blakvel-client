@@ -14,14 +14,15 @@ interface NavbarProps {
 
 function Navbar(props: NavbarProps) {
   const phase = props.phase || NavbarPhase.sticky;
-  const ref = useRef<HTMLElement>(null);
+  const reference = useRef<HTMLElement>(null);
   const redirect = useRedirection();
 
   useEffect(() => {
-    const { current } = ref;
+    const { current } = reference;
     if (phase === NavbarPhase.hybrid && current) {
-      const onscroll = () => {
+      const onScroll = () => {
         const fixedClassName = 'fixed';
+
         // smaller than 0 for safari support
         if (document.documentElement.scrollTop <= 0) {
           current.classList.remove(fixedClassName);
@@ -30,13 +31,15 @@ function Navbar(props: NavbarProps) {
         }
       };
 
-      document.addEventListener('scroll', onscroll);
-      return () => document.removeEventListener('scroll', onscroll);
+      document.addEventListener('scroll', onScroll);
+      return () => {
+        document.removeEventListener('scroll', onScroll);
+      }
     }
   })
 
   return (
-    <nav className={`navbar ${phase}`} ref={ref}>
+    <nav className={`navbar ${phase}`} ref={reference}>
       <div className='logo-boundary navbar-section' onClick={redirect('/')}>
         <i className="fa-solid fa-paw"></i>
         <h2>Petshop</h2>
