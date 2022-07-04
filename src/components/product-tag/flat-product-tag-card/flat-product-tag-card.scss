@@ -1,0 +1,44 @@
+.flat-product-tag-card {
+  border-left: .2rem solid var(--background-highlight-color);
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  box-sizing: border-box;
+  min-width: 10rem;
+  padding: .5rem 1rem;
+  height: auto;
+  justify-content: space-between;
+  text-align: center;
+  vertical-align: middle;
+  
+  * {
+    user-select: none;
+    cursor: default;
+  }
+
+  .product-tag-name-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .product-tag-name {
+      display: inline;
+      color: var(--text-main-color);
+    }
+  }
+
+  .product-tag-details {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+
+    span {
+      color: var(--text-main-color);
+    }
+  }
+
+  &.selected {
+    background-color: var(--background-highlight-color) !important;
+  }
+}

@@ -1,0 +1,23 @@
+#admin-product-tag-management.page {
+  * {
+    user-select: none;
+  }
+
+  button.panel-tool {
+    &.delete {
+      background-color: rgb(255, 70, 70);
+    }
+  }
+
+  .panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+
+    .flat-product-tag-card {
+      &:nth-child(2n - 1) {
+        background-color: rgb(40, 40, 40);
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+@mixin wrapped-product-image($padding: 10%) {
+  $inner-size: calc(100% - $padding);
+  max-width: $inner-size;
+  max-height: $inner-size;
+  object-fit: scale-down;
+}
+
+@mixin product-image-wrapper($size: auto, $padding: 10%) {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  width: $size;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: .5rem;
+  background: radial-gradient(circle, rgba(255,255,255,1), rgb(170, 170, 170));
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+:root {
+  --product-image-background: radial-gradient(circle, rgba(255,255,255,1), rgb(170, 170, 170));
+}
+
+.product-image-wrapper {
+  @include product-image-wrapper();
+
+  .product-image {
+    @include wrapped-product-image(10%);
+  }
+}

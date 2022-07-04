@@ -1,0 +1,29 @@
+.radio-button {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  font-size: 1rem;
+
+  .radio-selector-title {
+    cursor: inherit;
+    color: white;
+  }
+
+  &.select {
+    background-color: rgb(0, 174, 255);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+
+    .radio-selector-title {
+      color: grey;
+    }
+  }
+}

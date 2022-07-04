@@ -1,0 +1,45 @@
+@import "/src/components/ProductImageWrapper/productImageWrapper.scss";
+
+.product-image-viewer {
+  position: sticky;
+  top: 4rem;
+  max-width: 25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+
+  .element-viewer {
+    display: flex;
+
+    .product-image-wrapper {
+      @include product-image-wrapper(25rem, 90%);
+    }
+
+    .no-image-available-header {
+      color: black;
+    }
+  }
+  
+  .media-showcase {
+    display: flex;
+    overflow-x: auto;
+    flex-direction: row;
+    gap: .5rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .product-image-wrapper {
+      @include product-image-wrapper(5rem, 10%);
+      border: .15rem solid transparent;
+      flex-shrink: 0;
+      transition: border 200ms ease;
+
+      &.selected {
+        border: .15rem solid var(--background-highlight-color);
+      }
+    }
+  }
+}

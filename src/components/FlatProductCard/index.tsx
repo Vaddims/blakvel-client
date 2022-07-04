@@ -1,0 +1,35 @@
+import { Product } from '../../models/product.model';
+import "./flat-product-card.scss";
+
+interface FlatProductCardProps extends React.HTMLAttributes<HTMLElement> {
+  product: Product;
+}
+
+const FlatProductCard: React.FC<FlatProductCardProps> = (props) => {
+  const { className } = props;
+  const { id, name, price, originalPrice } = props.product;
+
+  const hasDiscount = originalPrice && originalPrice > price;
+  const discountPercent = hasDiscount ? (100 - Math.round(price / originalPrice * 100)) : 0;
+
+  return (
+    <article {...props} className={`flat-product-card ${className}`} title={id}>
+      <div className='product-name-box'>
+        <span className="product-name">{name}</span>
+      </div>
+      <div className="product-price-related">
+        {hasDiscount &&
+          <div className="product-discount-box">
+            <span className="product-discount">-{discountPercent}%</span>
+          </div>
+        }
+        <div className='product-price-showcase'>
+          {hasDiscount && <span className='product-source-price'>${originalPrice}</span>}
+          <span className='product-current-price'>${price}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export default FlatProductCard;

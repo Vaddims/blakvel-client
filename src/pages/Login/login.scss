@@ -1,0 +1,81 @@
+#login.page main {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+
+  .login-box {
+    display: flex;
+    flex-direction: column;
+    width: 15rem;
+
+    * {
+      color: white;
+    }
+
+    #login-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      box-sizing: border-box;
+      gap: 1rem;
+
+      .login-input-label {
+        width: 100%;
+        display: flex;
+        overflow: hidden;
+        border-radius: .5rem;
+  
+        .icon-boundary {
+          padding: .5rem 1rem;
+          background-color: rgb(40, 40, 40);
+        }
+      }
+
+      .login-input-box {
+        display: flex;
+        flex: 1;
+        background-color: rgb(50, 50, 50);
+        justify-content: center;
+        align-items: center;
+
+        .login-input {
+          width: 100%;
+          height: 100%;
+          outline: none;
+          border: none;
+          background-color: rgb(50, 50, 50);
+          padding: 0 .5rem;
+          margin: 0;
+        }
+      }
+
+      .login-submit-button {
+        width: 100%;
+        padding: .5rem 0;
+        background-color: rgb(0, 174, 255);
+        border: none;
+        border-radius: .5rem;
+        cursor: pointer;
+      }
+
+      .remember-user-radio-box {
+        display: flex;
+        gap: .5rem;
+        cursor: pointer;
+        align-self: flex-start;
+
+        #remember-user-radio[type=checkbox] {
+          margin: auto 0;
+          display:inline-block;
+          background-repeat:no-repeat;
+          background-position: 0 0;
+          vertical-align:middle;
+          cursor:pointer;
+        }
+      }
+    }
+  }
+}

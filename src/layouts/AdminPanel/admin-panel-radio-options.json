@@ -1,0 +1,46 @@
+{
+  "title": "Panels",
+  "muliple": false,
+  "buttonOptions": [
+    {
+      "title": "Overview",
+      "disabled": false,
+      "defaultSelection": true,
+      "payload": {
+        "endpoint": ""
+      }
+    },
+    {
+      "title": "Product Management",
+      "disabled": false,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/product-management"
+      }
+    },
+    {
+      "title": "Tag Management",
+      "disabled": false,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/tag-management"
+      }
+    },
+    {
+      "title": "Statistics",
+      "disabled": true,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/"
+      }
+    },
+    {
+      "title": "Website Visuals",
+      "disabled": true,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/"
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+[
+  {
+    "title": "None",
+    "defaultSelection": true,
+    "payload": {
+      "order": "",
+      "type": ""
+    }
+  },
+  {
+    "title": "Trending",
+    "payload": {
+      "order": "descending",
+      "type": "sale"
+    }
+  },
+  {
+    "title": "Name (A - Z)",
+    "payload": {
+      "order": "ascending",
+      "type": "name"
+    }
+  },
+  {
+    "title": "Name (Z - A)",
+    "payload": {
+      "order": "descending",
+      "type": "name"
+    }
+  },
+  {
+    "title": "Price (Low - High)",
+    "payload": {
+      "order": "ascending",
+      "type": "price"
+    }
+  },
+  {
+    "title": "Price (High - Low)",
+    "payload": {
+      "order": "descending",
+      "type": "price"
+    }
+  }
+]
