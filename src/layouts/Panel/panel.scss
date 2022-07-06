@@ -12,17 +12,38 @@
     text-align: center;
     gap: 2rem;
 
-    .panel-title-box {
+    .left-hand-box {
       display: flex;
       flex-direction: row;
       align-items: center;
-      text-align: center;
-      justify-content: center;
-      height: 100%;
-      gap: 1.5rem;
+      gap: 1rem;
 
-      .panel-title {
-        color: var(--text-main-color);
+      .previous-page-button {
+        $size: 3rem;
+        background-color: transparent;
+        border: none;
+        border-radius: 100%;
+        width: $size;
+        height: $size;
+        cursor: pointer;
+
+        &:hover {
+          background-color: var(--background-secondary-color);
+        }
+      }
+
+      .panel-title-box {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        height: 100%;
+        gap: 1.5rem;
+  
+        .panel-title {
+          color: var(--text-main-color);
+        }
       }
     }
 
