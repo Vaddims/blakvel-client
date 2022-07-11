@@ -8,15 +8,16 @@ interface FlatProductTagCardProps extends HTMLProps<HTMLElement> {
 
 const FlatProductTagCard: FC<FlatProductTagCardProps> = (props) => {
   const { className } = props;
-  const { id, name, fieldNames } = props.productTag;
+  const { productTag, ...articleProps } = props;
+  const { id, name, fields } = productTag;
 
   return (
-    <article {...props} className={`flat-product-tag-card ${className}`} title={id}>
+    <article {...articleProps} className={`flat-product-tag-card ${className}`} title={id}>
       <div className="product-tag-name-box">
         <span className="product-tag-name">{name}</span>
       </div>
       <div className="product-tag-details">
-        {fieldNames.length !== 0 && <span>{fieldNames.length} fields</span>}
+        {fields.length !== 0 && <span>{fields.length} fields</span>}
       </div>
     </article>
   );
