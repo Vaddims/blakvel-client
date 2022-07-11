@@ -2,6 +2,8 @@ import { createApi } from "@reduxjs/toolkit/dist/query/react";
 import { apiBaseQuery } from "./baseQuery";
 import { ProductTag } from '../../models/product-tag.model';
 import { CreateProductTag } from "../../models/create-product-tag.model";
+import { ProductTagField } from "../../models/productTagField.model";
+import { ProductTagDeclaration } from "../../models/product-tag-declaration.model";
 
 enum TagTypes {
   Tag = 'tag',
@@ -17,7 +19,7 @@ export const productTagsApi = createApi({
       query: () => `/product-tags`,
     }),
 
-    createProductTag: build.mutation<void, CreateProductTag>({
+    createProductTag: build.mutation<ProductTag, ProductTagDeclaration>({
       invalidatesTags: [TagTypes.Tag],
       query: (productTag) => ({
         method: 'POST',
@@ -39,4 +41,5 @@ export const productTagsApi = createApi({
 export const { 
   useGetProductTagsQuery,
   useDeleteProductTagMutation,
+  useCreateProductTagMutation,
 } = productTagsApi;

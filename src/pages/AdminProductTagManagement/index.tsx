@@ -4,6 +4,7 @@ import FlatProductTagCard from "../../components/FlatProductTagCard";
 import AdminPanel from '../../layouts/AdminPanel';
 import Page from "../../layouts/Page";
 import "./product-tag-management.scss";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminProductTagManagement() {
   const { data: productTags = [] } = useGetProductTagsQuery();
@@ -17,6 +18,21 @@ export default function AdminProductTagManagement() {
     identifier: (productTag) => productTag.id,
   });
 
+  const navigate = useNavigate();
+
+  const redirectToProductTagInspector = () => {
+    if (selections.length === 1) {
+      navigate(`/products/${selections[0].id}/inspect`);
+      return;
+    }
+
+    const url = new URL(`/product-tags/inspect`, window.location.origin);
+    for (const selection of selections) {
+      url.searchParams.append('target', selection.id);
+    }
+    navigate(url);
+  }
+
   const deleteSelectedTags = async () => {
     for (const selection of selections) {
       try {
@@ -27,7 +43,7 @@ export default function AdminProductTagManagement() {
 
   const defaultHeaderTools = (
     <>
-      <button className="panel-tool highlight">New Tag</button>
+      <button className="panel-tool highlight" onClick={() => navigate('/product-tags/create')}>New Tag</button>
     </>
   );
 

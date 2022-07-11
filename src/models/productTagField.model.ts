@@ -1,4 +1,4 @@
-export interface ProductTagField<T = string | number | boolean> { 
+export interface ProductTagField<T extends string | number | boolean = any> { 
   readonly id: string;
   readonly name: string;
   readonly required: boolean;
