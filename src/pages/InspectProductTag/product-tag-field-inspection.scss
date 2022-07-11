@@ -1,0 +1,26 @@
+.page#inspect-product-tag {
+  .product-tag-details {
+    .product-tag-static-field {
+      .tag-title {
+        color: black;
+      }
+    }
+  }
+
+  .product-tag-dynamic-fields {
+    input {
+      color: black;
+    }
+  }
+
+  .product-tag-field-adder {
+    .product-tag-field-adder-button {
+      background-color: green;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+  }
+}

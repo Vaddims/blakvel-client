@@ -1,11 +1,12 @@
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel"
 import { ProductTagField, ProductTagFieldInspection } from "./ProductTagFieldInspection";
-import { useCreateProductTagMutation } from "../../services/api/productTagsApi";
-import { useNavigate } from "react-router-dom";
-import { createContext, useContext, useState } from "react";
-import './product-tag-field-inspection.scss';
+import { useCreateProductTagMutation, useGetProductTagQuery, useGetProductTagsQuery, useUpdateProductTagMutation } from "../../services/api/productTagsApi";
+import { useNavigate, useParams } from "react-router-dom";
+import { createContext, useEffect, useState } from "react";
 import { ProductTagFieldDeclaration } from "../../models/product-tag-field-declaration.model";
+import * as uuid from 'uuid';
+import './product-tag-field-inspection.scss';
 
 interface ContextState {
   name: string;
@@ -19,25 +20,43 @@ const initialContextState = {
 
 export const ProductTagContext = createContext({ ...initialContextState });
 
-export const CreateProductTag = () => {
-  const [ createProductTag ] = useCreateProductTagMutation();
+export const InspectProductTag = () => {
+  const { id = '' } = useParams();
+  const { data: productTag } = useGetProductTagQuery(id, { skip: !uuid.validate(id) })
+  const [ updateProductTag ] = useUpdateProductTagMutation();
   const navigate = useNavigate();
 
   const [ productTagName, setProductTagName ] = useState('');
   const [ fields, setFields ] = useState<ProductTagFieldDeclaration[]>([]);
 
-  const requestProductCreation = async () => {
-    const product = await createProductTag({
-      name: productTagName,
-      fields: fields,
-    }).unwrap();
+  useEffect(() => {
+    if (!productTag) {
+      return;
+    }
 
-    navigate(`/product-tags/${product.id}/inspect`);
+    setProductTagName(productTag.name);
+    setFields(productTag.fields);
+  }, [productTag]);
+
+  const requestProductUpdate = async () => {
+    if (!productTag) {
+      return;
+    }
+    
+    try {
+      const product = await updateProductTag({
+        id: productTag.id,
+        name: productTagName,
+        fields: fields,
+      }).unwrap();
+      
+      navigate(`/product-tags/${product.id}/inspect`);
+    } catch {}
   }
 
   const headerTools = (
     <>
-      <button className="panel-tool highlight" onClick={requestProductCreation}>Create</button>
+      <button className="panel-tool highlight" onClick={requestProductUpdate}>Update</button>
     </>
   );
 
@@ -57,8 +76,8 @@ export const CreateProductTag = () => {
   }
   
   return (
-    <Page id="create-product-tag">
-      <Panel title="Create New Product Tag" headerTools={headerTools}>
+    <Page id="inspect-product-tag">
+      <Panel title="Inspecting One Tag" headerTools={headerTools}>
         <div className="product-tag-details">
           <div className="product-tag-static-field">
             <span>Tag Name: </span>

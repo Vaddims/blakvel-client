@@ -11,6 +11,7 @@ import Contact from "../../pages/Contact"
 import CreateProduct from "../../pages/CreateProduct"
 import { CreateProductTag } from "../../pages/CreateProductTag"
 import InspectProduct from "../../pages/InspectProduct";
+import { InspectProductTag } from "../../pages/InspectProductTag"
 import Landing from "../../pages/Landing"
 import Login from "../../pages/Login"
 import PageNotFound from "../../pages/PageNotFound"
@@ -69,7 +70,7 @@ const AppRoutes: React.FC = () => {
         <Route path='product-tags'>
           <Route path=":id">
             <Route path="inspect" element={adminProtectedRoute}>
-    
+              <Route index element={<InspectProductTag />} />
             </Route>
           </Route>
           <Route path="create">

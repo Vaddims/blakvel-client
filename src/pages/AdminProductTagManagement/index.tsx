@@ -49,7 +49,7 @@ export default function AdminProductTagManagement() {
 
   const selectionHeaderTools = (
     <>
-      <button className="panel-tool edit highlight">Edit</button>
+      <button className="panel-tool edit highlight" onClick={() => navigate(`/product-tags/${selections[0].id}/inspect`)}>Edit</button>
       <button className="panel-tool delete" onClick={deleteSelectedTags}>Delete</button>
     </>
   );
