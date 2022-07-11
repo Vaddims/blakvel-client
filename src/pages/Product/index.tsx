@@ -70,7 +70,7 @@ export default function Product() {
 
   return (
     <Page id="product">
-      <Panel title={product.name} headerTools={headerTools}>
+      <Panel title={product.name} displayBackNavigation headerTools={headerTools}>
         {imageFilenames.length > 0 && (
           <ProductImageShowcase imageFilenames={imageFilenames} targetImageFilenames={initialTargets} />
         )}
