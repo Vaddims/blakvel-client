@@ -1,0 +1,20 @@
+.product-tag-boundary {
+  font-weight: 500;
+
+  .product-tag-name {
+    font-size: 1.5rem;
+  }
+
+  .product-tag-field-cluster {
+    margin-top: .3rem;
+    border-left: .2rem solid var(--background-highlight-color);
+    margin-left: .5rem;
+    padding-left: .5rem;
+
+    .product-tag-field {
+      display: flex;
+      flex-direction: row;
+      gap: .5rem;
+    }
+  }
+}
