@@ -42,10 +42,10 @@ export default function Panel(props: PanelProps) {
           {headerTools}
         </div>
       </header>
-      <main className="panel-content-box">
-        <section className="panel-content">
+      <div className="panel-content-box">
+        <main className="panel-content">
           {children}
-        </section>
+        </main>
         {(extensions && !collapseExtensions) && 
           <aside className="panel-extensions-boundary">
             <div className="extensions-slidepath">
@@ -55,7 +55,7 @@ export default function Panel(props: PanelProps) {
             </div>
           </aside>
         }
-      </main>
+      </div>
     </div>
   );
 }

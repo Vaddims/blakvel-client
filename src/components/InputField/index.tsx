@@ -1,4 +1,4 @@
-import { faCheck, faWarning, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faRotateBack, faWarning, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './input-field.scss';
 
@@ -9,68 +9,92 @@ export enum InputStatus {
   Invalid = 'invalid',
 }
 
-interface InputFieldProps {
+export interface InputFieldDatalistElement {
   readonly name: string;
-  readonly value: string;
   readonly description?: string;
-  readonly className?: string;
-  readonly icon?: IconDefinition;
-  readonly placeholder?: string;
+}
+
+interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  readonly label: string;
+  readonly labelIcon?: IconDefinition;
+  readonly description?: string;
   readonly status?: InputStatus;
-  readonly disabled?: boolean;
-  readonly type?: React.HTMLInputTypeAttribute;
-  readonly onChange?: React.ChangeEventHandler<HTMLInputElement>;
-  readonly onBlur?: React.FocusEventHandler<HTMLInputElement>;
+  readonly inputDatalist?: InputFieldDatalistElement[];
+  readonly onInputRestore?: () => void;
 }
 
 export const InputField: React.FC<InputFieldProps> = (props) => {
   const {
-    name,
-    value,
-    icon,
-    placeholder = '',
-    description,
+    label,
+    labelIcon,
+    required = false,
+    description = '',
     status = InputStatus.Default,
-    disabled = false,
-    type = 'text',
-    className = '',
-    onChange,
-    onBlur,
+    inputDatalist = [],
+    onInputRestore,
+    value = '',
+    className,
+    ...inputProps
   } = props;
 
+  const formatedLabelId = label.toLowerCase().replace(' ', '-');
+  const inputElementId = `input:${formatedLabelId}`;
+  const tagDatalistElementId = `datalist:${formatedLabelId}`;
+
   return (
-    <div className={['input-field', className].join(' ')}>
+    <legend
+      className={['input-field', className].join(' ')}
+      about={inputElementId}
+    >
       <div className='title-bar'>
-        {icon && (
-          <FontAwesomeIcon icon={icon} />
+        {labelIcon && (
+          <FontAwesomeIcon icon={labelIcon} />
         )}
-        <span>{name}</span>
+        <span>
+          {label}
+          {required && (
+            <span className='required-asterisk'>*</span>
+          )}
+        </span>
       </div>
       <div className={["input-bar", status].join(' ')}>
         <input
-          type={type}
+          {...inputProps}
+          id={inputElementId}
+          list={inputDatalist.length > 0 ? tagDatalistElementId : void 0}
           value={value}
-          disabled={disabled}
-          placeholder={placeholder} 
-          onChange={onChange} 
-          onBlur={onBlur}
+          readOnly={props.readOnly ?? !props.onChange}
         />
+        { inputDatalist && (
+          <datalist id={tagDatalistElementId}>
+            {inputDatalist.map((element) => (
+              <option value={element.name} key={element.name}>{element.description}</option>
+            ))}
+          </datalist>
+        ) }
+        <div className='ics'>
+          {onInputRestore && (
+            <button onClick={() => onInputRestore()} title='Restore value'>
+              <FontAwesomeIcon icon={faRotateBack} size='lg' />
+            </button>
+          )}
+        </div>
         {renderInputStatusIcon(status)}
       </div>
       <span className='input-description'>{description}</span>
-    </div>
+    </legend>
   )
 }
 
 const renderInputStatusIcon = (inputStatus: InputStatus) => {
   switch (inputStatus) {
     case InputStatus.Valid:
-      return (<FontAwesomeIcon icon={faCheck} className='input-icon valid' color='red' />);
+      return (<FontAwesomeIcon icon={faCheck} className='input-icon valid' color='red' size='lg' />);
     
     case InputStatus.Invalid:
-      return (<FontAwesomeIcon icon={faXmark} className='input-icon invalid' />);
+      return (<FontAwesomeIcon icon={faXmark} className='input-icon invalid' size='lg' />);
 
     case InputStatus.Warn:
-      return (<FontAwesomeIcon icon={faWarning} className='input-icon warn' />)
+      return (<FontAwesomeIcon icon={faWarning} className='input-icon warn' size='lg' />)
   }
 }

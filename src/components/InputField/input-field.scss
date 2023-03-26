@@ -2,13 +2,18 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  // gap: .25rem;
+  padding: 0;
 
   .title-bar {
     margin-bottom: .5rem;
     display: flex;
     flex-direction: row;
     gap: .5rem;
+
+    .required-asterisk {
+      margin-left: .15rem;
+      color: rgb(225, 40, 50);
+    }
   }
 
   .input-bar {
@@ -16,6 +21,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    box-sizing: border-box;
 
     transition: border .25s ease;
     border: 1px solid rgb(150, 150, 150);
@@ -23,8 +29,27 @@
     padding: 0;
     overflow: hidden;
 
+    .ics {
+      padding-right: .5rem;
+    }
+
+    button {
+      visibility: hidden;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    &:hover button {
+      visibility: visible;
+    }
+
     &:hover {
       border: 1px solid rgb(190, 190, 190);
+
+      .input-icon {
+        display: none;
+      }
     }
 
     &:focus-within {
@@ -84,6 +109,13 @@
 
   .input-description {
     margin-top: .1rem;
+    display: inline-block;
+    text-align: right;
     font-size: smaller;
+    width: 100%;
+
+    &:empty:before {
+      content: '\00a0';
+    }
   }
 }

@@ -1,3 +1,3 @@
-import { ProductTag } from "./product-tag.model";
+import { Product } from "./product.model";
 
-export type CreateProductTag = Omit<ProductTag, 'id' | 'value'>;
+export type CreateProductTag = Omit<Product.Tag, 'id' | 'value'>;

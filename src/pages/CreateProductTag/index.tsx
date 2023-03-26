@@ -88,8 +88,8 @@ export const CreateProductTag = () => {
       <Panel title="Create New Product Tag" headerTools={headerTools}>
         <div className="product-tag-details">
           <InputField 
-            name="Tag Name" 
-            icon={faHashtag}
+            label="Tag Name" 
+            labelIcon={faHashtag}
             status={productNameInputStatus}
             value={productTagName}
             onChange={onInputChange} 

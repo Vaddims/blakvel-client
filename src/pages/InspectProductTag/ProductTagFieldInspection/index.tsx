@@ -3,16 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChangeEventHandler, FC, useState } from 'react';
 import { InputField, InputStatus } from '../../../components/InputField';
 import { ProductTagFieldDeclaration } from '../../../models/product-tag-field-declaration.model';
+import { Product } from '../../../models/product.model';
 import './product-tag-field-inspection.scss';
 
-export interface ProductTagField {
-  name: string;
-  required: boolean;
-  example: string;
-}
-
-export interface ProductTagFieldBundle extends Omit<ProductTagField, 'id'> {
-  initialField?: Omit<ProductTagField, 'id'>;
+export interface ProductTagFieldBundle extends Omit<Product.Tag.Field, 'id'> {
+  initialField?: Omit<Product.Tag.Field, 'id'>;
 }
 
 export interface ProductTagFieldInspectionState {
@@ -99,7 +94,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
   return (
     <div className="product-tag-field-inspection">
       <InputField
-        name="Field Name"
+        label="Field Name"
         status={fieldNameInputState}
         description={fieldNameDescription}
         value={field.name}
@@ -107,7 +102,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
         onBlur={onFieldNameBlur}
       />
       <InputField
-        name="Format Example"
+        label="Format Example"
         status={exampleInputState}
         value={field.example}
         onChange={onExampleChange}

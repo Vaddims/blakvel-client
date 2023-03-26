@@ -1,6 +1,6 @@
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel"
-import { ProductTagField, ProductTagFieldBundle, ProductTagFieldInspection } from "./ProductTagFieldInspection";
+import { ProductTagFieldBundle, ProductTagFieldInspection } from "./ProductTagFieldInspection";
 import { useCreateProductTagMutation, useGetProductTagQuery, useGetProductTagsQuery, useUpdateProductTagMutation } from "../../services/api/productTagsApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { createContext, useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import * as uuid from 'uuid';
 import './product-tag-field-inspection.scss';
 import { InputField, InputStatus } from "../../components/InputField";
 import { faHashtag } from "@fortawesome/free-solid-svg-icons";
+import { Product } from "../../models/product.model";
 
 interface ContextState {
   name: string;
@@ -40,7 +41,7 @@ export const InspectProductTag = () => {
     }
 
     setProductTagName(productTag.name);
-    setFields(productTag.fields.map<ProductTagFieldBundle>(field => ({...field, initialField: field})));
+    setFields(productTag.fields.map<ProductTagFieldBundle>(field => ({...field, initialField: { ...field }})));
   }, [productTag]);
 
   const requestProductUpdate = async () => {
@@ -75,7 +76,7 @@ export const InspectProductTag = () => {
     </>
   );
   
-  const updateField = (index: number) => (field: ProductTagField) => {
+  const updateField = (index: number) => (field: ProductTagFieldBundle) => {
     const modifiedFields = [...fields];
     modifiedFields[index] = field;
     setFields(modifiedFields);
@@ -124,8 +125,8 @@ export const InspectProductTag = () => {
       <Panel title="Inspecting One Tag" headerTools={headerTools}>
         <div className="product-tag-details">
           <InputField 
-            name="Tag Name" 
-            icon={faHashtag}
+            label="Tag Name" 
+            labelIcon={faHashtag}
             description={tagNameDescription}
             status={productNameInputStatus}
             value={productTagName}

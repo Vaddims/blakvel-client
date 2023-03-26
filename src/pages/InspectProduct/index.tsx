@@ -7,115 +7,330 @@ import Page from "../../layouts/Page";
 import * as uuid from 'uuid';
 import './inspect-product.scss';
 import { useGetProductTagsQuery } from "../../services/api/productTagsApi";
-import { ProductTag } from "../../models/product-tag.model";
 import { ProductTagRepresenter } from "./ProductTagRepresenter";
+import { useInputFieldManagement, ValidationTiming } from "../../middleware/hooks/useInputFieldManagement";
+import { InputFieldDatalistElement, InputStatus } from "../../components/InputField";
+import { Product } from "../../models/product.model";
+import { faBoxesStacked, faDollarSign, faHashtag, faHeading, faMoneyBill, faSignature, faTag } from "@fortawesome/free-solid-svg-icons";
 
-export interface ProductSpecificationField {
-  fieldId: string;
-  value: string;
+export interface InputFieldStatusDescriptor {
+  readonly fieldId: string;
+  readonly status: InputStatus;
+  readonly description?: string;
 }
 
 const InspectProduct = () => {
-  const { id = '' } = useParams();
-  const { data: product } = useGetProductQuery(id, { skip: !uuid.validate(id) });
-  const { data: tags } = useGetProductTagsQuery();
   const navigate = useNavigate();
-
+  const { id = '' } = useParams();
+  const uuidIsValid = uuid.validate(id);
+  
   const [ updateProduct ] = useUpdateProductMutation();
-  const [productNameInput, setProductNameInput] = useState<string>();
-  const [productPriceInput, setProductPriceInput ] = useState<number>();
-  const [productOriginalPrice, setProductOriginalPriceInput] = useState<number | null>(null);
-  const [productStockInput, setProductStockInput] = useState<number>();
 
-  const [productTagInput, setProductTagInput] = useState('');
-  const [productTags, setProductTags] = useState<ProductTag[]>([]);
-  const [ productSpecificationFields, setProductSpecificationFields ] = useState<ProductSpecificationField[]>([]);
+  const { data: product } = useGetProductQuery(id, { skip: !uuidIsValid });
+  const { data: globalProductTags } = useGetProductTagsQuery();
 
-  useEffect(() => {
-    if (product) {
-      setProductTags(product.tags);
-    }
-  }, [product])
+  const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(product?.tags ?? []);
 
-  const handleProductTagInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    event.preventDefault();
-    setProductTagInput(event.target.value);
+  const [ 
+    draftProductSpecifications, 
+    setDraftProductSpecifications 
+  ] = useState<Product.Specification[]>(product?.specifications ?? []);
+
+  const [ 
+    draftProductSpecificationStatusDescriptors,
+    setDraftProductSpecificationStatusDescriptors
+  ] = useState<InputFieldStatusDescriptor[]>((product?.specifications ?? []).map(spec => ({
+    fieldId: spec.field.id,
+    status: InputStatus.Default,
+    description: '',
+  })));
+
+  const updateDraftProductSpecificationStatusDescriptor = (fieldId: string, status: InputStatus, description?: string) => {
+    setDraftProductSpecificationStatusDescriptors(prevState => {
+      const targetSpec = prevState.find(spec => spec.fieldId === fieldId);
+  
+      if (!targetSpec) {
+        return [
+          ...prevState,
+          {
+            fieldId,
+            status,
+            description: description ?? '',
+          },
+        ];
+      }
+  
+      const newDraftProductSpecificationStatusDescriptors = prevState.filter(
+        spec => spec.fieldId !== targetSpec.fieldId
+      );
+  
+      return [
+        ...newDraftProductSpecificationStatusDescriptors,
+        {
+          fieldId,
+          status,
+          description: description ?? targetSpec.description,
+        },
+      ];
+
+      // TODO Overhaul to be memory save (delete descriptor when specification is deleted)
+    });
+  };
+
+  const getUniqueTagDatalist = (targetProductTags: Product.Tag[]): InputFieldDatalistElement[] => {
+    const unassignedTags = globalProductTags?.filter(globalProductTag => (
+      !targetProductTags.find(productTag => productTag.name === globalProductTag.name)
+    ));
+
+    const unassignedTagDatalist = unassignedTags?.map(unassignedTag => ({
+      name: unassignedTag.name,
+      description: `${unassignedTag.fields.length} fields`
+    }));
+
+    return unassignedTagDatalist ?? [];
   }
 
-  const handleProductTagAdd: KeyboardEventHandler<HTMLInputElement> = (event) => {
-    if (event.key !== 'Enter') {
-      return;
+  // Product name input management
+  const productNameInputField = useInputFieldManagement({
+    label: 'Name',
+    required: true,
+    format: (input) => {
+      if (input.trim() === '') {
+        throw new Error('Name not provided');
+      }
+
+      return input;
     }
+  });
 
-    const productTag = tags?.find(tag => tag.name === productTagInput);
-    if (!productTag) {
-      console.log('no such tag')
-      return;
+  // Product price input management
+  const productPriceInputField = useInputFieldManagement({
+    label: 'Price',
+    required: true,
+    format: (input) => {
+      console.log(input, input.trim())
+      if (input.trim() === '') {
+        throw new Error('Price not provided');
+      }
+
+      const number = Number(input);
+      if (Number.isNaN(number)) {
+        throw new Error('Input is not a number');
+      }
+
+      if (number < 0) {
+        throw new Error(`Price can't be negative`);
+      }
+
+      return number;
     }
+  });
 
-    if (productTags?.find(tag => tag.name === productTag.name)) {
-      console.log('already exists');
-      return;
+  // Product original price input management
+  const productOriginalPriceInputField = useInputFieldManagement({
+    label: 'Discount Price',
+    format: (input) => {
+      if (input.trim() === '') {
+        return;
+      }
+
+      const number = Number(input);
+      if (Number.isNaN(number)) {
+        throw new Error('Input is not a number');
+      }
+
+      if (number < 0) {
+        throw new Error(`Price can't be negative`);
+      }
+
+      return number;
     }
+  });
 
-    setProductTags([productTag, ...productTags]);
-    setProductTagInput('');
-  }
+  // Product stock input management
+  const productStockInputField = useInputFieldManagement({
+    label: 'In Stock',
+    required: true,
+    format: (input) => {
+      if (input.trim() === '') {
+        throw new Error('Price not provided');
+      }
 
-  // useEffect(() => {
-  //   if (tags) {
-  //     setProductTags(tags);
-  //   }
+      const number = Number(input);
+      if (Number.isNaN(number)) {
+        throw new Error('Input is not a number');
+      }
 
-  // }, [tags])
+      if (number < 0) {
+        throw new Error(`Price can't be negative`);
+      }
+
+      return number;
+    }
+  });
+
+  // Product tag input mamangement
+  const productTagSearchInputField = useInputFieldManagement<Product.Tag>({
+    label: 'Search for Tag',
+    labelIcon: faHashtag,
+    validationTiming: ValidationTiming.OnBoth,
+    format: (input) => {
+      const targetTag = globalProductTags?.find(globalProductTag => globalProductTag.name === input);
+      if (!targetTag) {
+        throw new Error(`\`${input}\` tag doesn't exist`);
+      }
+      
+      const productHasTargetTag = draftProductTags.find(draftProductTag => draftProductTag.id === targetTag.id);
+      if (productHasTargetTag) {
+        throw new Error(`\`${targetTag}\` tag is already added`);
+      }
+
+      return targetTag;
+    },
+    onSubmit(targetProductTag) {
+      const newDraftProductTags = [targetProductTag, ...draftProductTags];
+      setDraftProductTags(newDraftProductTags);
+      productTagSearchInputField.setInputDatalist(getUniqueTagDatalist(newDraftProductTags));
+      productTagSearchInputField.restoreInputValue()
+    },
+  });
 
   const {
     render: renderProductImageShowcaseEditor,
     uploadImages,
   } = useProductImageShowcaseEditor(product);
 
+  const applyProductValues = (targetProduct: Product) => {
+    productNameInputField.setInputValue(targetProduct.name, true);
+    productPriceInputField.setInputValue(targetProduct.price.toString(), true);
+    productOriginalPriceInputField.setInputValue(targetProduct.originalPrice?.toString() ?? '', true);
+    productStockInputField.setInputValue(targetProduct.stock.toString(), true);
+    productTagSearchInputField.setInputDatalist(getUniqueTagDatalist(targetProduct.tags));
+
+    setDraftProductTags(targetProduct.tags);
+    setDraftProductSpecifications(targetProduct.specifications)
+  }
+
+  const restoreProductValues = () => {
+    productNameInputField.restoreInputValue()
+    productPriceInputField.restoreInputValue()
+    productOriginalPriceInputField.restoreInputValue()
+    productStockInputField.restoreInputValue()
+
+    setDraftProductTags(product?.tags ?? []);
+    setDraftProductSpecifications(product?.specifications ?? []);
+    setDraftProductSpecificationStatusDescriptors((product?.specifications ?? []).map(spec => ({
+      fieldId: spec.field.id,
+      status: InputStatus.Default,
+      description: '',
+    })))
+  }
+
+  const updateSpecification = (field: Product.Tag.Field): React.ChangeEventHandler<HTMLInputElement> => (event) => {
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default, '');
+    const specificationIndex = draftProductSpecifications.findIndex(draftSpecification => draftSpecification.field.id === field.id);
+    const newDraftProductSpecification = [...draftProductSpecifications];
+    
+    if (specificationIndex >= 0) {
+      newDraftProductSpecification.splice(specificationIndex, 1);
+    }
+
+    newDraftProductSpecification.push({
+      field: field,
+      value: event.target.value,
+    });
+
+    setDraftProductSpecifications(newDraftProductSpecification)
+  }
+
+  const blurSpecification = (field: Product.Tag.Field): React.FocusEventHandler<HTMLInputElement> => (event) => {
+    if (event.target.value === '') {
+      return;
+    }
+
+    const t = product?.specifications.find(spec => spec.field.id === field.id);
+    if (t && event.target.value === t.value) {
+      return;
+    }
+
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Valid, '');
+  }
+
+  const click = (field: Product.Tag.Field): React.MouseEventHandler<HTMLInputElement> => (event) => {
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default, '');
+  }
+
+  const restoreTagSpecifications = (tag: Product.Tag) => {
+    setDraftProductSpecifications(prevState => {
+      const clear = prevState.filter(spec => !tag.fields.some(field => field.id === spec.field.id));
+      for (const field of tag.fields) {
+        const target = product?.specifications.find(s => field.id === s.field.id);
+        clear.push({
+          field,
+          value: target?.value ?? '',
+        });
+        updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default, '');
+      }
+
+      return clear;
+    });
+  }
+
   useEffect(() => {
     if (!product) {
       return;
     }
 
-    setProductNameInput(product.name);
-    setProductPriceInput(product.price);
-    setProductOriginalPriceInput(product.originalPrice);
-    setProductStockInput(product.stock);
+    applyProductValues(product);
   }, [product]);
-
-  const restoreProductValues = () => {
-    if (!product) {
-      return;
-    }
-
-    setProductNameInput(product.name);
-    setProductPriceInput(product.price);
-    setProductOriginalPriceInput(product.originalPrice);
-    setProductStockInput(product.stock);
-  }
   
   const requestProductUpdate = async () => {
     if (!product) {
       return;
     }
 
-    const obj = {
-      id: product.id,
-      name: productNameInput,
-      price: productPriceInput,
-      originalPrice: productOriginalPrice,
-      stock: productStockInput,
-      addTags: productTags.filter(productTag => !product.tags.some(pt => pt.id === productTag.id)).map(pt => pt.id),
-    }
+    try {
+      const name = productNameInputField.validateInput();
+      const price = productPriceInputField.validateInput();
+      const originalPrice = productOriginalPriceInputField.validateInput();
+      const stock = productStockInputField.validateInput();
 
-    console.log(obj)
+      let specificationInputsAreInvalid = false;
+      const definedSpecifications: Product.Specification[] = [];
+      for (const draftSpecification of draftProductSpecifications) {
+        if (draftSpecification.value.trim() !== '') {
+          definedSpecifications.push(draftSpecification);
+          continue;
+        }
 
-    await updateProduct(obj);
+        if (draftSpecification.field.required) {
+          updateDraftProductSpecificationStatusDescriptor(draftSpecification.field.id, InputStatus.Invalid, 'No input')
+          specificationInputsAreInvalid = true;
+        }
+      }
 
-    await uploadImages(product.id);
-    navigate(`/products/${product.id}`);
+      if (specificationInputsAreInvalid) {
+        throw new Error();
+      }
+
+      const formattedSpecifications = definedSpecifications.map(spec => ({
+        fieldId: spec.field.id,
+        value: spec.value,
+      }))
+      
+      await updateProduct({
+        id: product.id,
+        name,
+        price,
+        originalPrice,
+        stock,
+        tags: draftProductTags.map(tag => tag.id),
+        specifications: formattedSpecifications,
+      } as any);
+
+      await uploadImages(product.id);
+      navigate(`/products/${product.id}`);
+    } catch {}
   }
 
   const headerTools = (
@@ -131,47 +346,37 @@ const InspectProduct = () => {
 
   return (
     <Page id="inspect-product">
-      <Panel 
+      <Panel
         title={`Inspecting one product`}
         headerTools={headerTools}
       >
-        {renderProductImageShowcaseEditor()}
-        <div className="product-details">
-          <div className="product-static-field">
-            <span className="product-static-field-title">Name: </span>
-            <input type="text" defaultValue={productNameInput} onChange={(e) => setProductNameInput(e.target.value)} className={product.name !== productNameInput ? "changed" : ""} alt="" id="" />
+        <article className="product-image-showcase-editor">
+          {renderProductImageShowcaseEditor()}
+        </article>
+        <article className="product-information-fields">
+          { productNameInputField.render() }
+          { productPriceInputField.render() }
+          { productOriginalPriceInputField.render() }
+          { productStockInputField.render() }
+        </article>
+        <article className="product-tag-management">
+          { productTagSearchInputField.render() }
+          <div className="product-tag-cluster">
+            {draftProductTags?.map(productTag => (
+              <ProductTagRepresenter
+                draftProductSpecificationStatusDescriptors={draftProductSpecificationStatusDescriptors}
+                specifications={draftProductSpecifications}
+                targetProductTag={productTag}
+                draftProductTags={draftProductTags ?? []} 
+                setProductTags={setDraftProductTags} 
+                updateSpecification={updateSpecification}
+                blurSpecification={blurSpecification}
+                clickSpecification={click}
+                restore={() => restoreTagSpecifications(productTag)}
+              />
+            ))}
           </div>
-          <div className="product-static-field">
-            <span>Price: </span>
-            <input type="number" className={product.price !== productPriceInput ? "changed" : ""}  placeholder="price" defaultValue={productPriceInput} onChange={(e) => setProductPriceInput(Number(e.target.value))} />
-          </div>
-          <div className="product-static-field">
-            <span>Original Price:</span>
-            <input type="number" className={product.originalPrice !== productOriginalPrice ? "changed" : ""}  placeholder="original price" defaultValue={productOriginalPrice ?? ''} onChange={(e) => setProductOriginalPriceInput(e.target.value ? Number(e.target.value) : null)} />
-          </div>
-          <div className="product-static-field">
-            <span>Stock</span>
-            <input className={product.stock !== productStockInput ? "changed" : ""}  type="text" placeholder="stock" defaultValue={productStockInput} onChange={(e) => setProductStockInput(Number(e.target.value))} />
-          </div>
-          <div className="product-static-field">
-            <div className={`product-tag-add ${tags?.some(tag => tag.name === productTagInput) ? 'valid' : ''}`}>
-              <input type="text" list="tag-list" value={productTagInput} placeholder="Search for tag" onChange={handleProductTagInputChange} onKeyDown={handleProductTagAdd} />
-              <datalist id="tag-list">
-                {tags?.filter(tag => !productTags.some(pt => pt.name === tag.name)).map(productTag => 
-                  <option value={productTag.name} key={productTag.id}>
-                    {productTag.fields.length} fields
-                  </option>
-                )}
-              </datalist>
-            </div>
-            <div className="product-tag-cluster">
-              {productTags?.map(productTag => <ProductTagRepresenter productTag={productTag} setSpecificationFields={setProductSpecificationFields} />)}
-            </div>
-          </div>
-          <div>
-            
-          </div>
-        </div>
+        </article>
       </Panel>
     </Page>
   )

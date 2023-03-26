@@ -1,14 +1,52 @@
-import { ProductTag } from "./product-tag.model";
-
 export interface Product {
   readonly id: string;
   readonly name: string;
-  readonly tags: ProductTag[];
   readonly price: number;
   readonly originalPrice: number | null;
   readonly stock: number;
-  readonly urn: {
+  readonly tags: Product.Tag[];
+  readonly specifications: Product.Specification[];
+  readonly urn: Product.URN;
+}
+
+export namespace Product {
+  export interface URN {
     readonly thumbs: string[];
     readonly thumbnail: string | null;
+  }
+
+  export interface Tag {
+    readonly id: string;
+    readonly name: string;
+    readonly fields: Tag.Field[];
+  }
+
+  export namespace Tag {
+    export interface Field { 
+      readonly id: string;
+      readonly name: string;
+      readonly required: boolean;
+      readonly example: string;
+    }
+  }
+  
+  export interface Specification {
+    readonly field: Product.Tag.Field;
+    readonly value: string;
+  }
+
+  export namespace Unregistered {
+    export interface Tag extends Omit<Product.Tag, 'id' | 'fields'> {
+      readonly fields: Unregistered.Tag.Field[];
+    }
+
+    export namespace Tag {
+      export type Field = Omit<Product.Tag.Field, 'id'>;
+    }
+
+    export interface Specification {
+      readonly field: Product.Tag.Field;
+      readonly value: string;
+    }
   }
 }
