@@ -1,0 +1,51 @@
+.product-tag-boundary {
+  font-weight: 500;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-secondary-color);
+  gap: 1rem;
+  border-radius: .5rem;
+
+  &:hover .product-tag-management {
+    visibility: visible;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+
+    .product-tag-name {
+      width: min-content;
+      font-size: 1.5rem;
+      // border-bottom: .2rem solid var(--background-highlight-color);
+    }
+  
+    .product-tag-management {
+      visibility: hidden;
+      display: flex;
+      gap: .3rem;
+
+      button {
+        background-color: transparent;
+        aspect-ratio: 1;
+        border: none;
+        transition: background-color .25s ease;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .product-tag-fields {
+    display: flex;
+    flex-direction: column;
+
+    .product-tag-field {
+      display: flex;
+      flex-direction: row;
+      gap: .5rem;
+
+
+    }
+  }
+}

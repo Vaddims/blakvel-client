@@ -1,5 +1,7 @@
 .page#inspect-product-tag {
   .product-tag-details {
+    width: 350px;
+
     .product-tag-static-field {
       .tag-title {
         color: black;
@@ -7,15 +9,9 @@
     }
   }
 
-  .product-tag-dynamic-fields {
-    input {
-      color: black;
-    }
-  }
-
   .product-tag-field-adder {
     .product-tag-field-adder-button {
-      background-color: green;
+      background-color: var(--background-highlight-color);
       border: none;
       border-radius: 0.5rem;
       padding: 0.5rem;

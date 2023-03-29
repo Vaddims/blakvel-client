@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEventHandler, KeyboardEventHandler, useEffect, useState } from "react";
 import { useGetProductQuery, useUpdateProductMutation } from "../../services/api/productsApi";
 import { useProductImageShowcaseEditor } from '../../components/ProductImageEditor/useProductImageShowcaseEditor';
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,65 +6,58 @@ import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
 import * as uuid from 'uuid';
 import './inspect-product.scss';
+import { useGetProductTagsQuery } from "../../services/api/productTagsApi";
+import { ProductTagRepresenter } from "./ProductTagRepresenter";
+import { useInputFieldManagement, ValidationTiming } from "../../middleware/hooks/useInputFieldManagement";
+import { InputFieldDatalistElement, InputStatus } from "../../components/InputField";
+import { Product } from "../../models/product.model";
+import { faBoxesStacked, faDollarSign, faHashtag, faHeading, faMoneyBill, faSignature, faTag } from "@fortawesome/free-solid-svg-icons";
+import { useProductInspector } from "../../middleware/component-hooks/product-inspector/useProductInspector";
+
+export interface InputFieldStatusDescriptor {
+  readonly fieldId: string;
+  readonly status: InputStatus;
+  readonly description?: string;
+}
 
 const InspectProduct = () => {
-  const { id = '' } = useParams();
-  const { data: product } = useGetProductQuery(id, { skip: !uuid.validate(id) });
   const navigate = useNavigate();
-
+  const { id = '' } = useParams();
+  const uuidIsValid = uuid.validate(id);
+  
   const [ updateProduct ] = useUpdateProductMutation();
-  const [productNameInput, setProductNameInput] = useState<string>();
-  const [productPriceInput, setProductPriceInput ] = useState<number>();
-  const [productOriginalPrice, setProductOriginalPriceInput] = useState<number | null>(null);
-  const [productStockInput, setProductStockInput] = useState<number>();
-
-  const {
-    render: renderProductImageShowcaseEditor,
-    uploadImages,
-  } = useProductImageShowcaseEditor(product);
-
-  useEffect(() => {
-    if (!product) {
-      return;
-    }
-
-    setProductNameInput(product.name);
-    setProductPriceInput(product.price);
-    setProductOriginalPriceInput(product.originalPrice);
-    setProductStockInput(product.stock);
-  }, [product]);
-
-  const restoreProductValues = () => {
-    if (!product) {
-      return;
-    }
-
-    setProductNameInput(product.name);
-    setProductPriceInput(product.price);
-    setProductOriginalPriceInput(product.originalPrice);
-    setProductStockInput(product.stock);
-  }
+  const { data: product } = useGetProductQuery(id, { skip: !uuidIsValid });
+  const productInspector = useProductInspector({
+    productId: id,
+  });
   
   const requestProductUpdate = async () => {
     if (!product) {
       return;
     }
 
-    await updateProduct({
-      id: product.id,
-      name: productNameInput,
-      price: productPriceInput,
-      originalPrice: productOriginalPrice,
-      stock: productStockInput,
-    });
+    try {
+      const inputProduct = productInspector.validateInputs();
+      await updateProduct({
+        ...inputProduct,
+        id: product.id,
+        tags: inputProduct.tags.map(tag => tag.id),
+        specifications: inputProduct.specifications.map(spec => ({
+          value: spec.value,
+          fieldId: spec.field.id,
+        }))
+      } as any);
 
-    await uploadImages(product.id);
-    navigate(`/products/${product.id}`);
+      await productInspector.imageEditor.uploadImages(product.id);
+      navigate(`/products/${product.id}`);
+    } catch (error) {
+      alert(error);
+    }
   }
 
   const headerTools = (
     <>
-      <button className="panel-tool outline-highlight" onClick={restoreProductValues}>Restore</button>
+      <button className="panel-tool outline-highlight" onClick={productInspector.restoreProductValues}>Restore</button>
       <button className="panel-tool highlight" onClick={requestProductUpdate}>Update</button>
     </>
   )
@@ -75,29 +68,11 @@ const InspectProduct = () => {
 
   return (
     <Page id="inspect-product">
-      <Panel 
+      <Panel
         title={`Inspecting one product`}
         headerTools={headerTools}
       >
-        {renderProductImageShowcaseEditor()}
-        <div className="product-details">
-          <div className="product-static-field">
-            <span>Name: </span>
-            <input type="text" defaultValue={productNameInput} onChange={(e) => setProductNameInput(e.target.value)} className={product.name !== productNameInput ? "changed" : ""} alt="" id="" />
-          </div>
-          <div className="product-static-field">
-            <span>Price: </span>
-            <input type="number" className={product.price !== productPriceInput ? "changed" : ""}  placeholder="price" defaultValue={productPriceInput} onChange={(e) => setProductPriceInput(Number(e.target.value))} />
-          </div>
-          <div className="product-static-field">
-            <span>Original Price:</span>
-            <input type="number" className={product.originalPrice !== productOriginalPrice ? "changed" : ""}  placeholder="original price" defaultValue={productOriginalPrice ?? ''} onChange={(e) => setProductOriginalPriceInput(e.target.value ? Number(e.target.value) : null)} />
-          </div>
-          <div className="product-static-field">
-            <span>Stock</span>
-            <input className={product.stock !== productStockInput ? "changed" : ""}  type="text" placeholder="stock" defaultValue={productStockInput} onChange={(e) => setProductStockInput(Number(e.target.value))} />
-          </div>
-        </div>
+        {productInspector.render()}
       </Panel>
     </Page>
   )

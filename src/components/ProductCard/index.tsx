@@ -6,10 +6,11 @@ interface ProductCardProps extends React.HTMLProps<HTMLElement> {
 }
 
 const ProductCard: React.FC<ProductCardProps> = (props) => {
-  const { id, name, price, originalPrice, urn } = props.product;
+  const { id, name, price, discountPrice, urn } = props.product;
 
-  const hasDiscount = originalPrice && originalPrice > price;
-  const discountPercent = hasDiscount ? (100 - Math.round(price / originalPrice * 100)) : 0;
+  const hasDiscount = discountPrice && discountPrice < price;
+  const discountPercent = hasDiscount ? (100 - Math.round(discountPrice / price * 100)) : 0;
+  const currentPrice = hasDiscount ? discountPrice : price;
 
   return (
     <article className='product-card' {...props} title={id}>
@@ -28,8 +29,8 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
             </div>
           }
           <div className='product-price-showcase'>
-            <h3 className='product-current-price'>${price}</h3>
-            {hasDiscount && <h3 className='product-source-price'>${originalPrice}</h3>}
+            <h3 className='product-current-price'>${currentPrice}</h3>
+            {hasDiscount && <h3 className='product-source-price'>${price}</h3>}
           </div>
         </div>
       </div>

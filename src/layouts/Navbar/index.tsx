@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import logo from './logo.png';
 import { useRedirection } from '../../utils/hooks/useRedirection';
 import UnauthorizedNavbarNavigation from './unauthorized-navigation';
 import AdminNavbarNavigation from './admin-navigation';
@@ -47,7 +48,8 @@ function Navbar(props: NavbarProps) {
   return (
     <nav className={`navbar ${phase}`} ref={reference}>
       <div className='logo-boundary navbar-section' onClick={redirect('/')}>
-        <i className="fa-solid fa-paw"></i>
+        {/* <i className="fa-solid fa-paw"></i> */}
+        <img className='logo' src={logo} />
         <h2>Petshop</h2>
       </div>
       <div className='navbar-section'>

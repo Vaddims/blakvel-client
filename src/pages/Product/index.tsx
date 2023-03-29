@@ -65,8 +65,9 @@ export default function Product() {
 
   const headerTools = user?.role === UserRole.Admin ? adminHeaderTools : commonHeaderTools;
 
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercent = hasDiscount ? (100 - Math.round(product.price / product.originalPrice! * 100)) : 0;
+  const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+  const discountPercent = hasDiscount ? (100 - Math.round(product.discountPrice! / product.price * 100)) : 0;
+  const currentPrice = hasDiscount ? product.discountPrice : product.price;
 
   return (
     <Page id="product">
@@ -77,11 +78,11 @@ export default function Product() {
         <article className="product-details">
           <div className="common-details">
             {templateDescription && <p className="product-">{templateDescription}</p>}
-            <h2 className="product-price">${product.price}</h2>
+            <h2 className="product-price">${currentPrice}</h2>
             {hasDiscount &&
               <div className="product-sale-details">
                 <div className="product-sale-specs">
-                  <h3 className='product-source-price'>${product.originalPrice}</h3>
+                  <h3 className='product-source-price'>${product.price}</h3>
                   <div className='product-discount-box'>
                     <h5 className='product-discount'>-{discountPercent}%</h5>
                   </div>

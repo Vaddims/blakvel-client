@@ -1,0 +1,125 @@
+.input-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+
+  .title-bar {
+    margin-bottom: .5rem;
+    display: flex;
+    flex-direction: row;
+    gap: .5rem;
+
+    .required-asterisk {
+      margin-left: .15rem;
+      color: rgb(225, 40, 50);
+    }
+  }
+
+  .input-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+
+    transition: border .25s ease;
+    border: 1px solid rgb(150, 150, 150);
+    border-radius: .5rem;
+    padding: 0;
+    overflow: hidden;
+
+    .ics {
+      padding-right: .5rem;
+
+      button {
+        display: none;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+      }
+
+      &:empty {
+        display: none;
+      }
+    }
+
+    &:hover button {
+      display: block;
+    }
+
+    &:hover {
+      border: 1px solid rgb(190, 190, 190);
+
+      .input-icon {
+        display: none;
+      }
+    }
+
+    &:focus-within {
+      border: 1px solid var(--background-highlight-color);
+    }
+
+    &.valid {
+      border: 1px solid rgb(64, 199, 66);
+
+      .input-icon path {
+        fill: rgb(64, 199, 66);
+      }
+
+      & + .input-description {
+        color: rgb(64, 199, 66);
+      }
+    }
+
+    &.warn {
+      border: 1px solid rgb(255, 153, 51);
+
+      .input-icon path {
+        fill: rgb(255, 153, 51);
+      }
+
+      & + .input-description {
+        color: rgb(255, 153, 51);
+      }
+    }
+
+    &.invalid {
+      border: 1px solid rgb(225, 40, 50);
+
+      .input-icon path {
+        fill: rgb(225, 40, 50);
+      }
+
+      & + .input-description {
+        color: rgb(225, 40, 50);
+      }
+    }
+
+    input {
+      width: 100%;
+      color: white;
+      background-color: transparent;
+      outline: none;
+      padding: .5rem;
+      font-size: larger;
+      border: none;
+    }
+
+    .input-icon {
+      margin: 0 .75rem;
+    }
+  }
+
+  .input-description {
+    margin-top: .1rem;
+    display: inline-block;
+    text-align: right;
+    font-size: smaller;
+    width: 100%;
+
+    &:empty:before {
+      content: '\00a0';
+    }
+  }
+}

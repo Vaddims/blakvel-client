@@ -4,31 +4,29 @@ import { ProductImageShowcaseInspector, ProductImageShowcaseInspectorRefMethods 
 import { useProductImageShowcaseEditor } from "../../components/ProductImageEditor/useProductImageShowcaseEditor";
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel";
+import { useProductInspector } from "../../middleware/component-hooks/product-inspector/useProductInspector";
 import { useCreateProductMutation } from "../../services/api/productsApi";
 import './createProduct.scss';
 
 const CreateProduct: React.FC = () => {
   const [ createProduct ] = useCreateProductMutation();
-  const {
-    render,
-    uploadImages,
-  } = useProductImageShowcaseEditor();
+  const productInspector = useProductInspector();
   const navigate = useNavigate();
-  const [productNameInput, setProductNameInput] = useState('');
-  const [productPriceInput, setProductPriceInput ] = useState(0);
-  const [productOriginalPrice, setProductOriginalPriceInput] = useState<number | null>(null);
-  const [productStockInput, setProductStockInput] = useState(0);
   
   const requestProductCreation = async () => {
     try {
-      const product = await createProduct({
-        name: productNameInput,
-        price: productPriceInput,
-        originalPrice: productOriginalPrice,
-        stock: productStockInput,
-      }).unwrap();
+      const inputProduct = productInspector.validateInputs();
 
-      await uploadImages(product.id);
+      const product = await createProduct({
+        ...inputProduct,
+        tags: inputProduct.tags.map(tag => tag.id),
+        specifications: inputProduct.specifications.map(spec => ({
+          value: spec.value,
+          fieldId: spec.field.id,
+        }))
+      } as any).unwrap();
+
+      await productInspector.imageEditor.uploadImages(product.id);
       navigate(`/products/${product.id}`);
     } catch {}
   }
@@ -42,26 +40,7 @@ const CreateProduct: React.FC = () => {
   return (
     <Page id="create-product">
       <Panel title="Create New Product" headerTools={headerTools}>
-        {/* <ProductImageShowcaseInspector ref={galleryRef} /> */}
-        {render()}
-        <div className="product-details">
-          <div className="product-static-field">
-            <span>Name: </span>
-            <input type="text" defaultValue={productNameInput} onChange={(e) => setProductNameInput(e.target.value)} className="changed" alt="" id="" />
-          </div>
-          <div className="product-static-field">
-            <span>Price: </span>
-            <input type="number" className="changed"  placeholder="price" defaultValue={productPriceInput} onChange={(e) => setProductPriceInput(Number(e.target.value))} />
-          </div>
-          <div className="product-static-field">
-            <span>Original Price:</span>
-            <input type="number" className="changed"  placeholder="original price" defaultValue={productOriginalPrice ?? ''} onChange={(e) => setProductOriginalPriceInput(e.target.value ? Number(e.target.value) : null)} />
-          </div>
-          <div className="product-static-field">
-            <span>Stock</span>
-            <input className="changed"  type="text" placeholder="stock" defaultValue={productStockInput} onChange={(e) => setProductStockInput(Number(e.target.value))} />
-          </div>
-        </div>
+        { productInspector.render() }
       </Panel>
     </Page>
   )
