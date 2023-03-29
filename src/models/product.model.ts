@@ -1,15 +1,18 @@
-export interface Product {
-  readonly id: string;
-  readonly name: string;
-  readonly price: number;
-  readonly originalPrice: number | null;
-  readonly stock: number;
+export interface Product extends Product.GenericInformation {
   readonly tags: Product.Tag[];
   readonly specifications: Product.Specification[];
   readonly urn: Product.URN;
 }
 
 export namespace Product {
+  export interface GenericInformation {
+    readonly id: string;
+    readonly name: string;
+    readonly price: number;
+    readonly discountPrice: number | null;
+    readonly stock: number;
+  }
+
   export interface URN {
     readonly thumbs: string[];
     readonly thumbnail: string | null;

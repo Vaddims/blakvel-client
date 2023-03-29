@@ -7,10 +7,11 @@ interface FlatProductCardProps extends React.HTMLAttributes<HTMLElement> {
 
 const FlatProductCard: React.FC<FlatProductCardProps> = (props) => {
   const { className } = props;
-  const { id, name, price, originalPrice } = props.product;
+  const { id, name, price, discountPrice } = props.product;
 
-  const hasDiscount = originalPrice && originalPrice > price;
-  const discountPercent = hasDiscount ? (100 - Math.round(price / originalPrice * 100)) : 0;
+  const hasDiscount = discountPrice && discountPrice < price;
+  const discountPercent = hasDiscount ? (100 - Math.round(discountPrice / price  * 100)) : 0;
+  const currentPrice = hasDiscount ? discountPrice : price;
 
   return (
     <article {...props} className={`flat-product-card ${className}`} title={id}>
@@ -24,8 +25,10 @@ const FlatProductCard: React.FC<FlatProductCardProps> = (props) => {
           </div>
         }
         <div className='product-price-showcase'>
-          {hasDiscount && <span className='product-source-price'>${originalPrice}</span>}
-          <span className='product-current-price'>${price}</span>
+          {hasDiscount && (
+            <span className='product-source-price'>${price}</span>
+          )}
+          <span className='product-current-price'>${currentPrice}</span>
         </div>
       </div>
     </article>

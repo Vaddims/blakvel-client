@@ -31,17 +31,21 @@
 
     .ics {
       padding-right: .5rem;
-    }
 
-    button {
-      visibility: hidden;
-      background-color: transparent;
-      border: none;
-      cursor: pointer;
+      button {
+        display: none;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+      }
+
+      &:empty {
+        display: none;
+      }
     }
 
     &:hover button {
-      visibility: visible;
+      display: block;
     }
 
     &:hover {

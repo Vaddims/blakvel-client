@@ -5,9 +5,8 @@ import { InputField, InputFieldDatalistElement, InputStatus } from '../../compon
 export const composedValueAbordSymbol: unique symbol = Symbol('ComposedValueAbord');
 
 export enum ValidationTiming {
-  AfterBlur,
+  OnBlur,
   OnChange,
-  OnBoth,
 }
 
 export interface InputFieldManagement<T> {
@@ -16,8 +15,8 @@ export interface InputFieldManagement<T> {
   readonly description?: string;
   readonly initialInputValue?: string;
   readonly inputInitialDatalist?: InputFieldDatalistElement[];
-  readonly validationTiming?: ValidationTiming;
-  readonly required?: boolean;
+  readonly validationTimings?: ValidationTiming[];
+  readonly required?: boolean; 
 
   readonly format?: (input: string) => T;
   readonly onInputBlur?: () => void;
@@ -31,7 +30,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     labelIcon,
     initialInputValue = '',
     inputInitialDatalist = [],
-    validationTiming = ValidationTiming.AfterBlur,
+    validationTimings = [ValidationTiming.OnBlur],
     required = false,
     format: formatInput,
     description: staticDescription = '',
@@ -46,14 +45,20 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
   const [ status, setStatus ] = useState(InputStatus.Default);
   const [ inputDatalist, setInputDatalist ] = useState(inputInitialDatalist);
 
-  const displayInformationAlert = (status: InputStatus, description?: string) => {
-    setStatus(status);
-    setDescription(description ?? '');
-  }
+  const informationAlert = {
+    display(status: InputStatus, description?: string) {
+      setStatus(status);
 
-  const hideInformationAlert = () => {
-    setStatus(InputStatus.Default);
-    setDescription(staticDescription);
+      if (status === InputStatus.Default) {
+        setDescription(staticDescription);
+        return;
+      }
+
+      setDescription(description ?? '');
+    },
+    hide() {
+      setStatus(InputStatus.Default);
+    }
   }
 
   const onInputRestore = () => {
@@ -61,9 +66,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
   }
 
   const onClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
-    if (validationTiming !== ValidationTiming.OnChange && validationTiming !== ValidationTiming.OnBoth) {
-      displayInformationAlert(InputStatus.Default);
-    }
+    informationAlert.display(InputStatus.Default, staticDescription);
   }
 
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -71,20 +74,21 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     setInputValue(input);
     inputChangeCallback?.(input);
 
-    if (validationTiming === ValidationTiming.OnChange || validationTiming === ValidationTiming.OnBoth) {
+    if (validationTimings.includes(ValidationTiming.OnChange)) {
       try {
         if (!formatInput) {
           return;
         }
 
-        formatInput(input);
         if (input === anchorValue) {
           return;
         }
+        
+        formatInput(input);
 
-        displayInformationAlert(InputStatus.Valid);
+        informationAlert.display(InputStatus.Valid);
       } catch {
-        hideInformationAlert();
+        informationAlert.hide();
       }
     }
   }
@@ -92,7 +96,12 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
   const onInputBlur = () => {
     inputBlurCallback?.();
 
-    if (validationTiming === ValidationTiming.AfterBlur) {
+    if (inputValue === anchorValue) {
+      informationAlert.display(InputStatus.Default);
+      return;
+    }
+
+    if (validationTimings.includes(ValidationTiming.OnBlur)) {
       const composedValue = getValidatedResult(inputValue);
 
       if (composedValue === composedValueAbordSymbol) {
@@ -102,9 +111,30 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
       if (inputValue === anchorValue) {
         return;
       }
+
+      if (inputValue === '') {
+        informationAlert.display(InputStatus.Default);
+        return;
+      }
   
-      displayInformationAlert(InputStatus.Valid);
+      informationAlert.display(InputStatus.Valid);
       return;
+    }
+  }
+
+  const getFormattedResult = (value: string) => {
+    if (!formatInput) {
+      throw new Error('No input formatter provided');
+    }
+
+    if (required && inputValue === '') {
+      return composedValueAbordSymbol;
+    }
+    
+    try {
+      return formatInput(value);
+    } catch {
+      return composedValueAbordSymbol;
     }
   }
 
@@ -114,13 +144,17 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     }
 
     try {
+      if (required && inputValue === '') {
+        throw new Error('Field is required');
+      }
+
       return formatInput(value);
     } catch (exception) {
       if (!(exception instanceof Error)) {
         throw new Error(`Validation exception is not an error`);
       }
 
-      displayInformationAlert(InputStatus.Invalid, exception.message);
+      informationAlert.display(InputStatus.Invalid, exception.message);
       throw exception;
     }
   }
@@ -133,8 +167,9 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     }
   }
 
-  const validateInput = () => validateValue(inputValue)
-  const getValidatedInputResult = () => getValidatedResult(inputValue)
+  const validateInput = () => validateValue(inputValue);
+  const getValidatedInputResult = () => getValidatedResult(inputValue);
+  const getFormattedInputResult = () => getFormattedResult(inputValue);
 
   const updateInputValue = (value: string, isAnchor = false) => {
     setInputValue(value);
@@ -147,7 +182,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     const anchor = isAnchor ? value : anchorValue;
 
     if (value === anchor) {
-      hideInformationAlert();
+      informationAlert.hide();
       return;
     }
 
@@ -158,11 +193,11 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     }
 
     if (value === anchor) {
-      displayInformationAlert(InputStatus.Default);
+      informationAlert.display(InputStatus.Default);
       return;
     }
 
-    displayInformationAlert(InputStatus.Valid);
+    informationAlert.display(InputStatus.Valid);
     return;
   }
 
@@ -216,6 +251,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     restoreInputValue,
     validateInput,
     getValidatedInputResult,
+    getFormattedInputResult,
     render,
   }
 } 

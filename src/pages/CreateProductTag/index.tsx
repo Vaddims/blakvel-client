@@ -5,10 +5,10 @@ import { useCreateProductTagMutation, useGetProductTagsQuery } from "../../servi
 import { useNavigate } from "react-router-dom";
 import { createContext, useContext, useState } from "react";
 import './product-tag-field-inspection.scss';
-import { ProductTagFieldDeclaration } from "../../models/product-tag-field-declaration.model";
 import { InputField, InputStatus } from "../../components/InputField";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHashtag, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { Product } from "../../models/product.model";
 
 
 interface ContextState {
@@ -30,7 +30,7 @@ export const CreateProductTag = () => {
   
   const [ productNameInputStatus, setProductNameInputStatus ] = useState(InputStatus.Default);
   const [ productTagName, setProductTagName ] = useState('');
-  const [ fields, setFields ] = useState<ProductTagFieldDeclaration[]>([]);
+  const [ fields, setFields ] = useState<Product.Unregistered.Tag.Field[]>([]);
 
   const requestProductCreation = async () => {
     const product = await createProductTag({

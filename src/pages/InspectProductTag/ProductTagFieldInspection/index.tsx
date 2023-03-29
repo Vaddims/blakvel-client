@@ -2,7 +2,6 @@ import { faRedo, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChangeEventHandler, FC, useState } from 'react';
 import { InputField, InputStatus } from '../../../components/InputField';
-import { ProductTagFieldDeclaration } from '../../../models/product-tag-field-declaration.model';
 import { Product } from '../../../models/product.model';
 import './product-tag-field-inspection.scss';
 

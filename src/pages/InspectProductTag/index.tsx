@@ -4,12 +4,12 @@ import { ProductTagFieldBundle, ProductTagFieldInspection } from "./ProductTagFi
 import { useCreateProductTagMutation, useGetProductTagQuery, useGetProductTagsQuery, useUpdateProductTagMutation } from "../../services/api/productTagsApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { createContext, useEffect, useState } from "react";
-import { ProductTagFieldDeclaration } from "../../models/product-tag-field-declaration.model";
 import * as uuid from 'uuid';
 import './product-tag-field-inspection.scss';
 import { InputField, InputStatus } from "../../components/InputField";
 import { faHashtag } from "@fortawesome/free-solid-svg-icons";
 import { Product } from "../../models/product.model";
+import { UpdateProductTagRequest } from "../../models/update-product-tag-request.model";
 
 interface ContextState {
   name: string;
@@ -53,7 +53,10 @@ export const InspectProductTag = () => {
       const product = await updateProductTag({
         id: productTag.id,
         name: productTagName,
-        fields: fields,
+        fields: fields.map(f => {
+          delete f.initialField;
+          return f as Product.Tag.Field;
+        }),
       }).unwrap();
       
       navigate(`/product-tags/${product.id}/inspect`);
