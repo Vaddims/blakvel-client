@@ -32,7 +32,7 @@ export const InspectProductTag = () => {
 
   const [ productNameInputStatus, setProductNameInputStatus ] = useState(InputStatus.Default);
   const [ productTagName, setProductTagName ] = useState('');
-  const [ tagNameDescription, setTagNameDescription ] = useState('');
+  const [ tagNameHelperText, setTagNameHelperText ] = useState('');
   const [ fields, setFields ] = useState<ProductTagFieldBundle[]>([]);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export const InspectProductTag = () => {
   const onInputBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
     const newProductTagName = event.target.value;
     setProductTagName(newProductTagName)
-    setTagNameDescription('');
+    setTagNameHelperText('');
 
     if (newProductTagName.length === 0) {
       setProductNameInputStatus(InputStatus.Default);
@@ -109,7 +109,7 @@ export const InspectProductTag = () => {
     const existingTag = productTags.find((tag) => tag.name.toLowerCase() === newProductTagName.trim().toLowerCase())
     if (existingTag) {
       setProductNameInputStatus(InputStatus.Invalid);
-      setTagNameDescription(`Tag with the name \`${existingTag.name}\` already exists`);
+      setTagNameHelperText(`Tag with the name \`${existingTag.name}\` already exists`);
       return;
     }
     
@@ -119,7 +119,7 @@ export const InspectProductTag = () => {
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const newProductTagName = event.target.value;
     setProductTagName(newProductTagName)
-    setTagNameDescription('');
+    setTagNameHelperText('');
     setProductNameInputStatus(InputStatus.Default);
   }
   
@@ -130,7 +130,7 @@ export const InspectProductTag = () => {
           <InputField 
             label="Tag Name" 
             labelIcon={faHashtag}
-            description={tagNameDescription}
+            helperText={tagNameHelperText}
             status={productNameInputStatus}
             value={productTagName}
             onChange={onInputChange} 

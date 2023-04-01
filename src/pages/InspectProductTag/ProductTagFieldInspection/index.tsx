@@ -19,7 +19,7 @@ export interface ProductTagFieldInspectionState {
 export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (props) => {
   const { field, fields, updateField, removeField } = props;
 
-  const [ fieldNameDescription, setFieldNameDescription ] = useState('');
+  const [ fieldNameHelperText, setFieldNameHelperText ] = useState('');
   const [ fieldNameInputState, setFieldNameInputState ] = useState(InputStatus.Default);
 
   const [ exampleInputState, setExampleInputState ] = useState(InputStatus.Default);
@@ -56,7 +56,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
 
   const onFieldNameBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
     const newFieldName = event.target.value;
-    setFieldNameDescription('');
+    setFieldNameHelperText('');
 
     if (newFieldName.length === 0) {
       setFieldNameInputState(InputStatus.Default);
@@ -66,7 +66,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
     const existingLocalTagName = fields.find((localField) => localField.name.toLowerCase() === field.name.trim().toLowerCase() && localField !== field)
     if (existingLocalTagName) {
       setFieldNameInputState(InputStatus.Invalid);
-      setFieldNameDescription(`Tag field with the name \`${existingLocalTagName.name}\` already exist`);
+      setFieldNameHelperText(`Tag field with the name \`${existingLocalTagName.name}\` already exist`);
       return;
     }
 
@@ -80,7 +80,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
 
   const onExampleBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
     const newExample = event.target.value;
-    setFieldNameDescription('');
+    setFieldNameHelperText('');
 
     if (newExample.length === 0 || field.initialField?.example === newExample) {
       setExampleInputState(InputStatus.Default);
@@ -95,7 +95,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
       <InputField
         label="Field Name"
         status={fieldNameInputState}
-        description={fieldNameDescription}
+        helperText={fieldNameHelperText}
         value={field.name}
         onChange={onFieldNameChange}
         onBlur={onFieldNameBlur}

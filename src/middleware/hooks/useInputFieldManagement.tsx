@@ -12,7 +12,9 @@ export enum ValidationTiming {
 export interface InputFieldManagement<T> {
   readonly label: string;
   readonly labelIcon?: IconDefinition;
-  readonly description?: string;
+  readonly inputIcon?: IconDefinition;
+  readonly placeholder?: string;
+  readonly helperText?: string;
   readonly initialInputValue?: string;
   readonly inputInitialDatalist?: InputFieldDatalistElement[];
   readonly validationTimings?: ValidationTiming[];
@@ -24,16 +26,18 @@ export interface InputFieldManagement<T> {
   readonly onSubmit?: (data: T) => void;
 }
 
-export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
+export function useInputFieldManagement<T>(options: InputFieldManagement<T>): InputFieldManagementHook.Result<T> {
   const { 
     label,
     labelIcon,
+    inputIcon,
+    placeholder,
     initialInputValue = '',
     inputInitialDatalist = [],
     validationTimings = [ValidationTiming.OnBlur],
     required = false,
     format: formatInput,
-    description: staticDescription = '',
+    helperText: staticHelperText = '',
     onInputChange: inputChangeCallback,
     onInputBlur: inputBlurCallback,
     onSubmit: onInputSubmit,
@@ -41,59 +45,67 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
 
   const [ inputValue, setInputValue ] = useState(initialInputValue);
   const [ anchorValue, setAnchorValue ] = useState(initialInputValue);
-  const [ description, setDescription ] = useState(staticDescription);
+  const [ helperText, setDescription ] = useState(staticHelperText);
   const [ status, setStatus ] = useState(InputStatus.Default);
   const [ inputDatalist, setInputDatalist ] = useState(inputInitialDatalist);
+  
 
   const informationAlert = {
     display(status: InputStatus, description?: string) {
       setStatus(status);
 
       if (status === InputStatus.Default) {
-        setDescription(staticDescription);
+        setDescription(staticHelperText);
         return;
       }
 
       setDescription(description ?? '');
     },
-    hide() {
+    restore() {
       setStatus(InputStatus.Default);
+      setDescription(staticHelperText);
     }
   }
 
-  const onInputRestore = () => {
+  const handleInputRestore: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     restoreInputValue();
   }
 
-  const onClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
-    informationAlert.display(InputStatus.Default, staticDescription);
+  const handleInputClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
+    informationAlert.display(InputStatus.Default, staticHelperText);
   }
 
-  const onInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const input = event.target.value;
-    setInputValue(input);
     inputChangeCallback?.(input);
+    setInputValue(input);
 
     if (validationTimings.includes(ValidationTiming.OnChange)) {
-      try {
-        if (!formatInput) {
-          return;
-        }
+      if (input === anchorValue) {
+        informationAlert.restore();
+        return;
+      }
 
-        if (input === anchorValue) {
+      if (!formatInput) {
+        if (input === '') {
+          informationAlert.restore();
           return;
         }
-        
-        formatInput(input);
 
         informationAlert.display(InputStatus.Valid);
+        return;
+      }
+
+      try {
+        formatInput(input);
+        informationAlert.display(InputStatus.Valid);
       } catch {
-        informationAlert.hide();
+        informationAlert.restore();
       }
     }
   }
 
-  const onInputBlur = () => {
+  const handleInputBlur = () => {
     inputBlurCallback?.();
 
     if (inputValue === anchorValue) {
@@ -102,22 +114,15 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     }
 
     if (validationTimings.includes(ValidationTiming.OnBlur)) {
-      const composedValue = getValidatedResult(inputValue);
+      try {
+        validateInput();
+        if (inputValue === '') {
+          informationAlert.restore();
+          return;
+        }
 
-      if (composedValue === composedValueAbordSymbol) {
-        return;
-      }
-  
-      if (inputValue === anchorValue) {
-        return;
-      }
-
-      if (inputValue === '') {
-        informationAlert.display(InputStatus.Default);
-        return;
-      }
-  
-      informationAlert.display(InputStatus.Valid);
+        informationAlert.display(InputStatus.Valid);
+      } catch {}
       return;
     }
   }
@@ -171,6 +176,10 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
   const getValidatedInputResult = () => getValidatedResult(inputValue);
   const getFormattedInputResult = () => getFormattedResult(inputValue);
 
+  const updateStaticDescription = (value: string) => {
+    setDescription(value);
+  }
+
   const updateInputValue = (value: string, isAnchor = false) => {
     setInputValue(value);
 
@@ -182,7 +191,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     const anchor = isAnchor ? value : anchorValue;
 
     if (value === anchor) {
-      informationAlert.hide();
+      informationAlert.restore();
       return;
     }
 
@@ -201,7 +210,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     return;
   }
 
-  const onKeyPress: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
+  const handleKeyPress: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key !== 'Enter') {
       return;
     }
@@ -230,16 +239,19 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     <InputField
       label={label}
       labelIcon={labelIcon}
+      inputIcon={inputIcon}
+      placeholder={placeholder}
       inputDatalist={inputDatalist}
-      description={description}
+      helperText={helperText}
+      anchor={anchorValue}
       required={required}
       status={status}
       value={inputValue}
-      onInputRestore={onInputRestore}
-      onClick={onClick}
-      onChange={onInputChange}
-      onBlur={onInputBlur}
-      onKeyPress={onKeyPress}
+      onInputRestore={handleInputRestore}
+      onClick={handleInputClick}
+      onChange={handleInputChange}
+      onBlur={handleInputBlur}
+      onKeyPress={handleKeyPress}
     />
   )
 
@@ -252,6 +264,28 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>) {
     validateInput,
     getValidatedInputResult,
     getFormattedInputResult,
+    setStaticDescription: updateStaticDescription,
     render,
   }
 } 
+
+export namespace InputFieldManagementHook {
+  export type SetInputValue = (value: string, isAnchor?: boolean) => void;
+  export type SetAnchorValue = (newAnchorValue: string) => void;
+  export type SetInputDatalist = (datalist: InputFieldDatalistElement[]) => void;
+  export type GetComposedInputResult<T> = () => T | typeof composedValueAbordSymbol;
+
+
+  export interface Result<T> {
+    readonly inputValue: string;
+    readonly setInputValue: SetInputValue;
+    readonly setAnchorValue: SetAnchorValue;
+    readonly setInputDatalist: SetInputDatalist;
+    readonly restoreInputValue: () => void;
+    readonly validateInput: () => T;
+    readonly getValidatedInputResult: GetComposedInputResult<T>;
+    readonly getFormattedInputResult: GetComposedInputResult<T>;
+    readonly render: () => JSX.Element;
+    readonly setStaticDescription: (value: string) => void;
+  }
+}

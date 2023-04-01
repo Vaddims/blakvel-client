@@ -80,7 +80,7 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
             <InputField
               key={field.id}
               status={draftProductSpecificationStatusDescriptors.find(spec => spec.fieldId === field.id)?.status}
-              description={draftProductSpecificationStatusDescriptors.find(spec => spec.fieldId === field.id)?.description}
+              helperText={draftProductSpecificationStatusDescriptors.find(spec => spec.fieldId === field.id)?.description}
               required={field.required}
               label={field.name} 
               value={specifications.find(spec => spec.field.id === field.id)?.value ?? ''} 

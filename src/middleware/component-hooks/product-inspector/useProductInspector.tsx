@@ -1,4 +1,4 @@
-import { faHashtag } from "@fortawesome/free-solid-svg-icons";
+import { faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
 import { InputFieldDatalistElement, InputStatus } from "../../../components/InputField";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
@@ -6,7 +6,7 @@ import { Product } from "../../../models/product.model";
 import { InputFieldStatusDescriptor } from "../../../pages/InspectProduct";
 import { ProductTagRepresenter } from "../../../pages/InspectProduct/ProductTagRepresenter";
 import { useGetProductQuery } from "../../../services/api/productsApi";
-import { useInputFieldManagement, ValidationTiming } from "../../hooks/useInputFieldManagement";
+import { composedValueAbordSymbol, InputFieldManagementHook, useInputFieldManagement, ValidationTiming } from "../../hooks/useInputFieldManagement";
 import * as uuid from 'uuid';
 import { useGetProductTagsQuery } from "../../../services/api/productTagsApi";
 import './product-inspector.scss';
@@ -28,6 +28,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const { data: globalProductTags } = useGetProductTagsQuery();
 
   const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(product?.tags ?? []);
+
 
   useEffect(() => {
     if (!product) {
@@ -113,8 +114,8 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const productPriceInputField = useInputFieldManagement({
     label: 'Price',
     required: true,
+    inputIcon: faDollar,
     format: (input) => {
-      console.log(input, input.trim())
       if (input.trim() === '') {
         throw new Error('Price not provided');
       }
@@ -129,12 +130,13 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       }
 
       return number;
-    }
+    },
   });
 
   // Product original price input management
   const productDiscountPriceInputField = useInputFieldManagement({
     label: 'Discount Price',
+    inputIcon: faDollar,
     format: (input) => {
       if (input.trim() === '') {
         return;
@@ -175,10 +177,18 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
   });
 
+  const genericInformationFields = [
+    productNameInputField,
+    productPriceInputField,
+    productDiscountPriceInputField,
+    productStockInputField,
+  ] as const;
+
   // Product tag input mamangement
   const productTagSearchInputField = useInputFieldManagement<Product.Tag>({
     label: 'Search for Tag',
     labelIcon: faHashtag,
+    inputIcon: faSearch,
     validationTimings: [ValidationTiming.OnBlur, ValidationTiming.OnChange],
     format: (input) => {
       const targetTag = globalProductTags?.find(globalProductTag => globalProductTag.name === input);
@@ -280,26 +290,46 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   }
 
   const validateInputs = (): Omit<Product, 'id' | 'urn'> => {
-    const name = productNameInputField.validateInput();
-    const price = productPriceInputField.validateInput();
-    const discountPrice = productDiscountPriceInputField.validateInput();
-    const stock = productStockInputField.validateInput();
-
+    const name = productNameInputField.getValidatedInputResult();
+    const price = productPriceInputField.getValidatedInputResult();
+    const discountPrice = productDiscountPriceInputField.getValidatedInputResult();
+    const stock = productStockInputField.getValidatedInputResult();
+    
     let specificationInputsAreInvalid = false;
     const definedSpecifications: Product.Specification[] = [];
-    for (const draftSpecification of draftProductSpecifications) {
-      if (draftSpecification.value.trim() !== '') {
+
+    const productTagFields = draftProductTags.map(tag => tag.fields).flat();
+    for (const tagField of productTagFields) {
+      const draftSpecification = draftProductSpecifications.find(specification => specification.field.id === tagField.id);
+
+      if (!draftSpecification) {
+        if (tagField.required) {
+          updateDraftProductSpecificationStatusDescriptor(tagField.id, InputStatus.Invalid, 'Field is required')
+          continue;
+        }
+
+        continue;
+      }
+
+      if (draftSpecification.value !== '' as const) {
         definedSpecifications.push(draftSpecification);
         continue;
       }
 
       if (draftSpecification.field.required) {
-        updateDraftProductSpecificationStatusDescriptor(draftSpecification.field.id, InputStatus.Invalid, 'No input')
+        updateDraftProductSpecificationStatusDescriptor(draftSpecification.field.id, InputStatus.Invalid, 'Field is required')
         specificationInputsAreInvalid = true;
       }
     }
 
-    if (specificationInputsAreInvalid) {
+
+    if (
+      name === composedValueAbordSymbol ||
+      price === composedValueAbordSymbol ||
+      discountPrice === composedValueAbordSymbol ||
+      stock === composedValueAbordSymbol ||
+      specificationInputsAreInvalid
+    ) {
       throw new Error();
     }
 
@@ -331,7 +361,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         <div className="product-tag-cluster">
           {draftProductTags?.map(productTag => (
             <ProductTagRepresenter
-              
               draftProductSpecificationStatusDescriptors={draftProductSpecificationStatusDescriptors}
               specifications={draftProductSpecifications}
               targetProductTag={productTag}

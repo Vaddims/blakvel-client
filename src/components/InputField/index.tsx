@@ -1,4 +1,4 @@
-import { faCheck, faRotateBack, faWarning, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faRotateBack, faUserXmark, faWarning, faXmark, faXmarkCircle, faXRay, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './input-field.scss';
 
@@ -17,84 +17,73 @@ export interface InputFieldDatalistElement {
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   readonly label: string;
   readonly labelIcon?: IconDefinition;
-  readonly description?: string;
+  readonly inputIcon?: IconDefinition;
+  readonly anchor?: string;
+  readonly helperText?: string;
   readonly status?: InputStatus;
   readonly inputDatalist?: InputFieldDatalistElement[];
-  readonly onInputRestore?: () => void;
+  readonly onInputRestore?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const InputField: React.FC<InputFieldProps> = (props) => {
   const {
     label,
     labelIcon,
+    inputIcon,
     required = false,
-    description = '',
+    helperText = '',
     status = InputStatus.Default,
     inputDatalist = [],
     onInputRestore,
     value = '',
+    anchor = '',
     className,
     ...inputProps
   } = props;
 
   const formatedLabelId = label.toLowerCase().replace(' ', '-');
-  const inputElementId = `input:${formatedLabelId}`;
-  const tagDatalistElementId = `datalist:${formatedLabelId}`;
+  const inputElementId = `input-${formatedLabelId}`;
+  const tagDatalistElementId = `datalist-${formatedLabelId}`;
+
+  const shouldDisplayValueRestoreButton = !!onInputRestore && value !== anchor;
 
   return (
-    <legend
+    <label
+      htmlFor={inputElementId}
       className={['input-field', className].join(' ')}
-      about={inputElementId}
     >
-      <div className='title-bar'>
-        {labelIcon && (
-          <FontAwesomeIcon icon={labelIcon} />
-        )}
-        <span>
-          {label}
-          {required && (
-            <span className='required-asterisk'>*</span>
-          )}
-        </span>
-      </div>
-      <div className={["input-bar", status].join(' ')}>
+      <header>
+        { labelIcon && <FontAwesomeIcon icon={labelIcon} /> }
+        <label>{label}{ required && <span className='required-asterisk'>*</span> }</label>
+      </header>
+      <section className={["input-bar", status].join(' ')}>
+        { inputIcon && <FontAwesomeIcon icon={inputIcon} className='input-icon' /> }
         <input
           {...inputProps}
           id={inputElementId}
           list={inputDatalist.length > 0 ? tagDatalistElementId : void 0}
           value={value}
+          required={required}
           readOnly={props.readOnly ?? !props.onChange}
         />
-        { inputDatalist && (
-          <datalist id={tagDatalistElementId}>
-            {inputDatalist.map((element) => (
-              <option value={element.name} key={element.name}>{element.description}</option>
-            ))}
-          </datalist>
-        ) }
-        <div className='ics'>
-          {onInputRestore && (
-            <button onClick={() => onInputRestore()} title='Restore value'>
-              <FontAwesomeIcon icon={faRotateBack} size='lg' />
+        <datalist id={tagDatalistElementId}>
+          {inputDatalist.map((element) => (
+            <option value={element.name} key={element.name}>{element.description}</option>
+          ))}
+        </datalist>
+        <div className='input-management-actions'>
+          {shouldDisplayValueRestoreButton && (
+            <button onClick={onInputRestore} title='Restore initial value'>
+              { anchor === '' ? (
+                <FontAwesomeIcon icon={faXmark} size='xl' />
+              ) : (
+                <FontAwesomeIcon icon={faRotateBack} size='lg' />
+              ) }
             </button>
           )}
         </div>
-        {renderInputStatusIcon(status)}
-      </div>
-      <span className='input-description'>{description}</span>
-    </legend>
+      </section>
+      <span className='input-helper-text'>{helperText}</span>
+    </label>
   )
-}
-
-const renderInputStatusIcon = (inputStatus: InputStatus) => {
-  switch (inputStatus) {
-    case InputStatus.Valid:
-      return (<FontAwesomeIcon icon={faCheck} className='input-icon valid' color='red' size='lg' />);
-    
-    case InputStatus.Invalid:
-      return (<FontAwesomeIcon icon={faXmark} className='input-icon invalid' size='lg' />);
-
-    case InputStatus.Warn:
-      return (<FontAwesomeIcon icon={faWarning} className='input-icon warn' size='lg' />)
-  }
 }
