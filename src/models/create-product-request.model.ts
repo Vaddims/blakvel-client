@@ -1,6 +1,7 @@
 import { Product } from "./product.model";
 
-export interface CreateProductRequest extends Product.GenericInformation {
+export interface CreateProductRequest extends Omit<Product.GenericInformation, 'discountExpirationDate'> {
+  readonly discountExpirationDate: string;
   readonly tags: string[];
   readonly specifications: CreateProductRequest.Specification[];
 }

@@ -10,6 +10,7 @@ export namespace Product {
     readonly name: string;
     readonly price: number;
     readonly discountPrice: number | null;
+    readonly discountExpirationDate: string | null;
     readonly stock: number;
   }
 

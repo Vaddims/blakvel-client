@@ -9,8 +9,6 @@ import { Product } from "../../models/product.model";
 import "./productImageShowcaseInspector.scss";
 
 export const useProductImageShowcaseEditor = (product?: Product) => {
-  const navigate = useNavigate();
-
   const [ patchThumbs ] = usePatchProductThumbsMutation();
   const [ updateThumbnail ] = useUpdateThumbnailMutation();
   const [ deleteThumbnail ] = useDeleteProductThumbnailMutation();
@@ -33,12 +31,22 @@ export const useProductImageShowcaseEditor = (product?: Product) => {
 
   const {
     selections,
+    selectOneElement,
     elementIsSelected,
-    deselectAllSelections,
     handleSelectionEvent,
   } = useFlatElementSelection(selectableImageIdentificators, {
-    dependencies: [localFileBlobMap, thumbnailSrc],
+    dependencies: [product, thumbnailSrc, localFileBlobMap, thumbnailSrc],
   });
+
+  useEffect(() => {
+    if (!thumbnailSrc) {
+      return;
+    }
+
+    if (selections.length === 0) {
+      selectOneElement(thumbnailSrc)
+    }
+  }, [thumbnailSrc])
 
   useEffect(() => {
     setLocalFileBlobMap(((initialFileBlobMap) => {

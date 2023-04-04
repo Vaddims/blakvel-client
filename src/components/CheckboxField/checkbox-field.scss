@@ -1,0 +1,25 @@
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+  gap: .5rem;
+
+  .checkbox {
+    outline: none;
+    border: none;
+    border-radius: .5rem;
+    aspect-ratio: 1;
+    border: 1px solid rgb(150, 150, 150);
+    background-color: transparent;
+
+    .checkbox-icon {
+      visibility: hidden;
+    }
+
+    &[data-checked=true] {
+      .checkbox-icon {
+        visibility: visible;
+      }
+    }
+  }
+}

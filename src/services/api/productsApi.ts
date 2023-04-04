@@ -1,4 +1,4 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { FetchBaseQueryMeta, createApi } from '@reduxjs/toolkit/query/react';
 import { CreateProductRequest } from '../../models/create-product-request.model';
 import { Product } from '../../models/product.model';
 import { UpdateProductRequest } from '../../models/update-product-request.model';

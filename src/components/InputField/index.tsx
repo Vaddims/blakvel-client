@@ -23,6 +23,7 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   readonly status?: InputStatus;
   readonly inputDatalist?: InputFieldDatalistElement[];
   readonly onInputRestore?: React.MouseEventHandler<HTMLButtonElement>;
+  readonly onInputClear?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const InputField: React.FC<InputFieldProps> = (props) => {
@@ -35,6 +36,7 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
     status = InputStatus.Default,
     inputDatalist = [],
     onInputRestore,
+    onInputClear,
     value = '',
     anchor = '',
     className,
@@ -44,8 +46,6 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
   const formatedLabelId = label.toLowerCase().replace(' ', '-');
   const inputElementId = `input-${formatedLabelId}`;
   const tagDatalistElementId = `datalist-${formatedLabelId}`;
-
-  const shouldDisplayValueRestoreButton = !!onInputRestore && value !== anchor;
 
   return (
     <label
@@ -57,7 +57,9 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
         <label>{label}{ required && <span className='required-asterisk'>*</span> }</label>
       </header>
       <section className={["input-bar", status].join(' ')}>
-        { inputIcon && <FontAwesomeIcon icon={inputIcon} className='input-icon' /> }
+        <div className='input-icon-wrapper'>
+          { inputIcon && <FontAwesomeIcon icon={inputIcon} className='input-icon' /> }
+        </div>
         <input
           {...inputProps}
           id={inputElementId}
@@ -72,13 +74,14 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
           ))}
         </datalist>
         <div className='input-management-actions'>
-          {shouldDisplayValueRestoreButton && (
-            <button onClick={onInputRestore} title='Restore initial value'>
-              { anchor === '' ? (
-                <FontAwesomeIcon icon={faXmark} size='xl' />
-              ) : (
-                <FontAwesomeIcon icon={faRotateBack} size='lg' />
-              ) }
+          { onInputRestore && anchor !== value && (
+            <button onClick={onInputRestore} title='Restore input'>
+              <FontAwesomeIcon icon={faRotateBack} size='lg' />
+            </button>
+          )}
+          { onInputClear && value && (
+            <button onClick={onInputClear} title='Clear input'>
+              <FontAwesomeIcon icon={faXmark} size='xl' />
             </button>
           )}
         </div>

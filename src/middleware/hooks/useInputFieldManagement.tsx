@@ -15,6 +15,7 @@ export interface InputFieldManagement<T> {
   readonly inputIcon?: IconDefinition;
   readonly placeholder?: string;
   readonly helperText?: string;
+  readonly type?: 'text' | 'time' | 'datetime-local';
   readonly initialInputValue?: string;
   readonly inputInitialDatalist?: InputFieldDatalistElement[];
   readonly validationTimings?: ValidationTiming[];
@@ -32,6 +33,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
     labelIcon,
     inputIcon,
     placeholder,
+    type,
     initialInputValue = '',
     inputInitialDatalist = [],
     validationTimings = [ValidationTiming.OnBlur],
@@ -69,6 +71,10 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
 
   const handleInputRestore: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     restoreInputValue();
+  }
+
+  const handleInputClear: React.MouseEventHandler<HTMLButtonElement> = () => {
+    updateInputValue('');
   }
 
   const handleInputClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
@@ -243,11 +249,13 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
       placeholder={placeholder}
       inputDatalist={inputDatalist}
       helperText={helperText}
+      type={type}
       anchor={anchorValue}
       required={required}
       status={status}
       value={inputValue}
       onInputRestore={handleInputRestore}
+      onInputClear={handleInputClear}
       onClick={handleInputClick}
       onChange={handleInputChange}
       onBlur={handleInputBlur}
@@ -265,6 +273,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
     getValidatedInputResult,
     getFormattedInputResult,
     setStaticDescription: updateStaticDescription,
+    format: formatInput,
     render,
   }
 } 
@@ -282,6 +291,7 @@ export namespace InputFieldManagementHook {
     readonly setAnchorValue: SetAnchorValue;
     readonly setInputDatalist: SetInputDatalist;
     readonly restoreInputValue: () => void;
+    readonly format: ((input: string) => T) | undefined;
     readonly validateInput: () => T;
     readonly getValidatedInputResult: GetComposedInputResult<T>;
     readonly getFormattedInputResult: GetComposedInputResult<T>;

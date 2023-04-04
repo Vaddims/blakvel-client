@@ -1,4 +1,4 @@
-import { faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarMinus, faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
 import { InputFieldDatalistElement, InputStatus } from "../../../components/InputField";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
@@ -10,7 +10,7 @@ import { composedValueAbordSymbol, InputFieldManagementHook, useInputFieldManage
 import * as uuid from 'uuid';
 import { useGetProductTagsQuery } from "../../../services/api/productTagsApi";
 import './product-inspector.scss';
-
+import { useCheckboxFieldManagement } from "../../hooks/useCheckboxFieldManagement";
 
 interface ProductInspectorOptions {
   readonly productId?: string;
@@ -133,25 +133,60 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     },
   });
 
+  const discountCheckboxField = useCheckboxFieldManagement();
+
   // Product original price input management
   const productDiscountPriceInputField = useInputFieldManagement({
     label: 'Discount Price',
     inputIcon: faDollar,
+    required: true,
     format: (input) => {
       if (input.trim() === '') {
-        return;
+        throw new Error('Input is empty')
       }
 
-      const number = Number(input);
-      if (Number.isNaN(number)) {
+      const discount = Number(input);
+      if (Number.isNaN(discount)) {
         throw new Error('Input is not a number');
       }
 
-      if (number < 0) {
+      if (discount < 0) {
         throw new Error(`Price can't be negative`);
       }
 
-      return number;
+      const price = productPriceInputField.getFormattedInputResult();
+      if (price === composedValueAbordSymbol) {
+        return discount;
+      }
+
+      if (discount > price) {
+        throw new Error(`Discount can't be higher than the price`);
+      }
+
+      return discount;
+    }
+  });
+
+  const productDiscountExpirationDateInputField = useInputFieldManagement<Date | undefined>({
+    label: 'Expiration Date',
+    inputIcon: faCalendarMinus,
+    type: 'datetime-local',
+    format: (input) => {
+      if (input === '') {
+        return;
+      }
+
+      const date = new Date(input);
+
+      if (Number.isNaN(date.getTime())) {
+        throw new Error('Invalid date');
+      }
+
+      if (date.getTime() - Date.now() <= 0) {
+        throw new Error('The expiration date must be in the feature')
+      }
+
+      return date;
     }
   });
 
@@ -176,13 +211,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       return number;
     }
   });
-
-  const genericInformationFields = [
-    productNameInputField,
-    productPriceInputField,
-    productDiscountPriceInputField,
-    productStockInputField,
-  ] as const;
 
   // Product tag input mamangement
   const productTagSearchInputField = useInputFieldManagement<Product.Tag>({
@@ -213,11 +241,47 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
   const imageEditor = useProductImageShowcaseEditor(product);
 
+  const calculateDiscountPercent = () => {
+    const price = productPriceInputField.getFormattedInputResult();
+    const discountPrice = productDiscountPriceInputField.getFormattedInputResult();
+
+    if (price === composedValueAbordSymbol || discountPrice === composedValueAbordSymbol || price < discountPrice) {
+      return null;
+    }
+
+    const discountPercent = 100 - Math.round(discountPrice / price * 100);
+    return discountPercent;
+  }
+
   const applyProductValues = (targetProduct: Product) => {
     productNameInputField.setInputValue(targetProduct.name, true);
-    productPriceInputField.setInputValue(targetProduct.price.toString(), true);
-    productDiscountPriceInputField.setInputValue(targetProduct.discountPrice?.toString() ?? '', true);
     productStockInputField.setInputValue(targetProduct.stock.toString(), true);
+    productPriceInputField.setInputValue(targetProduct.price.toString(), true);
+
+    let shouldShowDiscount = true;
+    const { discountPrice } = targetProduct;
+    const expirationDate = targetProduct.discountExpirationDate 
+      ? new Date(targetProduct.discountExpirationDate)
+      : null;
+
+    if (discountPrice) {
+      if (expirationDate) {
+        const expirationDatePassed = expirationDate.getTime() - Date.now() <= 0;
+        if (expirationDatePassed) {
+          shouldShowDiscount = false;
+        } else {
+          const offsetInMs = new Date().getTimezoneOffset() * 60 * 1000;
+          const valueFormattedDateWithOffset = new Date(expirationDate.getTime() - offsetInMs).toISOString().replace('Z', '');
+          productDiscountExpirationDateInputField.setInputValue(valueFormattedDateWithOffset, true);
+        }
+      }
+
+      if (shouldShowDiscount) {
+        discountCheckboxField.update(true, true);
+        productDiscountPriceInputField.setInputValue(discountPrice?.toString(), true);
+      }
+    }
+
     productTagSearchInputField.setInputDatalist(getUniqueTagDatalist(targetProduct.tags));
 
     setDraftProductTags(targetProduct.tags);
@@ -227,9 +291,12 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const restoreProductValues = () => {
     productNameInputField.restoreInputValue()
     productPriceInputField.restoreInputValue()
-    productDiscountPriceInputField.restoreInputValue()
     productStockInputField.restoreInputValue()
-
+    
+    discountCheckboxField.restoreInput();
+    productDiscountPriceInputField.restoreInputValue()
+    productDiscountExpirationDateInputField.restoreInputValue()
+    
     setDraftProductTags(product?.tags ?? []);
     setDraftProductSpecifications(product?.specifications ?? []);
     setDraftProductSpecificationStatusDescriptors((product?.specifications ?? []).map(spec => ({
@@ -292,9 +359,18 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const validateInputs = (): Omit<Product, 'id' | 'urn'> => {
     const name = productNameInputField.getValidatedInputResult();
     const price = productPriceInputField.getValidatedInputResult();
-    const discountPrice = productDiscountPriceInputField.getValidatedInputResult();
     const stock = productStockInputField.getValidatedInputResult();
     
+    const useDiscount = discountCheckboxField.checked;
+    const discountPrice = useDiscount ?
+      productDiscountPriceInputField.getValidatedInputResult() :
+      undefined;
+
+    const discountExpirationDate = useDiscount ?
+      productDiscountExpirationDateInputField.getValidatedInputResult() :
+      undefined;
+
+
     let specificationInputsAreInvalid = false;
     const definedSpecifications: Product.Specification[] = [];
 
@@ -322,12 +398,12 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       }
     }
 
-
     if (
       name === composedValueAbordSymbol ||
+      stock === composedValueAbordSymbol ||
       price === composedValueAbordSymbol ||
       discountPrice === composedValueAbordSymbol ||
-      stock === composedValueAbordSymbol ||
+      discountExpirationDate === composedValueAbordSymbol ||
       specificationInputsAreInvalid
     ) {
       throw new Error();
@@ -337,6 +413,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       name,
       price,
       discountPrice: discountPrice ?? null,
+      discountExpirationDate: discountExpirationDate?.toString() ?? null,
       stock,
       tags: draftProductTags,
       specifications: definedSpecifications,
@@ -345,6 +422,8 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     return product;
   }
 
+  const discountPercent = calculateDiscountPercent();
+
   const render = () => (
     <Fragment>
       <article className="product-image-showcase-editor">
@@ -352,9 +431,20 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       </article>
       <article className="product-information-fields">
         { productNameInputField.render() }
-        { productPriceInputField.render() }
-        { productDiscountPriceInputField.render() }
         { productStockInputField.render() }
+        { productPriceInputField.render() }
+        <div className='discount-information'>
+          <header>
+            { discountCheckboxField.render() }
+            { discountCheckboxField.checked && discountPercent && <span className=''>-{discountPercent}%</span> }
+          </header>
+          { discountCheckboxField.checked && (
+            <div>
+              {productDiscountPriceInputField.render()}
+              {productDiscountExpirationDateInputField.render()}
+            </div>
+          ) }
+        </div>
       </article>
       <article className="product-tag-management">
         { productTagSearchInputField.render() }

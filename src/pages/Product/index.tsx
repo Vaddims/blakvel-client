@@ -87,7 +87,11 @@ export default function Product() {
                     <h5 className='product-discount'>-{discountPercent}%</h5>
                   </div>
                 </div>
-                <p className="product-discount-end">Discount until: <b>{dateTime}</b></p>
+                { product.discountExpirationDate && (
+                  <p className="product-discount-end">
+                    Discount until: <b>{new Date(product.discountExpirationDate).toLocaleString()}</b>
+                  </p> 
+                )}
               </div>
             }
             {product.stock ? `In stock: ${product.stock} units` : 'Out of stock'}
