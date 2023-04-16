@@ -53,4 +53,20 @@ export namespace Product {
       readonly value: string;
     }
   }
+
+
+  export namespace Mixed {
+    export interface Tag extends Omit<Product.Tag, 'id' | 'fields'> {
+      readonly fields: Mixed.Tag.Field[];
+    }
+
+    export namespace Tag {
+      export type Field = Omit<Product.Tag.Field, 'id'> & { id?: Product.Tag.Field['id'] };
+    }
+
+    export interface Specification {
+      readonly field: Product.Tag.Field;
+      readonly value: string;
+    }
+  }
 }

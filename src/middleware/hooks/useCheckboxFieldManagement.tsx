@@ -1,9 +1,21 @@
 import { useState } from "react"
 import { CheckboxField } from "../../components/CheckboxField";
 
-export const useCheckboxFieldManagement = () => {
-  const [ checked, setChecked ] = useState(false);
-  const [ anchor, setAnchor ] = useState(false);
+interface CheckboxFieldManagementProps {
+  readonly label?: string;
+  readonly initialyChecked?: boolean;
+  readonly onChange?: (checked: boolean) => void;
+}
+
+export const useCheckboxFieldManagement = (options?: CheckboxFieldManagementProps) => {
+  const {
+    label,
+    initialyChecked = false,
+    onChange,
+  } = options ?? {};
+
+  const [ checked, setChecked ] = useState(initialyChecked);
+  const [ anchor, setAnchor ] = useState(initialyChecked);
 
   const update = (check: boolean, isAnchor = false) => {
     if (isAnchor) {
@@ -23,10 +35,12 @@ export const useCheckboxFieldManagement = () => {
 
   const handleCheckboxClick: React.MouseEventHandler<HTMLButtonElement> = () => {
     toggle();
+    onChange?.(!checked);
   }
 
   const render = () => (
     <CheckboxField
+      label={label}
       checked={checked}
       onClick={handleCheckboxClick}
     />

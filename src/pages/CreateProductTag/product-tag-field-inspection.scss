@@ -1,5 +1,10 @@
 .page#create-product-tag {
   .product-tag-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 350px;
+
     .product-tag-static-field {
       .tag-title {
         color: black;
@@ -8,14 +13,14 @@
   }
 
   .product-tag-dynamic-fields {
-    input {
-      color: black;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .product-tag-field-adder {
     .product-tag-field-adder-button {
-      background-color: green;
+      background-color: var(--background-highlight-color);
       border: none;
       border-radius: 0.5rem;
       padding: 0.5rem;

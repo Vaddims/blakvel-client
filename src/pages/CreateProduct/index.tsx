@@ -27,7 +27,7 @@ const CreateProduct: React.FC = () => {
       } as any).unwrap();
 
       await productInspector.imageEditor.uploadImages(product.id);
-      navigate(`/products/${product.id}`);
+      navigate(`/products/${product.id}`, { replace: true });
     } catch {}
   }
 

@@ -1,10 +1,10 @@
 import { useFlatElementSelection } from "../../middleware/hooks/useFlatElementSelection";
-import { useDeleteProductTagMutation, useGetProductTagsQuery } from "../../services/api/productTagsApi";
 import FlatProductTagCard from "../../components/FlatProductTagCard";
 import AdminPanel from '../../layouts/AdminPanel';
 import Page from "../../layouts/Page";
 import "./product-tag-management.scss";
 import { useNavigate } from "react-router-dom";
+import { useDeleteProductTagMutation, useGetProductTagsQuery } from "../../services/api/productsApi";
 
 export default function AdminProductTagManagement() {
   const { data: productTags = [] } = useGetProductTagsQuery();

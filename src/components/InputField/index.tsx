@@ -4,8 +4,6 @@ import './input-field.scss';
 
 export enum InputStatus {
   Default = 'default',
-  Valid = 'valid',
-  Warn = 'warn',
   Invalid = 'invalid',
 }
 
@@ -19,6 +17,8 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   readonly labelIcon?: IconDefinition;
   readonly inputIcon?: IconDefinition;
   readonly anchor?: string;
+  readonly required?: boolean;
+  readonly hideOptionalLabel?: boolean;
   readonly helperText?: string;
   readonly status?: InputStatus;
   readonly inputDatalist?: InputFieldDatalistElement[];
@@ -32,6 +32,7 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
     labelIcon,
     inputIcon,
     required = false,
+    hideOptionalLabel = false,
     helperText = '',
     status = InputStatus.Default,
     inputDatalist = [],
@@ -53,8 +54,16 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
       className={['input-field', className].join(' ')}
     >
       <header>
-        { labelIcon && <FontAwesomeIcon icon={labelIcon} /> }
-        <label>{label}{ required && <span className='required-asterisk'>*</span> }</label>
+        { labelIcon && <FontAwesomeIcon icon={labelIcon} className='label-icon' /> }
+        <label>
+          <span className='field-label'>{label}</span>
+          { !required && !hideOptionalLabel && (
+            <>
+              <span className='optional-field-divider'> - </span>
+              <span className='optional-field-label'>Optional</span>
+            </>
+          )}
+        </label>
       </header>
       <section className={["input-bar", status].join(' ')}>
         <div className='input-icon-wrapper'>
@@ -74,19 +83,21 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
           ))}
         </datalist>
         <div className='input-management-actions'>
-          { onInputRestore && anchor !== value && (
-            <button onClick={onInputRestore} title='Restore input'>
+          { onInputRestore && anchor !== value && anchor !== '' && (
+            <button className='action-icon' onClick={onInputRestore} title='Restore input'>
               <FontAwesomeIcon icon={faRotateBack} size='lg' />
             </button>
           )}
           { onInputClear && value && (
-            <button onClick={onInputClear} title='Clear input'>
+            <button className='action-icon' onClick={onInputClear} title='Clear input'>
               <FontAwesomeIcon icon={faXmark} size='xl' />
             </button>
           )}
         </div>
       </section>
-      <span className='input-helper-text'>{helperText}</span>
+      { helperText && (
+        <span className='input-helper-text'>{helperText}</span>
+      )}
     </label>
   )
 }

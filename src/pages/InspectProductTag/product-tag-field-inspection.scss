@@ -1,5 +1,8 @@
 .page#inspect-product-tag {
   .product-tag-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     width: 350px;
 
     .product-tag-static-field {

@@ -20,6 +20,7 @@ export interface InputFieldManagement<T> {
   readonly inputInitialDatalist?: InputFieldDatalistElement[];
   readonly validationTimings?: ValidationTiming[];
   readonly required?: boolean; 
+  readonly hideOptionalLabel?: boolean;
 
   readonly format?: (input: string) => T;
   readonly onInputBlur?: () => void;
@@ -38,6 +39,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
     inputInitialDatalist = [],
     validationTimings = [ValidationTiming.OnBlur],
     required = false,
+    hideOptionalLabel = false,
     format: formatInput,
     helperText: staticHelperText = '',
     onInputChange: inputChangeCallback,
@@ -51,7 +53,6 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
   const [ status, setStatus ] = useState(InputStatus.Default);
   const [ inputDatalist, setInputDatalist ] = useState(inputInitialDatalist);
   
-
   const informationAlert = {
     display(status: InputStatus, description?: string) {
       setStatus(status);
@@ -98,13 +99,13 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
           return;
         }
 
-        informationAlert.display(InputStatus.Valid);
+        informationAlert.restore();
         return;
       }
 
       try {
         formatInput(input);
-        informationAlert.display(InputStatus.Valid);
+        informationAlert.restore();
       } catch {
         informationAlert.restore();
       }
@@ -114,7 +115,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
   const handleInputBlur = () => {
     inputBlurCallback?.();
 
-    if (inputValue === anchorValue) {
+    if (inputValue === anchorValue && anchorValue !== '') {
       informationAlert.display(InputStatus.Default);
       return;
     }
@@ -127,7 +128,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
           return;
         }
 
-        informationAlert.display(InputStatus.Valid);
+        informationAlert.restore();
       } catch {}
       return;
     }
@@ -208,11 +209,11 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
     }
 
     if (value === anchor) {
-      informationAlert.display(InputStatus.Default);
+      informationAlert.restore();
       return;
     }
 
-    informationAlert.display(InputStatus.Valid);
+    informationAlert.restore();
     return;
   }
 
@@ -250,6 +251,7 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
       inputDatalist={inputDatalist}
       helperText={helperText}
       type={type}
+      hideOptionalLabel={hideOptionalLabel}
       anchor={anchorValue}
       required={required}
       status={status}

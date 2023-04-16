@@ -5,10 +5,9 @@ import { useProductImageShowcaseEditor } from "../../../components/ProductImageE
 import { Product } from "../../../models/product.model";
 import { InputFieldStatusDescriptor } from "../../../pages/InspectProduct";
 import { ProductTagRepresenter } from "../../../pages/InspectProduct/ProductTagRepresenter";
-import { useGetProductQuery } from "../../../services/api/productsApi";
+import { productsApi, useGetProductQuery, useGetProductTagsQuery } from "../../../services/api/productsApi";
 import { composedValueAbordSymbol, InputFieldManagementHook, useInputFieldManagement, ValidationTiming } from "../../hooks/useInputFieldManagement";
 import * as uuid from 'uuid';
-import { useGetProductTagsQuery } from "../../../services/api/productTagsApi";
 import './product-inspector.scss';
 import { useCheckboxFieldManagement } from "../../hooks/useCheckboxFieldManagement";
 
@@ -84,6 +83,10 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     });
   };
 
+  const getProductSpecificationInitialState = (specFieldId: string) => {
+    return product?.specifications?.find(spec => spec.field.id === specFieldId);
+  }
+
   const getUniqueTagDatalist = (targetProductTags: Product.Tag[]): InputFieldDatalistElement[] => {
     const unassignedTags = globalProductTags?.filter(globalProductTag => (
       !targetProductTags.find(productTag => productTag.name === globalProductTag.name)
@@ -133,7 +136,9 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     },
   });
 
-  const discountCheckboxField = useCheckboxFieldManagement();
+  const discountCheckboxField = useCheckboxFieldManagement({
+    label: 'Use Discount',
+  });
 
   // Product original price input management
   const productDiscountPriceInputField = useInputFieldManagement({
@@ -169,6 +174,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
   const productDiscountExpirationDateInputField = useInputFieldManagement<Date | undefined>({
     label: 'Expiration Date',
+    helperText: 'If an expiration date is not provided, the discount will remain active until it is manually changed.',
     inputIcon: faCalendarMinus,
     type: 'datetime-local',
     format: (input) => {
@@ -214,19 +220,20 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
   // Product tag input mamangement
   const productTagSearchInputField = useInputFieldManagement<Product.Tag>({
-    label: 'Search for Tag',
+    label: 'Add Tag',
+    hideOptionalLabel: true,
+    placeholder: 'Search',
     labelIcon: faHashtag,
     inputIcon: faSearch,
-    validationTimings: [ValidationTiming.OnBlur, ValidationTiming.OnChange],
     format: (input) => {
       const targetTag = globalProductTags?.find(globalProductTag => globalProductTag.name === input);
       if (!targetTag) {
-        throw new Error(`\`${input}\` tag doesn't exist`);
+        throw new Error(`Tag with the name ${input.toLocaleUpperCase()} doesn't exist`);
       }
       
       const productHasTargetTag = draftProductTags.find(draftProductTag => draftProductTag.id === targetTag.id);
       if (productHasTargetTag) {
-        throw new Error(`\`${targetTag}\` tag is already added`);
+        throw new Error(`Tag with the name ${targetTag.name.toLocaleUpperCase()} is already added`);
       }
 
       return targetTag;
@@ -333,7 +340,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       return;
     }
 
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Valid, '');
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default);
   }
 
   const click = (field: Product.Tag.Field): React.MouseEventHandler<HTMLInputElement> => (event) => {
@@ -356,6 +363,69 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     });
   }
 
+  const restoreTagSpecification = (specFieldId: string) => {
+    setDraftProductSpecifications(prevState => {
+      const a: Product.Specification[] = [];
+      for (const spec of prevState) {
+        if (spec.field.id !== specFieldId) {
+          a.push(spec);
+          continue;
+        }
+
+        const init = getProductSpecificationInitialState(spec.field.id);
+        if (!init) {
+          const s = {
+            field: spec.field,
+            value: '',
+          }
+
+          a.push(s);
+          continue
+        }
+
+        const s: Product.Specification = {
+          ...init,
+        }
+
+        a.push(s);
+      }
+
+      return a;
+    })
+  }
+
+  const clearTagSpecification = (specFieldId: string) => {
+    setDraftProductSpecifications(prevState => {
+      const a: Product.Specification[] = [];
+      for (const spec of prevState) {
+        if (spec.field.id !== specFieldId) {
+          a.push(spec);
+          continue;
+        }
+
+        const init = getProductSpecificationInitialState(spec.field.id);
+        if (!init) {
+          const s = {
+            field: spec.field,
+            value: '',
+          }
+
+          a.push(s);
+          continue
+        }
+
+        const s: Product.Specification = {
+          ...spec,
+          value: '',
+        }
+
+        a.push(s);
+      }
+
+      return a;
+    })
+  }
+
   const validateInputs = (): Omit<Product, 'id' | 'urn'> => {
     const name = productNameInputField.getValidatedInputResult();
     const price = productPriceInputField.getValidatedInputResult();
@@ -370,7 +440,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       productDiscountExpirationDateInputField.getValidatedInputResult() :
       undefined;
 
-
     let specificationInputsAreInvalid = false;
     const definedSpecifications: Product.Specification[] = [];
 
@@ -380,7 +449,8 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
       if (!draftSpecification) {
         if (tagField.required) {
-          updateDraftProductSpecificationStatusDescriptor(tagField.id, InputStatus.Invalid, 'Field is required')
+          updateDraftProductSpecificationStatusDescriptor(tagField.id, InputStatus.Invalid, 'Field is required');
+          specificationInputsAreInvalid = true;
           continue;
         }
 
@@ -439,7 +509,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
             { discountCheckboxField.checked && discountPercent && <span className=''>-{discountPercent}%</span> }
           </header>
           { discountCheckboxField.checked && (
-            <div>
+            <div className='discount-input-fields'>
               {productDiscountPriceInputField.render()}
               {productDiscountExpirationDateInputField.render()}
             </div>
@@ -460,6 +530,9 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
               blurSpecification={blurSpecification}
               clickSpecification={click}
               restore={() => restoreTagSpecifications(productTag)}
+              restoreSpecification={restoreTagSpecification}
+              clearSpecification={clearTagSpecification}
+              getProductSpecificationInitialState={getProductSpecificationInitialState}
             />
           ))}
         </div>

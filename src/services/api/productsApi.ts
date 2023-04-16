@@ -6,12 +6,13 @@ import { apiBaseQuery } from './baseQuery';
 
 enum TagTypes {
   Product = 'product',
+  Tag = 'tag',
 }
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',
   baseQuery: apiBaseQuery,
-  tagTypes: [TagTypes.Product],
+  tagTypes: [TagTypes.Product, TagTypes.Tag],
   endpoints: (build) => ({
     getProduct: build.query<Product, string>({
       providesTags: [TagTypes.Product],
@@ -80,6 +81,42 @@ export const productsApi = createApi({
         url: `/products/${id}`,
       }),
     }),
+
+    getProductTag: build.query<Product.Tag, string>({
+      providesTags: [TagTypes.Tag],
+      query: (id) => `/product-tags/${id}`
+    }),
+
+    getProductTags: build.query<Product.Tag[], void>({
+      providesTags: [TagTypes.Tag],
+      query: () => `/product-tags`,
+    }),
+
+    createProductTag: build.mutation<Product.Tag, Product.Unregistered.Tag>({
+      invalidatesTags: [TagTypes.Tag, TagTypes.Product],
+      query: (productTag) => ({
+        method: 'POST',
+        url: `/product-tags`,
+        body: productTag,
+      })
+    }),
+
+    updateProductTag: build.mutation<Product.Tag, Product.Tag>({
+      invalidatesTags: [TagTypes.Tag, TagTypes.Product],
+      query: (productTag) => ({
+        method: 'PATCH',
+        url: `/product-tags/${productTag.id}`,
+        body: productTag,
+      }),
+    }),
+
+    deleteProductTag: build.mutation<void, string>({
+      invalidatesTags: [TagTypes.Tag, TagTypes.Product],
+      query: (id) => ({
+        method: 'DELETE',
+        url: `/product-tags/${id}`,
+      }),
+    }),
   }),
 });
 
@@ -92,4 +129,10 @@ export const {
   useDeleteProductMutation,
   useDeleteProductThumbnailMutation,
   usePatchProductThumbsMutation,
+
+  useGetProductTagQuery,
+  useGetProductTagsQuery,
+  useUpdateProductTagMutation,
+  useCreateProductTagMutation,
+  useDeleteProductTagMutation,
 } = productsApi;

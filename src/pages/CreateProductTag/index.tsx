@@ -1,14 +1,17 @@
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel"
 import { ProductTagField, ProductTagFieldInspection } from "./ProductTagFieldInspection";
-import { useCreateProductTagMutation, useGetProductTagsQuery } from "../../services/api/productTagsApi";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createContext, useContext, useState } from "react";
 import './product-tag-field-inspection.scss';
 import { InputField, InputStatus } from "../../components/InputField";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHashtag, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { Product } from "../../models/product.model";
+import { useProductTagInspector } from "../../middleware/component-hooks/product-tag-inspector/useProductTagInspector";
+import { useCreateProductTagMutation } from "../../services/api/productsApi";
+import { LocationState } from "../../models/location-state.model";
+import { StaticRoutes } from "../../middleware/utils/static-routes.enum";
 
 
 interface ContextState {
@@ -24,91 +27,45 @@ const initialContextState = {
 export const ProductTagContext = createContext({ ...initialContextState });
 
 export const CreateProductTag = () => {
-  const { data: productTags = [] } = useGetProductTagsQuery();
   const [ createProductTag ] = useCreateProductTagMutation();
+  const productTagInspector = useProductTagInspector();
+
   const navigate = useNavigate();
-  
-  const [ productNameInputStatus, setProductNameInputStatus ] = useState(InputStatus.Default);
-  const [ productTagName, setProductTagName ] = useState('');
-  const [ fields, setFields ] = useState<Product.Unregistered.Tag.Field[]>([]);
+  const location = useLocation();
+  const locationState: LocationState = location.state ?? {}
+  const { 
+    awaitingPreviousPaths = [],
+  } = locationState;
 
-  const requestProductCreation = async () => {
-    const product = await createProductTag({
-      name: productTagName,
-      fields: fields,
-    }).unwrap();
+  const requestProductTagCreation = async () => {
+    try {
+      const inputProductTag = productTagInspector.validateInputs();
+      await createProductTag({
+        ...inputProductTag,
+      });
 
-    navigate(`/product-tags/${product.id}/inspect`);
+      const path = awaitingPreviousPaths?.[awaitingPreviousPaths.length - 1] ?? StaticRoutes.ProductTagManagement;
+      const newLocationState: LocationState = {
+        ...locationState,
+        awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
+      }
+      console.log(locationState)
+      navigate(path, { replace: true, state: newLocationState });
+    } catch {}
   }
 
   const headerTools = (
     <>
-      <button className="panel-tool highlight" onClick={requestProductCreation}>Create</button>
+      <button className="panel-tool" onClick={productTagInspector.createField}>Add field</button>
+      <button className="panel-tool highlight" onClick={requestProductTagCreation}>Create</button>
     </>
   );
 
-
-  const createField = () => {
-    setFields([ ...fields, {
-      name: '',
-      required: false,
-      example: '',
-    } ]);
-  }
-  
-  const updateField = (index: number) => (field: ProductTagField) => {
-    const modifiedFields = [...fields];
-    modifiedFields[index] = field;
-    setFields(modifiedFields);
-  }
-
-  const onInputBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
-
-  }
-
-  const onInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    const newProductTagName = event.target.value;
-    setProductTagName(newProductTagName)
-
-    if (newProductTagName.length === 0) {
-      setProductNameInputStatus(InputStatus.Default);
-      return;
-    }
-
-    if (productTags.some((tag) => tag.name.toLowerCase() === newProductTagName.trim().toLowerCase())) {
-      setProductNameInputStatus(InputStatus.Invalid);
-      return;
-    }
-    
-    setProductNameInputStatus(InputStatus.Valid);
-  }
-  
   return (
     <Page id="create-product-tag">
       <Panel title="Create New Product Tag" headerTools={headerTools}>
         <div className="product-tag-details">
-          <InputField 
-            label="Tag Name" 
-            labelIcon={faHashtag}
-            status={productNameInputStatus}
-            value={productTagName}
-            onChange={onInputChange} 
-            onBlur={onInputBlur}
-          />
-          <div className="product-tag-dynamic-fields">
-            <ProductTagContext.Provider value={{ ...initialContextState }}>
-              {fields.map((field, index) => 
-                <ProductTagFieldInspection
-                  key={index}
-                  field={field}
-                  updateField={updateField(index)} 
-                />
-              )}
-            </ProductTagContext.Provider>
-          </div>
-          <div className="product-tag-field-adder">
-            <button className="product-tag-field-adder-button" onClick={createField}>Add field</button>
-          </div>
+          { productTagInspector.render() }
         </div>
       </Panel>
     </Page>

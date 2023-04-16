@@ -1,12 +1,11 @@
 import { ChangeEventHandler, KeyboardEventHandler, useEffect, useState } from "react";
 import { useGetProductQuery, useUpdateProductMutation } from "../../services/api/productsApi";
 import { useProductImageShowcaseEditor } from '../../components/ProductImageEditor/useProductImageShowcaseEditor';
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
 import * as uuid from 'uuid';
 import './inspect-product.scss';
-import { useGetProductTagsQuery } from "../../services/api/productTagsApi";
 import { ProductTagRepresenter } from "./ProductTagRepresenter";
 import { useInputFieldManagement, ValidationTiming } from "../../middleware/hooks/useInputFieldManagement";
 import { InputFieldDatalistElement, InputStatus } from "../../components/InputField";
@@ -38,21 +37,21 @@ const InspectProduct = () => {
 
     try {
       const inputProduct = productInspector.validateInputs();
+
       await updateProduct({
         ...inputProduct,
+        discountExpirationDate: inputProduct.discountExpirationDate || void 0,
         id: product.id,
         tags: inputProduct.tags.map(tag => tag.id),
-        specifications: inputProduct.specifications.map(spec => ({
-          value: spec.value,
-          fieldId: spec.field.id,
+        specifications: inputProduct.specifications.map(specification => ({
+          value: specification.value,
+          fieldId: specification.field.id,
         }))
-      } as any);
+      });
 
       await productInspector.imageEditor.uploadImages(product.id);
-      navigate(`/products/${product.id}`);
-    } catch (error) {
-      alert(error);
-    }
+      navigate(`/products/${product.id}`, { replace: true });
+    } catch {}
   }
 
   const headerTools = (

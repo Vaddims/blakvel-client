@@ -1,12 +1,13 @@
 import { faEdit, faLink, faRotateLeft, faRotateRight, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC } from "react"
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { InputFieldStatusDescriptor } from "..";
 import { InputField } from "../../../components/InputField";
 import { Product } from "../../../models/product.model";
 import { ProductTagField } from "../../CreateProductTag/ProductTagFieldInspection";
 import './product-tag-representer.scss';
+import { LocationState } from "../../../models/location-state.model";
 
 interface ProductTagRepresenterProps {
   targetProductTag: Product.Tag;
@@ -18,6 +19,9 @@ interface ProductTagRepresenterProps {
   clickSpecification: (field: Product.Tag.Field) => React.MouseEventHandler<HTMLInputElement>;
   draftProductSpecificationStatusDescriptors: InputFieldStatusDescriptor[];
   restore?: () => void;
+  restoreSpecification?: (specFieldId: string) => void;
+  clearSpecification?: (specFieldId: string) => void
+  getProductSpecificationInitialState: (specFieldId: string) => Product.Specification | undefined; 
 }
 
 export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => {
@@ -31,12 +35,25 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
     blurSpecification,
     clickSpecification,
     restore,
+    restoreSpecification,
+    clearSpecification,
+    getProductSpecificationInitialState
   } = props;
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState: LocationState = location.state ?? {};
+  const { awaitingPreviousPaths = [] } = locationState;
 
   const editTag = () => {
-    navigate(`/product-tags/${targetProductTag.id}/inspect`)
+    const newAwaitingPreviousPaths = [...awaitingPreviousPaths, location.pathname];
+    navigate(`/product-tags/${targetProductTag.id}/inspect`, {
+      state: {
+        ...locationState,
+        awaitingPreviousPaths: newAwaitingPreviousPaths,
+      },
+
+    });
   }
 
   const removeTag = () => {
@@ -54,6 +71,14 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
 
   const onClick = (field: Product.Tag.Field): React.MouseEventHandler<HTMLInputElement> => (event) => {
     clickSpecification(field)(event);
+  }
+
+  const onRestore = (field: Product.Tag.Field): React.MouseEventHandler<HTMLButtonElement> => () => {
+    restoreSpecification?.(field.id);
+  }
+
+  const onClear = (field: Product.Tag.Field): React.MouseEventHandler<HTMLButtonElement> => () => {
+    clearSpecification?.(field.id);
   }
 
   return (
@@ -88,6 +113,9 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
               onChange={onChange(field)} 
               onBlur={onBlur(field)}
               onClick={onClick(field)}
+              onInputRestore={onRestore(field)}
+              onInputClear={onClear(field)}
+              anchor={getProductSpecificationInitialState(field.id)?.value ?? ''}
             />
           ))}
         </div>
