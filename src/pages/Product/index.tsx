@@ -8,6 +8,7 @@ import { useAppSelector } from "../../middleware/hooks/reduxAppHooks";
 import { selectUser } from "../../services/slices/userSlice";
 import "./product.scss";
 import { UserRole } from "../../models/user.model";
+import { Product as ProductModel } from "../../models/product.model";
 
 const templateDescription = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum necessitatibus, ut hic in non ab adipisci maiores libero doloribus sit debitis quis illum. Beatae facere corporis ratione voluptate voluptates suscipit?';
 const now = new Date();
@@ -69,6 +70,17 @@ export default function Product() {
   const discountPercent = hasDiscount ? (100 - Math.round(product.discountPrice! / product.price * 100)) : 0;
   const currentPrice = hasDiscount ? product.discountPrice : product.price;
 
+  const displaySpecifications = product.tags.reduce((specs, tag) => {
+    const newSpecs = [...specs];
+    for (const field of tag.fields) {
+      const specification = product.specifications.find(specification => specification.field.id === field.id)
+      if (specification) {
+        newSpecs.push(specification);
+      }
+    }
+    return newSpecs;
+  }, [] as ProductModel.Specification[]);
+
   return (
     <Page id="product">
       <Panel title={product.name} displayBackNavigation headerTools={headerTools}>
@@ -76,8 +88,8 @@ export default function Product() {
           <ProductImageShowcase imageFilenames={imageFilenames} targetImageFilenames={initialTargets} />
         )}
         <article className="product-details">
-          <div className="common-details">
-            {templateDescription && <p className="product-">{templateDescription}</p>}
+          {templateDescription && <p className="product-description">{templateDescription}</p>}
+          <div>
             <h2 className="product-price">${currentPrice}</h2>
             {hasDiscount &&
               <div className="product-sale-details">
@@ -94,8 +106,23 @@ export default function Product() {
                 )}
               </div>
             }
-            {product.stock ? `In stock: ${product.stock} units` : 'Out of stock'}
           </div>
+          { displaySpecifications.length > 0 && (
+            <div className="speciification-cluster">
+              <h2 className="specification-cluster-title">Specifications</h2>
+              <table className="specifications">
+                <tbody>
+                  { displaySpecifications.map((specification) => (
+                    <tr className="specification-representer">
+                      <td>{specification.field.name}</td>
+                      <td>{specification.value}</td>
+                      <td>{/* Other field */}</td>
+                    </tr>
+                  )) }
+                </tbody>
+              </table>
+            </div>
+          )}
         </article>
       </Panel>
     </Page>
