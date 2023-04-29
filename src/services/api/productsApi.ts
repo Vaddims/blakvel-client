@@ -2,7 +2,7 @@ import { FetchBaseQueryMeta, createApi } from '@reduxjs/toolkit/query/react';
 import { CreateProductRequest } from '../../models/create-product-request.model';
 import { Product } from '../../models/product.model';
 import { UpdateProductRequest } from '../../models/update-product-request.model';
-import { apiBaseQuery } from './baseQuery';
+import { appBaseQuery } from './baseQuery';
 
 enum TagTypes {
   Product = 'product',
@@ -11,7 +11,7 @@ enum TagTypes {
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',
-  baseQuery: apiBaseQuery,
+  baseQuery: appBaseQuery,
   tagTypes: [TagTypes.Product, TagTypes.Tag],
   endpoints: (build) => ({
     getProduct: build.query<Product, string>({

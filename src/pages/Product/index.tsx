@@ -5,10 +5,12 @@ import { useRedirection } from "../../utils/hooks/useRedirection";
 import { ProductImageShowcase } from "./ProductImageViewer";
 import { useGetProductQuery } from "../../services/api/productsApi";
 import { useAppSelector } from "../../middleware/hooks/reduxAppHooks";
-import { selectUser } from "../../services/slices/userSlice";
+// import { selectUser } from "../../services/slices/userSlice";
 import "./product.scss";
 import { UserRole } from "../../models/user.model";
 import { Product as ProductModel } from "../../models/product.model";
+import { useAuthentication } from "../../middleware/hooks/useAuthentication";
+// import { useGetAuthenticatedUserQuery } from "../../services/api/usersApi";
 
 const templateDescription = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum necessitatibus, ut hic in non ab adipisci maiores libero doloribus sit debitis quis illum. Beatae facere corporis ratione voluptate voluptates suscipit?';
 const now = new Date();
@@ -29,7 +31,9 @@ const dateTime = `${date} ${time}`;
 export default function Product() {
   const { id = '' } = useParams();
   const { data: product } = useGetProductQuery(id, { skip: !id });
-  const user = useAppSelector(selectUser);
+  // const { data: user } = useGetAuthenticatedUserQuery();
+  const { user } = useAuthentication();
+  // const user = useAppSelector(selectUser);
   const redirect = useRedirection();
 
   const imageFilenames: string[] = []; 

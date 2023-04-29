@@ -18,38 +18,17 @@ import PageNotFound from "../../pages/PageNotFound"
 import Product from "../../pages/Product"
 import { ProductInspectionRouter } from "../../pages/ProductInspectionRouter"
 import Signup from "../../pages/Signup"
-import { useGetAccessTokenMutation } from "../../services/api/usersApi";
-import { setUser } from '../../services/slices/userSlice';
+// import { useGetAccessTokenQuery } from "../../services/api/usersApi";
+import { useAuthentication } from "../../middleware/hooks/useAuthentication"
 
 const AppRoutes: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const [ getAccessToken ] = useGetAccessTokenMutation();
+  const createRoleProtectedRoute = (...roles: UserRole[]) => {
+    return (
+      <ProtectedRoute allowedRoles={roles} redirectPath='/auth/login' />
+    );
+  }
 
-  useEffect(() => {
-    const dispatchUser = async () => {
-      const response = await fetch('/api/users/current');
-      if (!response.ok) {
-        return;
-      }
-
-      const data = await response.json();
-      dispatch(setUser(data));
-
-      getAccessToken();
-      setInterval(getAccessToken, 1000 * 60 * 15);
-    }
-
-    const refreshTokenStart = Number(localStorage.getItem('REFRESH_TOKEN_START'));
-    if (refreshTokenStart) {
-      const refreshTokenStartDate = new Date(refreshTokenStart);
-      // check if date is 15 days or less from now
-      if (new Date().getTime() - refreshTokenStartDate.getTime() <= 1000 * 60 * 60 * 24 * 15) {
-        dispatchUser();
-      }
-    }
-  }, []);
-
-  const adminProtectedRoute = <ProtectedRoute allowedRoles={[UserRole.Admin]} redirectPath='/auth/login' />;
+  const adminProtectedRoute = createRoleProtectedRoute(UserRole.Admin);
 
   return (
     <BrowserRouter>

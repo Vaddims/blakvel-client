@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { UserRole } from "../../models/user.model";
-import { useGetAuthenticatedUserQuery } from "../../services/api/usersApi";
+import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 
 interface ProtectedRouteProps {
   readonly redirectPath: string;
@@ -8,19 +8,32 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = (props) => {
-  const { data: user, isLoading } = useGetAuthenticatedUserQuery();
-  const { allowedRoles, redirectPath } = props;
+  const { user, userIsLoading } = useAuthentication();
+  const { 
+    allowedRoles, 
+    redirectPath,
+  } = props;
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (userIsLoading) {
+    return (
+      <h1>loading</h1>
+    )
   }
 
-  if (user && allowedRoles.some((role) => user.role === role)) {
-    return <Outlet />;
+  if (!user) {
+    return (
+      <Navigate to={redirectPath} replace />
+    );
+  }
+
+  if (!allowedRoles.some((role) => user.role === role)) {
+    return (
+      <h1>Forbidden</h1>
+    )
   }
 
   return (
-    <Navigate to={redirectPath} replace />
+    <Outlet />
   );
 }
 

@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { User } from '../../models/user.model';
 import Page from "../../layouts/Page";
 import './login.scss';
-import { useLoginMutation } from "../../services/api/usersApi";
+import { useLoginMutation, usersApi } from "../../services/api/usersApi";
 import { useAppDispatch } from "../../middleware/hooks/reduxAppHooks";
-import { setUser } from "../../services/slices/userSlice";
+import { useAuthentication } from "../../middleware/hooks/useAuthentication";
+import { AuthStatus, setAuthStatus } from "../../services/slices/authSlice";
 
 interface LoginPageState {
   emailField: string;
@@ -17,6 +18,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [ login ] = useLoginMutation();
   const dispatch = useAppDispatch();
+  const { refetchUser } = useAuthentication();
 
   const [state, setState] = useState<LoginPageState>({
     emailField: 'vadym.iefremov@gmail.com',
@@ -41,21 +43,17 @@ export default function Login() {
   const submitLogin: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
+    dispatch(usersApi.util.resetApiState());
+
     try {
       await login({
         email: state.emailField,
         password: state.passwordField,
         remember: state.rememberUser,
-      });
+      }).unwrap();
 
-      const userResponse = await fetch('/api/users/current');
-      if (!userResponse.ok) {
-        return;
-      }
-      
-      const user = await userResponse.json() as User;
-      dispatch(setUser(user));
-      localStorage.setItem('REFRESH_TOKEN_START', new Date().getTime().toString());
+      dispatch(setAuthStatus(AuthStatus.LoggedIn));
+      refetchUser();
       navigate('/');
     } catch {
       console.log('no');
