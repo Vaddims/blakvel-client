@@ -9,8 +9,15 @@ function AuthorizedNavbarNavigation() {
     authentication.logout();
   }
 
+  if (!authentication.user) {
+    return (
+      <></>
+    )
+  }
+
   return (
     <>
+      <li onClick={redirect(`/users/${authentication.user.id}/cart`)}>Cart</li>
       <li onClick={logoutUser}>Logout</li>
     </>
   )

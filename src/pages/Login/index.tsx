@@ -7,6 +7,9 @@ import { useLoginMutation, usersApi } from "../../services/api/usersApi";
 import { useAppDispatch } from "../../middleware/hooks/reduxAppHooks";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { AuthStatus, setAuthStatus } from "../../services/slices/authSlice";
+import { composedValueAbordSymbol, useInputFieldManagement } from "../../middleware/hooks/useInputFieldManagement";
+import { useCheckboxFieldManagement } from "../../middleware/hooks/useCheckboxFieldManagement";
+import { faEnvelope, faKey } from "@fortawesome/free-solid-svg-icons";
 
 interface LoginPageState {
   emailField: string;
@@ -20,36 +23,48 @@ export default function Login() {
   const dispatch = useAppDispatch();
   const { refetchUser } = useAuthentication();
 
-  const [state, setState] = useState<LoginPageState>({
-    emailField: 'vadym.iefremov@gmail.com',
-    passwordField: 'pass',
-    rememberUser: false,
-  });
+  const emailInputField = useInputFieldManagement<string>({
+    label: 'Email',
+    required: true,
+    inputIcon: faEnvelope,
+    type: 'email',
+    initialInputValue: 'vadym.iefremov@gmail.com',
+    format(input) {
+      return input;
+    },
+  })
 
-  const setFieldValue = (field: keyof LoginPageState) => (event: ChangeEvent<HTMLInputElement>) => {
-    setState({
-      ...state,
-      [field]: event.target.value,
-    })
-  }
+  const passwordInputField = useInputFieldManagement<string>({
+    label: 'Password',
+    required: true,
+    inputIcon: faKey,
+    type: 'password',
+    initialInputValue: 'pass',
+    format(input) {
+      return input
+    },
+  })
 
-  const toggleRememberUserCheckbox: ChangeEventHandler<HTMLInputElement> = () => {
-    setState({
-      ...state,
-      rememberUser: !state.rememberUser,
-    })
-  }
+  const rememberUserCheckbox = useCheckboxFieldManagement({
+    label: 'Remember me on this device'
+  })
 
-  const submitLogin: FormEventHandler<HTMLFormElement> = async (event) => {
+  const submitLogin: FormEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
+    const email = emailInputField.getValidatedInputResult();
+    const password = passwordInputField.getValidatedInputResult();
+
     dispatch(usersApi.util.resetApiState());
+    if (email === composedValueAbordSymbol || password === composedValueAbordSymbol) {
+      return;
+    }
 
     try {
       await login({
-        email: state.emailField,
-        password: state.passwordField,
-        remember: state.rememberUser,
+        email: email,
+        password: password,
+        remember: rememberUserCheckbox.checked,
       }).unwrap();
 
       dispatch(setAuthStatus(AuthStatus.LoggedIn));
@@ -64,45 +79,10 @@ export default function Login() {
     <Page id='login'>
       <main>
         <div className="login-box">
-          <form id="login-form" onSubmit={submitLogin}>
-            <label className="login-input-label" htmlFor="login-email-input">
-              <div className="icon-boundary">
-                <i className="fas fa-envelope"></i>
-              </div>
-              <div className="login-input-box">
-                <input 
-                  className="login-input" 
-                  id="login-email-input" 
-                  type="email" 
-                  placeholder="Email"
-                  onChange={setFieldValue('emailField')}
-                  value={state.emailField}
-                  required
-                />
-              </div>
-            </label>
-            <label className="login-input-label" htmlFor="login-password-input">
-              <div className="icon-boundary">
-                <i className="fas fa-key"></i>              
-              </div>
-              <div className="login-input-box">
-                <input 
-                  className="login-input" 
-                  type="password" 
-                  id="login-password-input" 
-                  placeholder="Password" 
-                  onChange={setFieldValue('passwordField')}
-                  value={state.passwordField}
-                  required 
-                />
-              </div>
-            </label>
-            <label className="remember-user-radio-box" htmlFor="remember-user-radio">
-              <span className="remember-user-title">Remember Me</span>
-              <input type="checkbox" name="" id="remember-user-radio" onChange={toggleRememberUserCheckbox} checked={state.rememberUser} />
-            </label>
-            <input className="login-submit-button" type="submit" value="Login" />
-          </form>
+          { emailInputField.render() }
+          { passwordInputField.render() }
+          { rememberUserCheckbox.render() }
+          <button className="login-submit-button" onClick={submitLogin}>Login</button>
         </div>
       </main>
     </Page>

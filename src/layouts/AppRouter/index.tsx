@@ -20,20 +20,26 @@ import { ProductInspectionRouter } from "../../pages/ProductInspectionRouter"
 import Signup from "../../pages/Signup"
 // import { useGetAccessTokenQuery } from "../../services/api/usersApi";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication"
+import ShoppingCart from "../../pages/ShoppingCart"
 
 const AppRoutes: React.FC = () => {
-  const createRoleProtectedRoute = (...roles: UserRole[]) => {
-    return (
-      <ProtectedRoute allowedRoles={roles} redirectPath='/auth/login' />
-    );
-  }
+  const { user } = useAuthentication();
 
+  const createRoleProtectedRoute = (...roles: UserRole[]) => (
+    <ProtectedRoute 
+      allowed={user && roles.length === 0 || roles.some((role) => user?.role === role)} 
+      redirectPath='/auth/login' 
+    />
+  );
+
+  const authProtectedRoute = createRoleProtectedRoute();
   const adminProtectedRoute = createRoleProtectedRoute(UserRole.Admin);
 
   return (
     <BrowserRouter>
       <Routes>
         <Route index element={<Landing />} />
+
         <Route path="products">
           <Route index element={<Catalog />} />
           <Route path=":id">
@@ -46,6 +52,7 @@ const AppRoutes: React.FC = () => {
             <Route index element={<CreateProduct />} />
           </Route>
         </Route>
+
         <Route path='product-tags'>
           <Route path=":id">
             <Route path="inspect" element={adminProtectedRoute}>
@@ -58,11 +65,14 @@ const AppRoutes: React.FC = () => {
             </Route>
           </Route>
         </Route>
+
         <Route path="contact" element={<Contact />} />
+
         <Route path="auth">
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
         </Route>
+
         <Route path="admin-panel" element={adminProtectedRoute}>
           <Route index element={<AdminOverview />} />
           <Route path="product-management">
@@ -73,6 +83,13 @@ const AppRoutes: React.FC = () => {
             <Route path="inspect" />
           </Route>
         </Route>
+
+        <Route path="users" element={authProtectedRoute}>
+          <Route path=":id">
+            <Route path="cart" element={<ShoppingCart />} />
+          </Route>
+        </Route>
+
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>

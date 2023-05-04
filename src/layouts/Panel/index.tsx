@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './panel.scss';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
 export interface PanelProps {
   readonly title: string;
@@ -29,7 +31,7 @@ export default function Panel(props: PanelProps) {
         <div className='left-hand-box'>
           {displayBackNavigation &&
             <button className='previous-page-button' onClick={() => navigate(-1)}>
-              <i className="fa-solid fa-angle-left fa-3x" />
+              <FontAwesomeIcon icon={faAngleLeft} size='3x'/>
             </button>
           }
           <div className="panel-title-box">

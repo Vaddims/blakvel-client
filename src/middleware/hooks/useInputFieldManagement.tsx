@@ -15,7 +15,7 @@ export interface InputFieldManagement<T> {
   readonly inputIcon?: IconDefinition;
   readonly placeholder?: string;
   readonly helperText?: string;
-  readonly type?: 'text' | 'time' | 'datetime-local';
+  readonly type?: 'text' | 'time' | 'datetime-local' | 'email' | 'password';
   readonly initialInputValue?: string;
   readonly inputInitialDatalist?: InputFieldDatalistElement[];
   readonly validationTimings?: ValidationTiming[];

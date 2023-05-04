@@ -4,13 +4,13 @@ import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 
 interface ProtectedRouteProps {
   readonly redirectPath: string;
-  readonly allowedRoles: UserRole[];
+  readonly allowed: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = (props) => {
   const { user, userIsLoading } = useAuthentication();
   const { 
-    allowedRoles, 
+    allowed,
     redirectPath,
   } = props;
 
@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = (props) => {
     );
   }
 
-  if (!allowedRoles.some((role) => user.role === role)) {
+  if (!allowed) {
     return (
       <h1>Forbidden</h1>
     )

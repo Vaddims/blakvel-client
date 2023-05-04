@@ -10,31 +10,37 @@ import "./product.scss";
 import { UserRole } from "../../models/user.model";
 import { Product as ProductModel } from "../../models/product.model";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
+import { useUpdateUserMutation } from "../../services/api/usersApi";
 // import { useGetAuthenticatedUserQuery } from "../../services/api/usersApi";
 
 const templateDescription = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum necessitatibus, ut hic in non ab adipisci maiores libero doloribus sit debitis quis illum. Beatae facere corporis ratione voluptate voluptates suscipit?';
-const now = new Date();
-const date = now.toLocaleDateString('en-US', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-const time = now.toLocaleTimeString('en-US', {
-  hour: 'numeric',
-  minute: 'numeric',
-  hour12: false,
-});
-// merge to locale time and to locale date to show the date and time
-const dateTime = `${date} ${time}`;
 
+const formatDiscountExpirationDate = (date: Date) => {
+  const formattedDateString = date.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  });
+
+  const formattedTimeString = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  });
+
+  return `${formattedDateString} ${formattedTimeString}`
+}
 
 export default function Product() {
   const { id = '' } = useParams();
+  const authentication = useAuthentication();
   const { data: product } = useGetProductQuery(id, { skip: !id });
-  // const { data: user } = useGetAuthenticatedUserQuery();
+  const [ updateUser ] = useUpdateUserMutation();
   const { user } = useAuthentication();
-  // const user = useAppSelector(selectUser);
   const redirect = useRedirection();
+
+  const allLoaded = !!authentication.user && !!product;
+  const productInCart = !!authentication.user && !!product && authentication.user.shoppingCart.some(item => item.product.id === product.id)
 
   const imageFilenames: string[] = []; 
   const initialTargets: string[] = [];
@@ -61,9 +67,66 @@ export default function Product() {
     </button>
   );
 
-  const commonHeaderTools = (
+  const addProductToCart = async () => {
+    if (!authentication.user || !product) {
+      return;
+    }
+
+    if (productInCart) {
+      return;
+    }
+
+    const newShoppingCart = [
+      ...authentication.user.shoppingCart.map(({ product, quantity }) => ({
+        productId: product.id,
+        quantity,
+      })), 
+      {
+        productId: product.id,
+        quantity: 1,
+      }
+    ]
+
+    try {
+      await updateUser({
+        userId: authentication.user.id,
+        shoppingCart: newShoppingCart,
+      })
+    } catch {
+
+    }
+  }
+
+  const removeProductFromCart = async () => {
+    if (!authentication.user || !product) {
+      return;
+    }
+
+    if (!productInCart) {
+      return;
+    }
+
+    const filteredItems = authentication.user.shoppingCart.filter(item => item.product.id !== product.id);
+    try {
+      await updateUser({
+        userId: authentication.user.id,
+        shoppingCart: filteredItems.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+        })),
+      })
+    } catch {
+
+    }
+  }
+
+  const commonHeaderTools = allLoaded && (
     <>
-      <button className="panel-tool outline-highlight">To card</button>
+      {!productInCart ? (
+        <button className="panel-tool outline-highlight" onClick={addProductToCart}>To cart</button>
+      ) : (
+        <button className="panel-tool outline-highlight" onClick={removeProductFromCart}>Delete from cart</button>
+      )}
       <button className="panel-tool highlight">Buy</button>
     </>
   );
@@ -105,7 +168,7 @@ export default function Product() {
                 </div>
                 { product.discountExpirationDate && (
                   <p className="product-discount-end">
-                    Discount until: <b>{new Date(product.discountExpirationDate).toLocaleString()}</b>
+                    Offer ends {formatDiscountExpirationDate(new Date(product.discountExpirationDate))}
                   </p> 
                 )}
               </div>

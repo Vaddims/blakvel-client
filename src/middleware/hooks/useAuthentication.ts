@@ -28,7 +28,7 @@ export function useAuthentication(queryOptions?: Parameters<typeof useGetCurrent
 
   return {
     authToken,
-    user: user,
+    user: user as User | null,
     userIsLoading,
     userIsFetching,
     refetchUser,

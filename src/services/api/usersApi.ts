@@ -3,16 +3,18 @@ import { Login } from "../../models/login.model";
 import { User } from "../../models/user.model";
 import { apiBaseQuery, appBaseQuery, asyncQueryStrategyUtil } from "./baseQuery";
 import type { RootState } from "../store";
+import { PatchUser } from "../../models/patch-user.model";
 
 enum TagTypes {
   RefreshToken = "refreshToken",
   AccessToken = "accessToken",
+  User = 'user',
 }
 
 export const usersApi = createApi({
   reducerPath: 'usersApi',
   baseQuery: appBaseQuery,
-  tagTypes: [TagTypes.RefreshToken, TagTypes.AccessToken],
+  tagTypes: [TagTypes.RefreshToken, TagTypes.AccessToken, TagTypes.User],
   endpoints: (build) => ({
     login: build.mutation<void, Login>({
       invalidatesTags: [TagTypes.RefreshToken, TagTypes.AccessToken],
@@ -21,7 +23,6 @@ export const usersApi = createApi({
         method: 'POST',
         body: login,
       }),
-      
     }),
 
     logout: build.mutation<void, void>({
@@ -33,24 +34,25 @@ export const usersApi = createApi({
     }),
 
     getCurrentUser: build.query<User, void>({
-      providesTags: [TagTypes.RefreshToken, TagTypes.AccessToken],
+      providesTags: [TagTypes.RefreshToken, TagTypes.AccessToken, TagTypes.User],
       query: () => 'users/current',
+    }),
+
+    updateUser: build.mutation<void, PatchUser>({
+      invalidatesTags: [TagTypes.User],
+      query: ({ userId, ...body }) => ({
+        method: 'PATCH',
+        url: `users/${userId}`,
+        body,
+      })
     }),
   }),
 });
-
-// export function initiateAccessTokenGetter(store: any) {
-//   async function getAccessToken() {
-//     const { data: access } = await usersApi.endpoints.getAccessToken.initiate()(store.dispatch, store.getState, {});
-//     return access?.accessToken;
-//   }
-
-//   asyncQueryStrategyUtil.getAccessToken = getAccessToken;
-// }
 
 export const {
   useGetCurrentUserQuery,
   useLoginMutation,
   useLogoutMutation,
+  useUpdateUserMutation,
 } = usersApi;
 
