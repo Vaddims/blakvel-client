@@ -17,7 +17,8 @@ function AuthorizedNavbarNavigation() {
 
   return (
     <>
-      <li onClick={redirect(`/users/${authentication.user.id}/cart`)}>Cart</li>
+      <li onClick={redirect(`/user/cart`)}>Cart</li>
+      <li onClick={redirect(`/user/orders`)}>Orders</li>
       <li onClick={logoutUser}>Logout</li>
     </>
   )

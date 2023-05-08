@@ -21,19 +21,23 @@ import Signup from "../../pages/Signup"
 // import { useGetAccessTokenQuery } from "../../services/api/usersApi";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication"
 import ShoppingCart from "../../pages/ShoppingCart"
+import Order from "../../pages/Order"
+import UserOrders from "../../pages/UserOrders"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
 
   const createRoleProtectedRoute = (...roles: UserRole[]) => (
     <ProtectedRoute 
-      allowed={user && roles.length === 0 || roles.some((role) => user?.role === role)} 
+      allowed={!!user && (roles.length === 0 || roles.some((role) => user?.role === role))} 
       redirectPath='/auth/login' 
     />
   );
 
   const authProtectedRoute = createRoleProtectedRoute();
   const adminProtectedRoute = createRoleProtectedRoute(UserRole.Admin);
+
+  // console
 
   return (
     <BrowserRouter>
@@ -84,12 +88,16 @@ const AppRoutes: React.FC = () => {
           </Route>
         </Route>
 
-        <Route path="users" element={authProtectedRoute}>
-          <Route path=":id">
-            <Route path="cart" element={<ShoppingCart />} />
+        <Route path='user' element={authProtectedRoute} >
+          <Route path='cart' element={<ShoppingCart />} />
+          <Route path='orders'>
+            <Route index element={<UserOrders />} />
+            <Route path=':orderId'>x
+              <Route index element={<Order />} />
+            </Route>
           </Route>
         </Route>
-
+        
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>

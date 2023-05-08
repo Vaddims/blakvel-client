@@ -1,17 +1,18 @@
 import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { UserRole } from "../../models/user.model";
 import './shopping-cart.scss';
 import { useRedirection } from "../../utils/hooks/useRedirection";
-import { useUpdateUserMutation } from "../../services/api/usersApi";
+import { useCreateCheckoutSessionMutation, useUpdateUserMutation } from "../../services/api/usersApi";
 
 const ShoppingCart: React.FC = () => {
-  const { id } = useParams();
   const { user } = useAuthentication();
   const redirect = useRedirection();
   const [ updateUser ] = useUpdateUserMutation();
+  const [ createCheckoutSession ] = useCreateCheckoutSessionMutation();
+  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -19,9 +20,7 @@ const ShoppingCart: React.FC = () => {
     )
   }
 
-  const allowed = user && (user.id === id || user.role === UserRole.Admin);
-
-  if (!allowed) {
+  if (!user) {
     return (
       <>Forbidden</>
     )
@@ -75,6 +74,12 @@ const ShoppingCart: React.FC = () => {
         quantity: item.quantity,
       })),
     })
+  }
+
+  const checkout = async () => {
+    const data = await createCheckoutSession().unwrap();
+    window.location.href = data.url;
+    console.log(data);
   }
 
   return (
@@ -166,7 +171,7 @@ const ShoppingCart: React.FC = () => {
                 ).toFixed(2)}
               </h4>
             </div>
-            <button className="checkout-action">Checkout</button>
+            <button className="checkout-action" onClick={checkout}>Checkout</button>
           </header>
         </aside>
       </Panel>

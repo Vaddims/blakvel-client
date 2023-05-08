@@ -11,7 +11,7 @@
       }
     },
     {
-      "title": "Product Management",
+      "title": "Products",
       "disabled": false,
       "defaultSelection": false,
       "payload": {
@@ -19,11 +19,27 @@
       }
     },
     {
-      "title": "Tag Management",
+      "title": "Tags",
       "disabled": false,
       "defaultSelection": false,
       "payload": {
         "endpoint": "/tag-management"
+      }
+    },
+    {
+      "title": "Orders",
+      "disabled": true,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/orders"
+      }
+    },
+    {
+      "title": "Users",
+      "disabled": true,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/users"
       }
     },
     {

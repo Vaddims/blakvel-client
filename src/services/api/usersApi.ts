@@ -46,6 +46,18 @@ export const usersApi = createApi({
         body,
       })
     }),
+
+    createCheckoutSession: build.mutation<any, void>({
+      query: () => ({
+        method: 'POST',
+        url: `users/current/create-checkout-session`,
+      })
+    }),
+
+    getCheckoutSession: build.query<any, void>({
+      query: () => `users/current/checkout-session`,
+      keepUnusedDataFor: 0,
+    })
   }),
 });
 
@@ -54,5 +66,7 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useUpdateUserMutation,
+  useCreateCheckoutSessionMutation,
+  useGetCheckoutSessionQuery,
 } = usersApi;
 

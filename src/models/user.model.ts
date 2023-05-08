@@ -1,3 +1,4 @@
+import { ClientOrder } from "./order.model";
 import { Product } from "./product.model";
 
 export enum UserRole {
@@ -13,4 +14,5 @@ export interface User {
     readonly product: Product;
     readonly quantity: number;
   }[];
+  readonly orders: ClientOrder[];
 }
