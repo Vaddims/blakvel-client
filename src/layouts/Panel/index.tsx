@@ -7,7 +7,7 @@ import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 export interface PanelProps {
   readonly title: string;
   readonly headerTools?: ReactNode;
-  readonly extensions?: ReactNode;
+  readonly extensions?: ReactNode | ReactNode[];
   readonly children?: ReactNode;
   readonly collapseExtensions?: boolean;
   readonly displayBackNavigation?: boolean;
@@ -50,10 +50,8 @@ export default function Panel(props: PanelProps) {
         </main>
         {(extensions && !collapseExtensions) && 
           <aside className="panel-extensions-boundary">
-            <div className="extensions-slidepath">
-              <div className="panel-extensions">
-                {extensions}
-              </div>
+            <div className="panel-extensions">
+              {extensions}
             </div>
           </aside>
         }

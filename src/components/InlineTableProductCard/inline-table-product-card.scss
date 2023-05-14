@@ -1,0 +1,54 @@
+tr.inline-table-product-card {
+  .common-info {
+    text-align: left;
+    margin: 0;
+    max-width: 25vw;
+    overflow: hidden;
+
+    .name-limiter {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      .name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 1.25rem;
+        text-align: left;
+      }
+    }
+
+    .info {
+      text-transform: capitalize;
+      color: rgb(122, 122, 122);
+    }
+  }
+  
+  .discount-percent {
+    text-align: center;
+    align-items: center;
+
+    div {
+      padding: .1rem .25rem;
+      box-sizing: border-box;
+      background-color: green;
+      display: inline-block;
+      background-color: var(--background-highlight-color);
+      width: min-content;
+    }
+  }
+
+  .discount-related {
+    padding: .25rem;
+  }
+
+  .previous-price {
+    text-decoration: line-through;
+    text-align: center;
+  }
+
+  .current-price {
+    text-align: center;
+  }
+}

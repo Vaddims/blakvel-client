@@ -1,0 +1,69 @@
+.app-table {
+  user-select: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+
+  td .app-table-row-checkbox {
+    width: 2rem;
+    padding-inline: 1rem;
+
+    .stablizer {
+      display: flex;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+
+  thead {
+    border-bottom: .1rem solid var(--background-secondary-color);
+
+    td {
+      height: 4rem;
+      color: grey;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color .25s ease;
+      padding-inline: 1rem;
+      white-space: nowrap;
+
+      .sort-icon {
+        margin-right: .25rem;
+  
+        path {
+          transition: fill .25s ease;
+          fill: grey;
+        }
+      }
+
+      &:hover {
+        color: white;
+        
+        &[aria-sort=none] .sort-icon path {
+          fill: white;
+        }
+      }
+  
+      &[aria-sort]:not([aria-sort=none]) {
+        color: var(--background-highlight-color);
+
+        .sort-icon path {
+          fill: var(--background-highlight-color);
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      &:nth-child(2n) {
+        background-color: var(--background-dilution-color);
+      }
+
+      td {
+        padding: 1rem;
+        text-align: center;
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "title": "None",
+    "defaultSelection": true,
+    "disabled": false,
+    "payload": {
+      
+    }
+  },
+  {
+    "title": "Discount Exists",
+    "disabled": false,
+    "defaultSelection": false,
+    "payload": {
+      "type": "hasDiscount",
+      "value": true
+    }
+  },
+  {
+    "title": "No Discount",
+    "disabled": false,
+    "defaultSelection": false,
+    "payload": {
+      "type": "hasDiscount",
+      "value": false
+    }
+  }
+]

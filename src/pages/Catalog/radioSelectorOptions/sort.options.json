@@ -32,14 +32,14 @@
     "title": "Price (Low - High)",
     "payload": {
       "order": "ascending",
-      "type": "price"
+      "type": "activePrice"
     }
   },
   {
     "title": "Price (High - Low)",
     "payload": {
       "order": "descending",
-      "type": "price"
+      "type": "activePrice"
     }
   }
 ]

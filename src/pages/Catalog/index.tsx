@@ -1,14 +1,21 @@
-import { ChangeEventHandler, KeyboardEventHandler, MouseEventHandler, useState } from "react";
+import { ChangeEventHandler, KeyboardEventHandler, MouseEventHandler, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { RadioButtonOptions } from "../../components/RadioButton/radio-button-options.interface";
 import { usePanelExtensionCollpase } from '../../middleware/hooks/usePanelExtensionsCollapse';
 import { useGetProductsQuery } from "../../services/api/productsApi";
 import ProductCard from '../../components/ProductCard';
 import sortOptions from './radioSelectorOptions/sort.options.json';
-import RadioSelector from "../../components/RadioSelector";
 import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
+import useElementSelectorComponent from "../../middleware/component-hooks/element-selector-component/useElementSelectorComponent";
+import ElementSelectorButtonOptions from "../../components/ElementSelectorOption/element-selector-options.interface";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilter, faMagnifyingGlass, faTimes } from "@fortawesome/free-solid-svg-icons";
 import './catalog.scss';
+
+export interface ElementSelectorPayload {
+  order: string;
+  type: string;
+}
 
 export default function Catalog() {
   const navigate = useNavigate();
@@ -58,7 +65,7 @@ export default function Catalog() {
     applySearchParams(localSearchParams);
   }
 
-  const clearNameSearch: MouseEventHandler<HTMLElement> = (event) => {
+  const clearNameSearch: MouseEventHandler<SVGSVGElement> = (event) => {
     event.preventDefault();
     const localSearchParams = new URLSearchParams(searchParams);
     localSearchParams.delete('search');
@@ -66,35 +73,34 @@ export default function Catalog() {
     applySearchParams(localSearchParams);
   }
 
-  type SortOptionsPayload = typeof sortOptions[number]['payload'];
-  const handleSelection = (radioButtonOptions: RadioButtonOptions<SortOptionsPayload>) => {
-    const { payload } = radioButtonOptions;
+  const elementSelector = useElementSelectorComponent<ElementSelectorPayload>({
+    title: "Sort",
+    buttonOptions: sortOptions,
+    initialTarget: sortTarget,
+    dependencies: [searchParams.toString()]
+  });
 
-    if (!payload || sortTarget?.title === radioButtonOptions.title) {
+  useEffect(() => {
+    const selection: ElementSelectorButtonOptions<ElementSelectorPayload> = elementSelector.selections[0];
+    if (!selection) {
       return;
     }
 
     const selectionSearchParams = new URLSearchParams(searchParams);
     const fieldHanler = searchParamsFieldHandler(selectionSearchParams);
-    fieldHanler('sort', payload.type);
-    fieldHanler('order', payload.order);
+    fieldHanler('sort', selection.payload.type);
+    fieldHanler('order', selection.payload.order);
     applySearchParams(selectionSearchParams);
-  }
+  }, [elementSelector.selections.map(selection => selection.title).join(':')])
 
-  const extensions = (
-    <RadioSelector
-      title="Sort"
-      buttonOptions={sortOptions}
-      initialTarget={sortTarget}
-      onSelectionChange={handleSelection}
-      dependencies={[searchParams.toString()]}
-    />
-  );
+  const extensions = [
+    elementSelector.render(),
+  ]
 
-  const headerTools = (
-    <>
+  const headerTools = [
+    (
       <div className='search-boundary'>
-        <i className="fa-solid fa-magnifying-glass search-icon"></i>
+        <FontAwesomeIcon icon={faMagnifyingGlass} className="search-icon" />
         <input 
           type="text" 
           placeholder='Search' 
@@ -102,14 +108,18 @@ export default function Catalog() {
           onKeyUp={handleSearchConfirm} 
           onChange={handleSearchChange}
         />
-        { searchValue && <i className="fas fa-times clear-icon" onClick={clearNameSearch}></i> }
+        { searchValue && (
+          <FontAwesomeIcon icon={faTimes} onClick={clearNameSearch} />
+        ) }
       </div>
+    ),
+    (
       <div className='catalog-filter-toggler-boundary' onClick={toggleCollapse}>
-        <i className="fas fa-filter"></i>
+        <FontAwesomeIcon icon={faFilter} />
         <h4 className='catalog-filter-toggler-title'>Sort and Filter</h4>
       </div>
-    </>
-  )
+    ),
+  ]
 
   return (
     <Page id='catalog'>
@@ -119,13 +129,13 @@ export default function Catalog() {
         headerTools={headerTools}
         collapseExtensions={extensionsCollapsed}
       >
-        {products && products.map(product => 
+        {products && products.map(product => (
           <ProductCard
             key={product.id}
             product={product}
             onClick={() => navigate(`/products/${product.id}`)} 
-          />)
-        }
+          />
+        ))}
       </Panel>
     </Page>
   );

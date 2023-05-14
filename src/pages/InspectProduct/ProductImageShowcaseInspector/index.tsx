@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { usePatchProductThumbsMutation, useUpdateThumbnailMutation, useDeleteProductThumbnailMutation } from '../../../services/api/productsApi';
 import ProductImageWrapper from "../../../components/ProductImageWrapper";
-import { useFlatElementSelection } from "../../../middleware/hooks/useFlatElementSelection";
+import { useSequentialElementSelection } from "../../../middleware/hooks/useSequentialElementSelection";
 import { Product } from "../../../models/product.model";
 import { useNavigate } from "react-router-dom";
 import * as uuid from 'uuid';
@@ -74,7 +74,7 @@ export const InspectProductImageGallary: React.ForwardRefRenderFunction<IInspect
     elementIsSelected,
     deselectAllSelections,
     handleSelectionEvent,
-  } = useFlatElementSelection(selectionElements, {
+  } = useSequentialElementSelection(selectionElements, {
     targets: initialTargets,
     dependencies: [previewMap, thumbnailSrc],
   });

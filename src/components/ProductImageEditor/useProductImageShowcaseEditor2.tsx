@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useFlatElementSelection } from "../../middleware/hooks/useFlatElementSelection";
+import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
 import { Product } from "../../models/product.model";
 import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUpdateThumbnailMutation } from "../../services/api/productsApi";
 import * as path from 'path';
@@ -40,7 +40,7 @@ export const useProductImageShowcaseEditor = (product?: Product) => {
     elementIsSelected,
     deselectAllSelections,
     handleSelectionEvent,
-  } = useFlatElementSelection(selectableFilenames, {
+  } = useSequentialElementSelection(selectableFilenames, {
     dependencies: [downloadableThumbFilenames, uploadedThumbBlobMap, thumbnailFilename],
   });
 

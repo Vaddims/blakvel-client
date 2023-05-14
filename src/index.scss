@@ -3,8 +3,10 @@
   --text-secondary-color: white;
   --text-highlight-color: white;
   --background-main-dark-color: rgb(30, 30, 30);
+  --background-dark-dilution-color: rgb(35, 35, 35);
   --background-secondary-dark-color: rgb(40, 40, 40);
   --background-main-color: var(--background-main-dark-color);
+  --background-dilution-color: var(--background-dark-dilution-color);
   --background-secondary-color: var(--background-secondary-dark-color);
   --background-highlight-color: rgb(0, 160, 235);
 }

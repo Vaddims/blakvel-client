@@ -1,5 +1,5 @@
 import ProductImageWrapper from "../../../components/ProductImageWrapper";
-import { useFlatElementSelection } from "../../../middleware/hooks/useFlatElementSelection";
+import { useSequentialElementSelection } from "../../../middleware/hooks/useSequentialElementSelection";
 import "./productImageViewer.scss";
 
 export interface ProductImageShowcaseProps {
@@ -13,7 +13,7 @@ export function ProductImageShowcase(props: ProductImageShowcaseProps) {
     selections,
     elementIsSelected,
     selectOneElement,
-  } = useFlatElementSelection(imageFilenames, {
+  } = useSequentialElementSelection(imageFilenames, {
     targets: targetImageFilenames,
   });
 

@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useState, ForwardRefRenderFunction } from "react";
 import { usePatchProductThumbsMutation, useUpdateThumbnailMutation, useDeleteProductThumbnailMutation } from '../../services/api/productsApi';
 import ProductImageWrapper from "../ProductImageWrapper";
-import { useFlatElementSelection } from "../../middleware/hooks/useFlatElementSelection";
+import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
 import { Product } from "../../models/product.model";
 import { useNavigate } from "react-router-dom";
 import * as uuid from 'uuid';
@@ -52,7 +52,7 @@ const ProductImageShowcaseInspectorComponent: ProductImageShowcaseInspectorCompo
     elementIsSelected,
     deselectAllSelections,
     handleSelectionEvent,
-  } = useFlatElementSelection(selectableImageIdentificators, {
+  } = useSequentialElementSelection(selectableImageIdentificators, {
     dependencies: [localFileBlobMap, thumbnailSrc],
   });
 

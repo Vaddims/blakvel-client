@@ -1,5 +1,4 @@
 import { ChangeEventHandler, MouseEventHandler } from "react";
-import { useFlatElementSelection } from "../../middleware/hooks/useFlatElementSelection";
 import ProductImageWrapper from "../ProductImageWrapper";
 import ImageAdderLabel from "./ImageAdderLabel";
 

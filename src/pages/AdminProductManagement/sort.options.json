@@ -1,0 +1,58 @@
+{
+  "clusters": {
+    "name": [
+      {
+        "type": "name",
+        "order": "ascending"
+      },
+      {
+        "type": "name",
+        "order": "descending"
+      }
+    ],
+    "status": [
+      {
+        "type": "status",
+        "order": "public"
+      },
+      {
+        "type": "status",
+        "order": "internal"
+      },
+      {
+        "type": "status",
+        "order": "archived"
+      }
+    ],
+    "discountPercentage": [
+      {
+        "type": "discountPercentage",
+        "order": "ascending"
+      },
+      {
+        "type": "discountPercentage",
+        "order": "descending"
+      }
+    ],
+    "inactivePrice": [
+      {
+        "type": "inactivePrice",
+        "order": "ascending"
+      },
+      {
+        "type": "inactivePrice",
+        "order": "descending"
+      }
+    ],
+    "activePrice": [
+      {
+        "type": "activePrice",
+        "order": "ascending"
+      },
+      {
+        "type": "activePrice",
+        "order": "descending"
+      }
+    ]
+  }
+}

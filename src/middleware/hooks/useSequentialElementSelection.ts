@@ -1,8 +1,8 @@
 import { MouseEvent } from 'react';
 import { useElementSelection, ElementSelectionOptions } from "./useElementSelection";
 
-export const useFlatElementSelection = function<T>(elements: T[], options?: ElementSelectionOptions<T>) {
-  const universalElementSelection = useElementSelection(elements, options);
+export const useSequentialElementSelection = function<T>(elements: T[], options?: ElementSelectionOptions<T>) {
+  const elementSelection = useElementSelection(elements, options);
   const {
     selections,
     toggleOneElement,
@@ -10,7 +10,7 @@ export const useFlatElementSelection = function<T>(elements: T[], options?: Elem
     selectOneElement,
     toggleAdditionalElement,
     selectElementsInBlock,
-  } = universalElementSelection;
+  } = elementSelection;
   
   const handleSelectionEvent = (element: T) => (event: MouseEvent) => {
     event.stopPropagation();
@@ -34,7 +34,7 @@ export const useFlatElementSelection = function<T>(elements: T[], options?: Elem
   }
 
   return {
-    ...universalElementSelection,
+    ...elementSelection,
     handleSelectionEvent,
   }
 }

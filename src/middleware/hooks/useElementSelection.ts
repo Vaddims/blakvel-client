@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-type PrimitiveIdentifier = string | number | bigint | null | undefined;
-type IdentifierFunction<T> = (element: T) => PrimitiveIdentifier;
+export type PrimitiveIdentifier = string | number | bigint | null | undefined;
+export type IdentifierFunction<T> = (element: T) => PrimitiveIdentifier;
 export type ElementSelectionOptions<T> = T extends PrimitiveIdentifier 
   ? ElementPrimitiveSelectionOptions<T> 
   : ElementComplexSelectionOptions<T>;
@@ -16,9 +16,9 @@ export type ElementPrimitiveSelectionOptions<T> = Partial<ElementComplexSelectio
 
 export const useElementSelection = function<T>(elements: T[], options?: ElementSelectionOptions<T>) {
   const { 
-    dependencies,
     targets = [], 
-    identifier = (value: T) => value,
+    dependencies = [],
+    identifier = (value: unknown) => value,
   } = options || {};
 
   const identifySelections = (cluster: T[]) => {
@@ -36,13 +36,20 @@ export const useElementSelection = function<T>(elements: T[], options?: ElementS
 
   const [ selections, setSelections ] = useState(identifySelections(targets));
 
+  const getSelectionsInSequentialString = () => selections.map(identifier).join('&');
+  const getElementsInSequentialString = () => elements.map(identifier).join('&');
+
   useEffect(() => {
     const identifiedSelections = identifySelections(selections);
     setSelections(identifiedSelections);
-  }, dependencies || [elements]);
+  }, [...dependencies, getElementsInSequentialString()]);
 
-  const elementIsSelected = (element: T, useIdentifier = true) => {
+  const elementIsSelected = (element: T) => {
     return selections.some((selection) => identifier(selection) === identifier(element));
+  }
+
+  const allElementsAreSelected = () => {
+    return elements.length > 0 && selections.length === elements.length;
   }
 
   const deselectOneSelection = (element: T) => {
@@ -52,6 +59,10 @@ export const useElementSelection = function<T>(elements: T[], options?: ElementS
 
   const deselectAllSelections = () => {
     setSelections([]);
+  }
+
+  const selectMultipleElements = (targets: T[]) => {
+    setSelections([...targets]);
   }
 
   const selectOneElement = (element: T, ignoreSelectionState = false) => {
@@ -106,12 +117,16 @@ export const useElementSelection = function<T>(elements: T[], options?: ElementS
   return {
     selections,
     elementIsSelected,
+    allElementsAreSelected,
     selectOneElement,
     selectAdditionalElement,
     toggleOneElement,
     toggleAdditionalElement,
     selectElementsInBlock,
+    selectMultipleElements,
     deselectAllSelections,
     deselectOneSelection,
+    getSelectionsInSequentialString,
+    getElementsInSequentialString,
   }
 }
