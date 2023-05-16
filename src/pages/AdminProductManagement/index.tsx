@@ -36,10 +36,10 @@ export default function AdminProductManagement() {
   const { 
     selections,
     allElementsAreSelected,
-    selectMultipleElements,
     deselectAllSelections,
     handleSelectionEvent,
     elementIsSelected,
+    handleElementBulkSelection,
   } = useSequentialElementSelection(products, {
     identifier: (product) => product.id,
   });
@@ -140,14 +140,9 @@ export default function AdminProductManagement() {
     }
   }
 
-  const onBulkSelectionClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+  const bulkSelectionHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     event.stopPropagation();
-
-    if (allElementsAreSelected()) {
-      deselectAllSelections();
-    } else {
-      selectMultipleElements(products);
-    }
+    handleElementBulkSelection();
   }
 
   const defaultHeaderTools = (
@@ -205,7 +200,7 @@ export default function AdminProductManagement() {
         <AppTable useSelectionCheckbox>
           <thead>
             <AppTableRow 
-              onCheckboxClick={onBulkSelectionClick} 
+              onCheckboxClick={bulkSelectionHandler} 
               aria-selected={allElementsAreSelected()}
             >
               <td 

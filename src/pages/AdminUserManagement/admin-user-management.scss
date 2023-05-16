@@ -1,0 +1,11 @@
+#admin-user-management.page {
+  main {
+    table {
+      tbody {
+        .role {
+          text-transform: capitalize;
+        }
+      }
+    }
+  }
+}

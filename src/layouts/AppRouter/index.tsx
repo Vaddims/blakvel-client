@@ -23,6 +23,8 @@ import { useAuthentication } from "../../middleware/hooks/useAuthentication"
 import ShoppingCart from "../../pages/ShoppingCart"
 import Order from "../../pages/Order"
 import UserOrders from "../../pages/UserOrders"
+import AdminOrderManagement from "../../pages/AdminOrderManagement"
+import AdminUserManagement from "../../pages/AdminUserManagement"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
@@ -86,13 +88,19 @@ const AppRoutes: React.FC = () => {
             <Route index element={<AdminProductTagManagement />} />
             <Route path="inspect" />
           </Route>
+          <Route path="order-management">
+            <Route index element={<AdminOrderManagement />} />
+          </Route>
+          <Route path="user-management">
+            <Route index element={<AdminUserManagement />} />
+          </Route>
         </Route>
 
         <Route path='user' element={authProtectedRoute} >
           <Route path='cart' element={<ShoppingCart />} />
           <Route path='orders'>
             <Route index element={<UserOrders />} />
-            <Route path=':orderId'>x
+            <Route path=':orderId'>
               <Route index element={<Order />} />
             </Route>
           </Route>

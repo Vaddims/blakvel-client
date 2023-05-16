@@ -4,6 +4,7 @@ import { User } from "../../models/user.model";
 import { apiBaseQuery, appBaseQuery, asyncQueryStrategyUtil } from "./baseQuery";
 import type { RootState } from "../store";
 import { PatchUser } from "../../models/patch-user.model";
+import { ClientOrder } from "../../models/order.model";
 
 enum TagTypes {
   RefreshToken = "refreshToken",
@@ -57,7 +58,15 @@ export const usersApi = createApi({
     getCheckoutSession: build.query<any, void>({
       query: () => `users/current/checkout-session`,
       keepUnusedDataFor: 0,
-    })
+    }),
+
+    getOrders: build.query<ClientOrder[], void>({
+      query: () => `orders`,
+    }),
+
+    getUsers: build.query<User[], void>({
+      query: () => `/users`
+    }),
   }),
 });
 
@@ -68,5 +77,7 @@ export const {
   useUpdateUserMutation,
   useCreateCheckoutSessionMutation,
   useGetCheckoutSessionQuery,
+  useGetOrdersQuery,
+  useGetUsersQuery,
 } = usersApi;
 

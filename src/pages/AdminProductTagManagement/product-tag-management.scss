@@ -4,15 +4,4 @@
       background-color: rgb(255, 70, 70);
     }
   }
-
-  table {
-    thead {
-      td {
-        &.name {
-          padding-inline: 1rem;
-          width: 100%;
-        }
-      }
-    }
-  }
 }

@@ -77,6 +77,19 @@ export const useElementSelection = function<T>(elements: T[], options?: ElementS
     }
   }
 
+  const selectAllElements = () => {
+    selectMultipleElements(elements);
+  }
+
+  const handleElementBulkSelection = () => {
+    if (allElementsAreSelected()) {
+      deselectAllSelections();
+      return;
+    }
+
+    selectAllElements();
+  }
+
   const toggleOneElement = (element: T) => {
     if (elementIsSelected(element)) {
       deselectOneSelection(element);
@@ -124,6 +137,8 @@ export const useElementSelection = function<T>(elements: T[], options?: ElementS
     toggleAdditionalElement,
     selectElementsInBlock,
     selectMultipleElements,
+    selectAllElements,
+    handleElementBulkSelection,
     deselectAllSelections,
     deselectOneSelection,
     getSelectionsInSequentialString,

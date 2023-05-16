@@ -28,18 +28,18 @@
     },
     {
       "title": "Orders",
-      "disabled": true,
+      "disabled": false,
       "defaultSelection": false,
       "payload": {
-        "endpoint": "/orders"
+        "endpoint": "/order-management"
       }
     },
     {
       "title": "Users",
-      "disabled": true,
+      "disabled": false,
       "defaultSelection": false,
       "payload": {
-        "endpoint": "/users"
+        "endpoint": "/user-management"
       }
     },
     {

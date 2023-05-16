@@ -1,0 +1,18 @@
+#admin-order-management.page {
+  main {
+    tbody {
+      .status {
+        .container {
+          padding: .5rem 1rem;
+          border-radius: .5rem;
+          text-transform: uppercase;
+          background-color: var(--background-secondary-color);
+        }
+
+        &[data-status=open] .container {
+          background-color: var(--background-highlight-color);
+        }
+      }
+    }
+  }
+}

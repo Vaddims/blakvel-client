@@ -1,4 +1,5 @@
 import { Product } from "./product.model";
+import { User } from "./user.model";
 
 export enum OrderStatus {
   Open = 'open',
@@ -8,6 +9,8 @@ export enum OrderStatus {
 
 export interface ClientOrder {
   readonly id: string;
+  readonly author: User;
+  readonly creationDate: string;
   readonly status: OrderStatus;
   readonly items: {
     readonly product: Product;

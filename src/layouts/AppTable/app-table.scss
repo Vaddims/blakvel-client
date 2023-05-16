@@ -4,14 +4,23 @@
   border-spacing: 0;
   width: 100%;
 
-  td .app-table-row-checkbox {
-    width: 2rem;
-    padding-inline: 1rem;
+  &[aria-multiselectable=true] td:nth-child(2) {
+    width: 100%;
+    text-align: left;
+  }
 
-    .stablizer {
-      display: flex;
-      justify-content: center;
-      text-align: center;
+  td {
+    white-space: nowrap;
+
+    .app-table-row-checkbox {
+      width: 2rem;
+      padding-inline: 1rem;f
+  
+      .stablizer {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+      }
     }
   }
 
@@ -25,7 +34,7 @@
       cursor: pointer;
       transition: color .25s ease;
       padding-inline: 1rem;
-      white-space: nowrap;
+      text-align: center;
 
       .sort-icon {
         margin-right: .25rem;

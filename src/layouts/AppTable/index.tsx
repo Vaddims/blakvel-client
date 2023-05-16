@@ -25,7 +25,7 @@ const AppTable: React.FC<AppTableProps> = (props) => {
   }
 
   return (
-    <table {...tableProps} className={["app-table", tableProps.className].join(' ')}>
+    <table {...tableProps} aria-multiselectable={useSelectionCheckbox} className={["app-table", tableProps.className].join(' ')}>
       <AppTableContext.Provider value={contextValue}>
         { children }
       </AppTableContext.Provider>
