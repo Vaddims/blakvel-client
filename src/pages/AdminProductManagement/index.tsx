@@ -12,12 +12,9 @@ import discountFilterOptions from './discount-filter.options.json';
 import useElementSelectorComponent from '../../middleware/component-hooks/element-selector-component/useElementSelectorComponent';
 import AppTable from '../../layouts/AppTable';
 import AppTableRow from '../../layouts/AppTableRow';
+import useSearchParamState from '../../middleware/hooks/useSearchParamState';
+import { stringToBoolean } from '../../utils/converters';
 import './product-management.scss';
-
-interface ElementSelectorButtonDiscountFilterPayload {
-  type?: string;
-  value?: any;
-}
 
 export type SortOptionType = keyof typeof sortOptions['clusters'];
 export interface SortOption {
@@ -25,13 +22,21 @@ export interface SortOption {
   readonly order: string;
 }
 
-export default function AdminProductManagement() {  
-  const navigate = useNavigate();
-  const [ searchParams ] = useSearchParams();
-  const [ sortingOption, setSortingOption ] = useState<SortOption | null>(null);
+export interface ElementSelectorButtonDiscountFilterPayload {
+  readonly type?: string;
+  readonly value?: any;
+}
 
+const AdminProductManagement: React.FC = () => {  
+  const {
+    paramCluster,
+    urlSearchParams,
+    applySearchCluster,
+  } = useSearchParamState();
+  
+  const navigate = useNavigate();
+  const { data: products = [] } = useGetProductsQuery(urlSearchParams.toString());
   const [ deleteProduct ] = useDeleteProductMutation();
-  const { data: products = [] } = useGetProductsQuery(searchParams.toString());
 
   const { 
     selections,
@@ -49,76 +54,53 @@ export default function AdminProductManagement() {
     multiple: false,
     identifyOptions: (option) => option.title,
     buttonOptions: discountFilterOptions,
-    initialTarget: (
-      discountFilterOptions.find(option => (
-        typeof option.payload.type !== 'undefined' && 
-        typeof option.payload.value !== 'undefined' && 
-        searchParams.get(option.payload.type) === option.payload.value.toString()
-      ))
-    ),
+    initialTarget: discountFilterOptions.find(option => (
+      typeof paramCluster.hasDiscount.value === 'string' &&
+      option.payload.value === stringToBoolean(paramCluster.hasDiscount.value)
+    ))
   });
 
-  const constructSearchParams = (providedSearchParams: URLSearchParams) => {
-    const params = new URLSearchParams(providedSearchParams);
-    const handler = searchParamsFieldHandler(params)
-    handler('sort', sortingOption?.type)
-    handler('order', sortingOption?.order);
-
-    if (filterSelector.selections[0]?.payload.type && typeof filterSelector.selections[0]?.payload.value !== 'undefined') {
-      handler(filterSelector.selections[0].payload.type, filterSelector.selections[0].payload.value);
-    } else {
-      handler('hasDiscount')
-    }
-
-    return params;
-  }
-
   useEffect(() => {
-    const params = constructSearchParams(searchParams);
-    const urlEncodedSearchParams = params.toString();
-    const pathSearchParams = urlEncodedSearchParams === '' ? '' : `?${urlEncodedSearchParams}`;
-    navigate(`/admin-panel/product-management${pathSearchParams}`);
-  }, [sortingOption?.type, sortingOption?.order, filterSelector.getSelectionsInSequentialString()])
-
-  const searchParamsFieldHandler = (searchParams: URLSearchParams) => (key: string, value?: string, add = false) => {
-    if (typeof value !== 'undefined') {
-      if (searchParams.has(key) && add && searchParams.get(key) !== value.toString()) {
-        searchParams.append(key, value)
-      } else {
-        searchParams.set(key, value)
-      }
-    } else {
-      searchParams.delete(key);
+    if (filterSelector.selections[0]) {
+      const selva = filterSelector.selections[0]?.payload.value ?? null;
+      paramCluster.hasDiscount.set(selva === null ? null : selva.toString())
+      applySearchCluster();
     }
+  }, [filterSelector.getSelectionsInSequentialString()]);
+  
+  const applySortOption = (sortOption: SortOption | null) => {
+    paramCluster.sort.set(sortOption?.type ?? null);
+    paramCluster.order.set(sortOption?.order ?? null);
+    applySearchCluster()
   }
 
   const onTablePropertySortChange = (type: SortOptionType) => () => {
-    const cluster = sortOptions.clusters[type] as SortOption[];
-    if (!sortingOption) {
-      if (cluster.length === 0) {
+    const circularOptionCluster = sortOptions.clusters[type] as SortOption[];
+    if (paramCluster.sort.value === null) {
+      if (circularOptionCluster.length === 0) {
         return;
       }
 
-      setSortingOption(cluster[0]);
+      applySortOption(circularOptionCluster[0]);
       return;
     }
 
-    if (sortingOption.type !== type) {
-      setSortingOption(cluster[0]);
+    if (paramCluster.sort.value !== type) {
+      applySortOption(circularOptionCluster[0]);
       return;
     }
 
-    const index = cluster.findIndex((option) => option.order === sortingOption.order);
-    const nextOptionIndex = index + 1 < cluster.length
+    const index = circularOptionCluster.findIndex((option) => option.order === paramCluster.order.value);
+    const nextOptionIndex = index + 1 < circularOptionCluster.length
       ? index + 1
       : null;
 
     if (nextOptionIndex === null) {
-      setSortingOption(null);
+      applySortOption(null);
       return;
     }
  
-    setSortingOption(cluster[nextOptionIndex]);
+    applySortOption(circularOptionCluster[nextOptionIndex]);
   }
 
   const redirectToProductInspector = () => {
@@ -160,7 +142,7 @@ export default function AdminProductManagement() {
   const headerTools = selections.length > 0 ? selectionHeaderTools : defaultHeaderTools;
 
   const getSortIcon = (sortOptionType: SortOptionType) => {
-    const active = sortingOption?.type === sortOptionType;
+    const active = paramCluster.sort.value !== null && paramCluster.sort.value === sortOptionType;
 
     const getIconElement = (icon: IconDefinition) => (
       <FontAwesomeIcon icon={icon} className='sort-icon' />
@@ -170,7 +152,7 @@ export default function AdminProductManagement() {
       return getIconElement(faSort);
     }
 
-    switch (sortingOption.order) {
+    switch (paramCluster.order.value) {
       case 'descending':
         return getIconElement(faSortUp);
 
@@ -183,9 +165,9 @@ export default function AdminProductManagement() {
   }
 
   const getTypeAriaSort = (type: SortOptionType): React.AriaAttributes['aria-sort'] => (
-    type === sortingOption?.type 
-    ? ['ascending', 'descending'].includes(sortingOption.order)
-      ? sortingOption.order as "descending" | "ascending"
+    type === paramCluster.sort.value
+    ? ['ascending', 'descending'].includes(paramCluster.sort.value)
+      ? paramCluster.sort.value as "descending" | "ascending"
       : 'other'
     : 'none'
   );
@@ -250,3 +232,5 @@ export default function AdminProductManagement() {
     </Page>
   );
 }
+
+export default AdminProductManagement;
