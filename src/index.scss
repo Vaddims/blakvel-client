@@ -27,22 +27,3 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
-
-.product-image-boundary {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border-radius: .5rem;
-  background: rgb(255,255,255);
-  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgb(170, 170, 170) 100%);
-  box-sizing: border-box;
-
-  img {
-    width: 90%;
-    height: 90%;
-    object-fit: scale-down;
-  }
-}

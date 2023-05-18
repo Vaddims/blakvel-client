@@ -10,12 +10,18 @@ enum TagTypes {
   RefreshToken = "refreshToken",
   AccessToken = "accessToken",
   User = 'user',
+  Order = 'order',
 }
 
 export const usersApi = createApi({
   reducerPath: 'usersApi',
   baseQuery: appBaseQuery,
-  tagTypes: [TagTypes.RefreshToken, TagTypes.AccessToken, TagTypes.User],
+  tagTypes: [
+    TagTypes.RefreshToken, 
+    TagTypes.AccessToken, 
+    TagTypes.User,
+    TagTypes.Order,
+  ],
   endpoints: (build) => ({
     login: build.mutation<void, Login>({
       invalidatesTags: [TagTypes.RefreshToken, TagTypes.AccessToken],
@@ -60,12 +66,19 @@ export const usersApi = createApi({
       keepUnusedDataFor: 0,
     }),
 
+    getOrder: build.query<ClientOrder, string>({
+      query: (orderId: string) => `orders/${orderId}`,
+      providesTags: [TagTypes.Order],
+    }),
+
     getOrders: build.query<ClientOrder[], void>({
       query: () => `orders`,
+      providesTags: [TagTypes.Order],
     }),
 
     getUsers: build.query<User[], void>({
-      query: () => `/users`
+      query: () => `/users`,
+      providesTags: [TagTypes.User],
     }),
   }),
 });
@@ -77,6 +90,7 @@ export const {
   useUpdateUserMutation,
   useCreateCheckoutSessionMutation,
   useGetCheckoutSessionQuery,
+  useGetOrderQuery,
   useGetOrdersQuery,
   useGetUsersQuery,
 } = usersApi;

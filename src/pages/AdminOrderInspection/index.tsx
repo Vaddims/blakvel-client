@@ -4,9 +4,9 @@ import Panel from "../../layouts/Panel"
 import { useGetOrderQuery } from "../../services/api/usersApi";
 import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
-import './order.scss';
+import './admin-order-inspection.scss';
 
-const Order: React.FC = () => {
+const AdminOrderInspection: React.FC = () => {
   const { orderId = '' } = useParams();
   const {
     isLoading,
@@ -26,8 +26,8 @@ const Order: React.FC = () => {
   }
 
   return (
-    <Page id='order'>
-      <Panel title='Order' displayBackNavigation>
+    <Page id='admin-order-inspection'>
+      <Panel title='Inspect Order' displayBackNavigation>
         <div className="subheader">
           <div className="order-status">
             <span className="title">Status:</span>
@@ -59,7 +59,7 @@ const Order: React.FC = () => {
                 </td>
                 <td>
                   <div className="item-info">
-                    <span className="price">${ item.archivedPrice }</span>
+                    <span className="price">${ item.archivedPrice * item.quantity }</span>
                     <span className="qty">Qty: { item.quantity }</span>
                   </div>
                 </td>
@@ -105,4 +105,4 @@ const Order: React.FC = () => {
   )
 }
 
-export default Order;
+export default AdminOrderInspection;

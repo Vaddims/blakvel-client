@@ -22,9 +22,10 @@ import Signup from "../../pages/Signup"
 import { useAuthentication } from "../../middleware/hooks/useAuthentication"
 import ShoppingCart from "../../pages/ShoppingCart"
 import Order from "../../pages/Order"
-import UserOrders from "../../pages/UserOrders"
+import Orders from "../../pages/Orders"
 import AdminOrderManagement from "../../pages/AdminOrderManagement"
 import AdminUserManagement from "../../pages/AdminUserManagement"
+import AdminOrderInspection from "../../pages/AdminOrderInspection"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
@@ -72,6 +73,14 @@ const AppRoutes: React.FC = () => {
           </Route>
         </Route>
 
+        <Route path='orders'>
+          <Route path=':orderId'>
+            <Route path='inspect'>
+              <Route index element={<AdminOrderInspection />} />
+            </Route>
+          </Route>
+        </Route>
+
         <Route path="contact" element={<Contact />} />
 
         <Route path="auth">
@@ -99,7 +108,7 @@ const AppRoutes: React.FC = () => {
         <Route path='user' element={authProtectedRoute} >
           <Route path='cart' element={<ShoppingCart />} />
           <Route path='orders'>
-            <Route index element={<UserOrders />} />
+            <Route index element={<Orders />} />
             <Route path=':orderId'>
               <Route index element={<Order />} />
             </Route>

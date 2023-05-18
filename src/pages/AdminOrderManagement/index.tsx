@@ -1,12 +1,15 @@
+import { useNavigate } from "react-router-dom";
 import AdminPanel from "../../layouts/AdminPanel";
 import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import Page from "../../layouts/Page";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
+import { ClientOrder } from "../../models/order.model";
 import { useGetOrdersQuery } from "../../services/api/usersApi";
 import './admin-order-management.scss';
 
 const AdminOrderManagement: React.FC = () => {
+  const navigate = useNavigate();
   const { data: orders = [] } = useGetOrdersQuery();
 
   const {
@@ -22,6 +25,10 @@ const AdminOrderManagement: React.FC = () => {
   const bulkSelectionHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     event.stopPropagation();
     handleElementBulkSelection();
+  }
+
+  const orderDoubleClickHandler = (order: ClientOrder) => () => {
+    navigate(`/orders/${order.id}/inspect`);
   }
 
   return (
@@ -43,6 +50,7 @@ const AdminOrderManagement: React.FC = () => {
               <AppTableRow 
                 onClick={handleSelectionEvent(order)} 
                 aria-selected={elementIsSelected(order)}
+                onDoubleClick={orderDoubleClickHandler(order)}
               >
                 <td>{ order.author.email }</td>
                 <td>{ new Date(order.creationDate).toLocaleString() }</td>
