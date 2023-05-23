@@ -1,4 +1,4 @@
-.input-field {
+label.app-input {
   border: none;
   width: 100%;
   display: flex;
@@ -23,11 +23,11 @@
         color: rgb(198, 198, 198);
       }
 
-      .field-label {
+      .label-title {
         text-transform: uppercase;
       }
 
-      .optional-field-label {
+      .optional-label {
         font-style: italic;
       }
     }
@@ -40,7 +40,8 @@
     display: flex;
     flex-direction: row;
     box-sizing: border-box;
-    height: 2.5rem;
+    min-height: 2.5rem;
+    height: fit-content;
 
     transition: border .25s ease;
     border: 1px solid rgb(150, 150, 150);
@@ -120,33 +121,33 @@
       }
     }
 
-    input {
-      width: 100%;
-      color: white;
-      background-color: transparent;
-      outline: none;
-      padding: 0 .5rem;
-      height: 100%;
-      border: none;
-      position: relative;
+    // input {
+    //   width: 100%;
+    //   color: white;
+    //   background-color: transparent;
+    //   outline: none;
+    //   padding: 0 .5rem;
+    //   height: 100%;
+    //   border: none;
+    //   position: relative;
 
-      &[type=datetime-local]::-webkit-calendar-picker-indicator {
-        color: transparent;
-        background: none;
-        cursor: pointer;
-        position: absolute;
-        background-color: transparent;
-        height: 100%;
-        width: 100%;
-      }
-    }
+    //   &[type=datetime-local]::-webkit-calendar-picker-indicator {
+    //     color: transparent;
+    //     background: none;
+    //     cursor: pointer;
+    //     position: absolute;
+    //     background-color: transparent;
+    //     height: 100%;
+    //     width: 100%;
+    //   }
+    // }
 
     .action-icon path {
       fill: rgb(198, 198, 198);
     }
   }
 
-  .input-helper-text {
+  .helper-text {
     color: rgb(198, 198, 198);
     margin-top: .5rem;
     padding: 0 .5rem;

@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Public",
+    "value": "public"
+  },
+  {
+    "title": "Prepublic (Draft)",
+    "value": "prepublic"
+  },
+  {
+    "title": "Internal",
+    "value": "internal"
+  },
+  {
+    "title": "Archive",
+    "value": "archive"
+  }
+]

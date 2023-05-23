@@ -1,3 +1,5 @@
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChangeEventHandler } from "react";
 
 interface ImageAdderLabelProps {
@@ -11,7 +13,7 @@ const ImageAdderLabel: React.FC<ImageAdderLabelProps> = (props) => {
   return (
     <label className='media-add' about='file-adder'>
       <input type="file" id='file-adder' onChange={onChange} multiple={multiple} title=' ' />
-      <h1 className="media-add-icon">+</h1>
+      {/* <FontAwesomeIcon icon={faPlus} className="media-add-icon" /> */}
     </label>
   );
 }

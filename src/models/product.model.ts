@@ -7,11 +7,15 @@ export interface Product extends Product.GenericInformation {
 export namespace Product {
   export interface GenericInformation {
     readonly id: string;
+    readonly creationDate: string;
+    readonly physicalId: string;
+    readonly state: 'public' | 'prepublic' | 'internal' | 'archive';
     readonly name: string;
     readonly price: number;
     readonly discountPrice: number | null;
     readonly discountExpirationDate: string | null;
     readonly stock: number;
+    readonly description: string;
   }
 
   export interface URN {

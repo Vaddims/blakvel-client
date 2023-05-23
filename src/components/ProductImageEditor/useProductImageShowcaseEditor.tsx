@@ -6,6 +6,8 @@ import * as uuid from 'uuid';
 import ProductImageWrapper from "../ProductImageWrapper";
 import { Product } from "../../models/product.model";
 import "./productImageShowcaseInspector.scss";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 export const useProductImageShowcaseEditor = (product?: Product) => {
   const [ patchThumbs ] = usePatchProductThumbsMutation();
@@ -191,7 +193,7 @@ export const useProductImageShowcaseEditor = (product?: Product) => {
         ) : (
           <label className='media-add' about='add-file'>
             <input type="file" id='add-file' onChange={onThumbnailLoad} />
-            <h1 className="media-add-icon">+</h1>
+            <FontAwesomeIcon icon={faPlus} size='2x' />
           </label>
         )}
         <hr />
@@ -216,7 +218,8 @@ export const useProductImageShowcaseEditor = (product?: Product) => {
         {allowedImageQuantity > 0 && (
           <label className='media-add' about='add-file'>
             <input type="file" id='add-file' onChange={onImageLoad} multiple />
-            <h1 className="media-add-icon">+</h1>
+            {/* <h1 className="media-add-icon"></h1> */}
+            <FontAwesomeIcon icon={faPlus} size='2x' />
           </label>
         )}
       </div>

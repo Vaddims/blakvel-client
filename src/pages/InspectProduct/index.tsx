@@ -65,11 +65,25 @@ const InspectProduct = () => {
     return <div>Loading...</div>
   }
 
+  const panelSubheader = [
+    (
+      <span>ID: <span className="highlight">{ product.id }</span></span>
+    ),
+    (
+      <span>Creation Date: <span className="highlight">{ new Date(product.creationDate).toLocaleString() }</span></span>
+    ),
+    (
+      <span>Last Updated: <span className="highlight">{ new Date(product.creationDate).toLocaleString() }</span></span>
+    )
+  ]
+
   return (
     <Page id="inspect-product">
       <Panel
         title={`Inspecting one product`}
         headerTools={headerTools}
+        subheader={panelSubheader}
+        displayBackNavigation
       >
         {productInspector.render()}
       </Panel>

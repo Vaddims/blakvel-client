@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import * as uuid from 'uuid';
 import * as path from 'path';
 import './productImageShowcaseInspector.scss';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 export interface ProductImageShowcaseInspectorProps {
   product?: Product;
@@ -223,7 +225,8 @@ const ProductImageShowcaseInspectorComponent: ProductImageShowcaseInspectorCompo
         {allowedImageQuantity > 0 && (
           <label className='media-add' about='add-file'>
             <input type="file" id='add-file' onChange={onImageLoad} multiple />
-            <h1 className="media-add-icon">+</h1>
+            <FontAwesomeIcon icon={faPlus} />
+            {/* <h1 className="media-add-icon">+</h1> */}
           </label>
         )}
       </div>

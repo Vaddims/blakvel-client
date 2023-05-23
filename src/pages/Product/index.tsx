@@ -155,7 +155,7 @@ export default function Product() {
           <ProductImageShowcase imageFilenames={imageFilenames} targetImageFilenames={initialTargets} />
         )}
         <article className="product-details">
-          {templateDescription && <p className="product-description">{templateDescription}</p>}
+          {templateDescription && <p className="product-description">{product.description}</p>}
           <div>
             <h2 className="product-price">${currentPrice}</h2>
             {hasDiscount &&

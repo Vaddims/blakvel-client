@@ -7,6 +7,7 @@ import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 export interface PanelProps {
   readonly title: string;
   readonly headerTools?: ReactNode;
+  readonly subheader?: ReactNode | ReactNode[];
   readonly extensions?: ReactNode | ReactNode[];
   readonly children?: ReactNode;
   readonly collapseExtensions?: boolean;
@@ -17,6 +18,7 @@ export default function Panel(props: PanelProps) {
   const { 
     title, 
     headerTools, 
+    subheader,
     children, 
     extensions, 
     collapseExtensions = false ,
@@ -27,11 +29,11 @@ export default function Panel(props: PanelProps) {
 
   return (
     <div className='panel'>
-      <header className="panel-header">
+      <header className="panel-header" data-usesubheader={typeof subheader !== 'undefined'}>
         <div className='left-hand-box'>
           {displayBackNavigation &&
             <button className='previous-page-button' onClick={() => navigate(-1)}>
-              <FontAwesomeIcon icon={faAngleLeft} size='3x'/>
+              <FontAwesomeIcon icon={faAngleLeft} size='2x' />
             </button>
           }
           <div className="panel-title-box">
@@ -44,6 +46,11 @@ export default function Panel(props: PanelProps) {
           {headerTools}
         </div>
       </header>
+      { subheader && (
+        <div className='panel-subheader'>
+          { subheader }
+        </div>
+      ) }
       <div className="panel-content-box">
         <main className="panel-content">
           {children}

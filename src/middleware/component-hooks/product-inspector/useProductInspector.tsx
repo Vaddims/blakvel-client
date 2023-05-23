@@ -1,4 +1,4 @@
-import { faCalendarMinus, faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faBoxes, faCalendarMinus, faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
 import { InputFieldDatalistElement, InputStatus } from "../../../components/InputField";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
@@ -10,6 +10,10 @@ import { composedValueAbordSymbol, InputFieldManagementHook, useInputFieldManage
 import * as uuid from 'uuid';
 import './product-inspector.scss';
 import { useCheckboxFieldManagement } from "../../hooks/useCheckboxFieldManagement";
+import useAppSelectComponent from "../app-select-component/useAppSelectComponent";
+import statusSelections from './status.selection.json';
+import AppTextarea from "../../../components/AppTextarea";
+import useAppTextareaComponent from "../app-textarea-component/useAppTextareaComponent";
 
 interface ProductInspectorOptions {
   readonly productId?: string;
@@ -196,10 +200,15 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
   });
 
+  const descriptionInput = useAppTextareaComponent({
+    label: 'Description',
+  })
+
   // Product stock input management
   const productStockInputField = useInputFieldManagement({
     label: 'In Stock',
     required: true,
+    labelIcon: faBoxes,
     format: (input) => {
       if (input.trim() === '') {
         throw new Error('Price not provided');
@@ -218,6 +227,21 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
   });
 
+  const physicalIdInputField = useInputFieldManagement({
+    label: 'Product Physical ID',
+    format: (input) => input,
+    validationTimings: [],
+  })
+
+  // status is for error and state combined
+
+  const stateSelection = useAppSelectComponent({
+    label: 'State',
+    options: statusSelections,
+    initialTargetValue: product?.state ?? 'prepublic',
+    required: true,
+  });
+
   // Product tag input mamangement
   const productTagSearchInputField = useInputFieldManagement<Product.Tag>({
     label: 'Add Tag',
@@ -225,8 +249,13 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     placeholder: 'Search',
     labelIcon: faHashtag,
     inputIcon: faSearch,
+    validationTimings: [],
     format: (input) => {
-      const targetTag = globalProductTags?.find(globalProductTag => globalProductTag.name === input);
+      const uniFormattedInput = input.toUpperCase().trim();
+      const targetTag = globalProductTags?.find(globalProductTag => (
+        globalProductTag.name.toUpperCase() === uniFormattedInput
+      ));
+
       if (!targetTag) {
         throw new Error(`Tag with the name ${input.toLocaleUpperCase()} doesn't exist`);
       }
@@ -264,6 +293,9 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     productNameInputField.setInputValue(targetProduct.name, true);
     productStockInputField.setInputValue(targetProduct.stock.toString(), true);
     productPriceInputField.setInputValue(targetProduct.price.toString(), true);
+    physicalIdInputField.setInputValue(targetProduct.physicalId, true);
+    descriptionInput.setInputValue(targetProduct.description, true);
+    stateSelection.setInputValue(targetProduct.state, true);
 
     let shouldShowDiscount = true;
     const { discountPrice } = targetProduct;
@@ -430,6 +462,9 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     const name = productNameInputField.getValidatedInputResult();
     const price = productPriceInputField.getValidatedInputResult();
     const stock = productStockInputField.getValidatedInputResult();
+    const description = descriptionInput.value;
+    const state = stateSelection.value;
+    const physicalId = physicalIdInputField.inputValue;
     
     const useDiscount = discountCheckboxField.checked;
     const discountPrice = useDiscount ?
@@ -482,6 +517,10 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     const product: Omit<Product, 'id' | 'urn'> = {
       name,
       price,
+      creationDate: new Date().toString(),
+      description,
+      physicalId,
+      state: state as any,
       discountPrice: discountPrice ?? null,
       discountExpirationDate: discountExpirationDate?.toString() ?? null,
       stock,
@@ -499,44 +538,79 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       <article className="product-image-showcase-editor">
         {imageEditor.render()}
       </article>
-      <article className="product-information-fields">
-        { productNameInputField.render() }
-        { productStockInputField.render() }
-        { productPriceInputField.render() }
-        <div className='discount-information'>
-          <header>
-            { discountCheckboxField.render() }
-            { discountCheckboxField.checked && discountPercent && <span className=''>-{discountPercent}%</span> }
+      <main className="product-information-panel">
+        <section className="info-row">
+          <header className="row-divider">
+            General Information
+            <hr className="divider" />
           </header>
-          { discountCheckboxField.checked && (
-            <div className='discount-input-fields'>
-              {productDiscountPriceInputField.render()}
-              {productDiscountExpirationDateInputField.render()}
-            </div>
-          ) }
-        </div>
-      </article>
-      <article className="product-tag-management">
-        { productTagSearchInputField.render() }
-        <div className="product-tag-cluster">
-          {draftProductTags?.map(productTag => (
-            <ProductTagRepresenter
-              draftProductSpecificationStatusDescriptors={draftProductSpecificationStatusDescriptors}
-              specifications={draftProductSpecifications}
-              targetProductTag={productTag}
-              draftProductTags={draftProductTags ?? []} 
-              setProductTags={setDraftProductTags} 
-              updateSpecification={updateSpecification}
-              blurSpecification={blurSpecification}
-              clickSpecification={click}
-              restore={() => restoreTagSpecifications(productTag)}
-              restoreSpecification={restoreTagSpecification}
-              clearSpecification={clearTagSpecification}
-              getProductSpecificationInitialState={getProductSpecificationInitialState}
-            />
-          ))}
-        </div>
-      </article>
+          <div className="cluster">
+            <article className="product-information-fields">
+              { productNameInputField.render() }
+              { descriptionInput.render() }
+              { productPriceInputField.render() }
+              <div className='discount-information'>
+                <header>
+                  { discountCheckboxField.render() }
+                  { discountCheckboxField.checked && discountPercent && <span className=''>-{discountPercent}%</span> }
+                </header>
+                { discountCheckboxField.checked && (
+                  <div className='discount-input-fields'>
+                    {productDiscountPriceInputField.render()}
+                    {productDiscountExpirationDateInputField.render()}
+                  </div>
+                ) }
+              </div>
+            </article>
+            <article>
+              { physicalIdInputField.render() }
+              { stateSelection.render() }
+              { productStockInputField.render() }
+            </article>
+          </div>
+        </section>
+        <section className="info-row">
+          <header className="row-divider">
+            Specifications
+            <hr className="divider" />
+          </header>
+          <div className="cluster">
+            <article className="product-tag-management">
+              { productTagSearchInputField.render() }
+              <div className="product-tag-cluster">
+                {draftProductTags?.map(productTag => (
+                  <ProductTagRepresenter
+                    draftProductSpecificationStatusDescriptors={draftProductSpecificationStatusDescriptors}
+                    specifications={draftProductSpecifications}
+                    targetProductTag={productTag}
+                    draftProductTags={draftProductTags ?? []} 
+                    setProductTags={setDraftProductTags} 
+                    updateSpecification={updateSpecification}
+                    blurSpecification={blurSpecification}
+                    clickSpecification={click}
+                    restore={() => restoreTagSpecifications(productTag)}
+                    restoreSpecification={restoreTagSpecification}
+                    clearSpecification={clearTagSpecification}
+                    getProductSpecificationInitialState={getProductSpecificationInitialState}
+                  />
+                ))}
+              </div>
+            </article>
+            <article>
+              [content]
+            </article>
+          </div>
+        </section>
+        <section className="info-row">
+          <header className="row-divider">
+            Timelined Snapshots
+            <hr className="divider" />
+          </header>
+          <div className="cluster">
+            
+          </div>
+        </section>
+      </main>
     </Fragment>
   );
 

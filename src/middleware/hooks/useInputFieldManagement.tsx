@@ -7,6 +7,7 @@ export const composedValueAbordSymbol: unique symbol = Symbol('ComposedValueAbor
 export enum ValidationTiming {
   OnBlur,
   OnChange,
+  OnSubmit,
 }
 
 export interface InputFieldManagement<T> {
@@ -262,6 +263,8 @@ export function useInputFieldManagement<T>(options: InputFieldManagement<T>): In
       onChange={handleInputChange}
       onBlur={handleInputBlur}
       onKeyPress={handleKeyPress}
+      shouldAllowInputClear={!!inputValue}
+      shouldAllowInputRestore={anchorValue !== inputValue && anchorValue !== ''}
     />
   )
 
