@@ -11,6 +11,8 @@ import ElementSelectorButtonOptions from "../../components/ElementSelectorOption
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faMagnifyingGlass, faTimes } from "@fortawesome/free-solid-svg-icons";
 import './catalog.scss';
+import { useAuthentication } from "../../middleware/hooks/useAuthentication";
+import { UserRole } from "../../models/user.model";
 
 export interface ElementSelectorPayload {
   order: string;
@@ -20,11 +22,16 @@ export interface ElementSelectorPayload {
 export default function Catalog() {
   const navigate = useNavigate();
   const [ searchParams ] = useSearchParams();
+  const auth = useAuthentication();
 
   const [ searchValue, setSearchValue ] = useState(searchParams.get('search') || '');
   const { collapsed: extensionsCollapsed, toggleCollapse } = usePanelExtensionCollpase();
 
-  const { data: products } = useGetProductsQuery(searchParams.toString());
+  const a = new URLSearchParams(searchParams);
+  if (auth.user) {
+    a.set('format', UserRole.User);
+  }
+  const { data: products } = useGetProductsQuery(a.toString());
   
   const type = searchParams.get('sort');
   const order = searchParams.get('order');

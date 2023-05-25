@@ -7,13 +7,12 @@ import { InputFieldStatusDescriptor } from "../../../pages/InspectProduct";
 import { ProductTagRepresenter } from "../../../pages/InspectProduct/ProductTagRepresenter";
 import { productsApi, useGetProductQuery, useGetProductTagsQuery } from "../../../services/api/productsApi";
 import { composedValueAbordSymbol, InputFieldManagementHook, useInputFieldManagement, ValidationTiming } from "../../hooks/useInputFieldManagement";
-import * as uuid from 'uuid';
-import './product-inspector.scss';
 import { useCheckboxFieldManagement } from "../../hooks/useCheckboxFieldManagement";
 import useAppSelectComponent from "../app-select-component/useAppSelectComponent";
 import statusSelections from './status.selection.json';
-import AppTextarea from "../../../components/AppTextarea";
 import useAppTextareaComponent from "../app-textarea-component/useAppTextareaComponent";
+import * as uuid from 'uuid';
+import './product-inspector.scss';
 
 interface ProductInspectorOptions {
   readonly productId?: string;
@@ -22,16 +21,13 @@ interface ProductInspectorOptions {
 
 export const useProductInspector = (options?: ProductInspectorOptions) => {
   const {
-    productId = '',
+    productId,
   } = options ?? {};
 
-  const uuidIsValid = uuid.validate(productId);
-
-  const { data: product } = useGetProductQuery(productId, { skip: !uuidIsValid });
+  const { data: product } = useGetProductQuery(productId ?? '', { skip: typeof productId !== 'string' });
   const { data: globalProductTags } = useGetProductTagsQuery();
 
   const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(product?.tags ?? []);
-
 
   useEffect(() => {
     if (!product) {
@@ -597,7 +593,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
               </div>
             </article>
             <article>
-              [content]
+              [Unique specifications]
             </article>
           </div>
         </section>

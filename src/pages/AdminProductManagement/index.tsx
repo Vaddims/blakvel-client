@@ -15,6 +15,7 @@ import AppTableRow from '../../layouts/AppTableRow';
 import useSearchParamState from '../../middleware/hooks/useSearchParamState';
 import { stringToBoolean } from '../../utils/converters';
 import './product-management.scss';
+import { useAuthentication } from '../../middleware/hooks/useAuthentication';
 
 export type SortOptionType = keyof typeof sortOptions['clusters'];
 export interface SortOption {
@@ -33,9 +34,16 @@ const AdminProductManagement: React.FC = () => {
     urlSearchParams,
     applySearchCluster,
   } = useSearchParamState();
+
+  const auth = useAuthentication();
+
+  const requestSearchParams = new URLSearchParams(urlSearchParams);
+  if (auth.user) {
+    requestSearchParams.set('format', auth.user.role);
+  }
   
   const navigate = useNavigate();
-  const { data: products = [] } = useGetProductsQuery(urlSearchParams.toString());
+  const { data: products = [] } = useGetProductsQuery(requestSearchParams.toString());
   const [ deleteProduct ] = useDeleteProductMutation();
 
   const { 

@@ -71,9 +71,6 @@ const InspectProduct = () => {
     ),
     (
       <span>Creation Date: <span className="highlight">{ new Date(product.creationDate).toLocaleString() }</span></span>
-    ),
-    (
-      <span>Last Updated: <span className="highlight">{ new Date(product.creationDate).toLocaleString() }</span></span>
     )
   ]
 
