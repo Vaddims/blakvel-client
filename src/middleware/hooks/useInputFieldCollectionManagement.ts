@@ -1,16 +1,15 @@
 import { useState } from "react"
-import { InputStatus } from "../../components/InputField";
-import { ValidationTiming } from "./useInputFieldManagement";
+import { InputField } from "./input-field-hook";
 
 export interface FieldDescriptor<T> {
   readonly payload: T;
-  readonly status: InputStatus;
+  readonly status: InputField.Status;
   readonly staticHelperText?: string;
   readonly helperText?: string;
 }
 
 export interface InputFieldCollectionManagementOptions<T, K = any> {
-  readonly validationTimings?: ValidationTiming[];
+  readonly validationTimings?: InputField.ValidationTiming[];
   readonly initialDescriptors?: FieldDescriptor<T>[];
   readonly format?: (payload: T, input: string) => K;
 }
@@ -31,7 +30,7 @@ export const useInputFieldCollectionManagement = <T, K = any>(options?: InputFie
     setFieldDescriptors([...descriptors]);
   }
 
-  const createDescriptor = (payload: T, status: InputStatus, staticHelperText?: string) => {
+  const createDescriptor = (payload: T, status: InputField.Status, staticHelperText?: string) => {
     const newFieldDescriptors: FieldDescriptor<T>[] = [...fieldDescriptors];
     newFieldDescriptors.push({
       payload,
@@ -43,7 +42,7 @@ export const useInputFieldCollectionManagement = <T, K = any>(options?: InputFie
     setFieldDescriptors(newFieldDescriptors);
   }
 
-  const updateOneDescriptor = (payload: T, status: InputStatus, helperText?: string) => {
+  const updateOneDescriptor = (payload: T, status: InputField.Status, helperText?: string) => {
     setFieldDescriptors((prevState => {
       const newFieldDescriptors: FieldDescriptor<T>[] = [];
       for (const descriptor of prevState) {
@@ -80,20 +79,20 @@ export const useInputFieldCollectionManagement = <T, K = any>(options?: InputFie
         throw new Error(`Validation exception is not an error`);
       }
 
-      informationAlert.display(payload, InputStatus.Invalid, exception.message);
+      informationAlert.display(payload, InputField.Status.Error, exception.message);
       throw exception;
     }
   }
 
   const informationAlert = {
-    display(payload: T, status: InputStatus, helperText?: string) {
-      if (status === InputStatus.Default) {
+    display(payload: T, status: InputField.Status, helperText?: string) {
+      if (status === InputField.Status.Default) {
         const descriptor = findDescriptor(payload);
         if (!descriptor) {
           return;
         }
         
-        updateOneDescriptor(payload, InputStatus.Default, descriptor.staticHelperText);
+        updateOneDescriptor(payload, InputField.Status.Default, descriptor.staticHelperText);
         return;
       }
 
@@ -105,7 +104,7 @@ export const useInputFieldCollectionManagement = <T, K = any>(options?: InputFie
         return;
       }
       
-      updateOneDescriptor(payload, InputStatus.Default, descriptor.staticHelperText);
+      updateOneDescriptor(payload, InputField.Status.Default, descriptor.staticHelperText);
     }
   }
 
@@ -127,12 +126,12 @@ export interface InputFieldCollectionManagement<T, K> {
   validateValue: (payload: T, input: string) => K
   onInputClick: (payload: T) => React.MouseEventHandler<HTMLInputElement>;
   findDescriptor: (payload: T) => FieldDescriptor<T> | undefined;
-  updateOneDescriptor: (payload: T, status: InputStatus, helperText?: string) => void;
+  updateOneDescriptor: (payload: T, status: InputField.Status, helperText?: string) => void;
   setDescriptors: (descriptors: FieldDescriptor<T>[]) => void;
-  createDescriptor: (payload: T, status: InputStatus, staticHelperText?: string) => void;
+  createDescriptor: (payload: T, status: InputField.Status, staticHelperText?: string) => void;
   
   informationAlert: {
-    display(payload: T, status: InputStatus, helperText?: string): void;
+    display(payload: T, status: InputField.Status, helperText?: string): void;
     restore(payload: T): void;
   };
   fieldDescriptors: FieldDescriptor<T>[]

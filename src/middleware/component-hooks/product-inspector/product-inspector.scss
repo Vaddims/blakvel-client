@@ -1,182 +1,119 @@
 @import "/src/components/ProductImageWrapper/productImageWrapper.scss";
-main {
+
+.product-inspector-area {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   align-content: space-between;
   gap: 1rem;
   flex-grow: 1;
-}
 
-.product-information-panel {
-  display: flex;
-  flex-direction: column !important;
-  width: 100%;
-  gap: 2rem !important;
-  
-  .info-row {
-    width: 100%;
+  .product-information-panel {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-
-    & > div > article {
+    flex-direction: column !important;
+    width: 100%;
+    gap: 2rem !important;
+    
+    .info-row {
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 1rem;
-    }
+  
+      & > div > article {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+  
+      & > header {
+        position: sticky;
+        margin-top: -2rem;
+        padding-top: 2rem;
+        background-color: var(--background-main-color);
+        width: 100%;
+        z-index: 100;
+        font-size: 1.5rem;
+        top: 3.5rem;
+      }
+  
+      & .cluster {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        
+        article {
+          flex-basis: 50%;        
+        }
+      }
 
-    & > header {
-      position: sticky;
-      margin-top: -2rem;
-      padding-top: 2rem;
-      background-color: var(--background-main-color);
-      width: 100%;
-      z-index: 100;
-      font-size: 1.5rem;
-      top: 3.5rem;
-    }
-
-    & .cluster {
-      display: flex;
-      flex-direction: row;
-      gap: 1rem;
-      
-      article {
-        flex-basis: 50%;        
+      .row-divider {
+        .divider {
+          margin-bottom: 0;
+          width: 100%;
+          border: none;
+          border: .1rem solid var(--background-secondary-color);
+        }
       }
     }
 
-    // flex-basis: 1fr;
-  }
-}
-
-.row-divider {
-  .divider {
-    margin-bottom: 0;
-    width: 100%;
-    border: none;
-    border: .1rem solid var(--background-secondary-color);
-  }
-}
-
-article {
-  display: flex;
-  flex-direction: column;
-  // width: fit-content;
-
-  &.product-image-showcase-editor {
-    width: min-content;
-  }
-
-  &.product-information-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  &.product-tag-management {
-    gap: 1rem;
-    
     .product-tag-cluster {
-      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
     }
   }
 
-  .discount-information {
-    margin-top: .5rem;
-    font-weight: 500;
-    padding: 1rem;
+  article {
     display: flex;
     flex-direction: column;
-    background-color: var(--background-secondary-color);
-    gap: 1rem;
-    border-radius: .5rem;
-
-    header {
-      display: flex;
-      flex-direction: row;
-      vertical-align: middle;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .discount-input-fields {
+  
+    &.product-information-fields {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
-  }
-}
-
-article.product-image-showcase-editor {
-  height: 100%;
-}
-
-.product-static-field-title {
-  color: white;
-  margin-right: .5rem;
-  font-size: larger;
-}
-
-input, textarea {
-  border: none;
-  background-color: transparent;
-  font-size: large;
-
-  &[type=number] {
-    appearance: textfield;
-  }
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-}
-
-.product-tag-add {
-  display: flex;
-  flex-direction: row;
-  gap: .5rem;
-  padding: .25rem .5rem;
-  border: .1rem solid var(--background-highlight-color);
-  border-radius: .5rem;
-
-  * {
-    outline: none;
-  }
-
-  button i {
-    color: transparent;
-  }
-
-  input {
-    border: .1rem solid transparent;
-    flex: 1;
-    color: white;
-  }
-
-  &.valid {
-    background-color: var(--background-highlight-color);
-
-    button i {
-      color: white;
+  
+    &.product-tag-management {
+      gap: 1rem;
+      
+      .product-tag-cluster {
+        margin: 0;
+      }
+    }
+  
+    .discount-information {
+      margin-top: .5rem;
+      font-weight: 500;
+      padding: 1rem;
+      background-color: red;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--background-secondary-color);
+      gap: 1rem;
+      border-radius: .5rem;
+  
+      header {
+        display: flex;
+        flex-direction: row;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: space-between;
+      }
+  
+      .discount-input-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
     }
   }
 
-  .product-add-tag-button {
-    padding: 0.2rem 0.5rem;
-    background-color: transparent;
-    border: none;
-    border-radius: 2rem;
-    cursor: pointer;
+  .product-image-showcase-editor {
+    position: sticky;
+    top: 5.5rem;
+    width: min-content;
+    height: min-content;
   }
-}
-
-.product-tag-cluster {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
 }

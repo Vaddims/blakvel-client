@@ -1,16 +1,17 @@
 import * as uuid from 'uuid';
 import { useParams } from 'react-router-dom';
 import { Fragment, useEffect, useState } from 'react';
-import { InputField, InputStatus } from '../../../components/InputField';
+import InputField from '../../../components/TextInputField';
 import { ProductTagFieldBundle, ProductTagFieldInspection } from '../../../pages/InspectProductTag/ProductTagFieldInspection';
 import { Product } from '../../../models/product.model';
 import { faHashtag } from '@fortawesome/free-solid-svg-icons';
-import { composedValueAbordSymbol, useInputFieldManagement } from '../../hooks/useInputFieldManagement';
 import { ProductTagFieldInspector } from './ProductTagFieldInspector';
 import './product-tag-inspector.scss';
 import { useGetProductTagQuery, useGetProductTagsQuery } from '../../../services/api/productsApi';
 import { useInputFieldCollectionManagement } from '../../hooks/useInputFieldCollectionManagement';
 import { FieldDescriptor } from '../../hooks/useInputFieldCollectionManagement';
+import useTextInputField from '../../hooks/text-input-field-hook';
+import { InputField as InputFieldNamespace } from '../../hooks/input-field-hook';
 
 export interface ProductTagInspectorOptions {
   tagId?: string;
@@ -61,13 +62,10 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
     },
   });
 
-  const productTagNameInputField = useInputFieldManagement({
+  const productTagNameInputField = useTextInputField({
     label: 'Tag name',
     required: true,
     inputIcon: faHashtag,
-    format(input) {
-      return input;
-    },
   });
  
   useEffect(() => {
@@ -75,7 +73,7 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
       return;
     }
 
-    productTagNameInputField.setInputValue(productTag.name, true);
+    productTagNameInputField.setValue(productTag.name, true);
     setFields(productTag.fields.map<ProductTagFieldState>(field => ({
       localId: uuid.v4(),
       initial: { ...field },
@@ -94,13 +92,13 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
       const namePreviousDescriptor = findInputFieldDescriptor(createFieldUid(field, 'name'));
       descriptors.push(namePreviousDescriptor ?? {
         payload: createFieldUid(field, 'name'),
-        status: InputStatus.Default,
+        status: InputFieldNamespace.Status.Default,
       });
 
       const examplePreviousDescriptor = findInputFieldDescriptor(createFieldUid(field, 'example'));
       descriptors.push(examplePreviousDescriptor ?? {
         payload: createFieldUid(field, 'example'),
-        status: InputStatus.Default,
+        status: InputFieldNamespace.Status.Default,
       });
     }
 
@@ -137,7 +135,7 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
   }
   
   const validateInputs = (): Product.Mixed.Tag => {
-    const productTagName = productTagNameInputField.getValidatedInputResult();
+    const productTagNameResult = productTagNameInputField.validate();
 
     let fieldInputsAreInvalid = true;
     for (const field of fields) {
@@ -148,12 +146,12 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
       }
     }
 
-    if (productTagName === composedValueAbordSymbol || !fieldInputsAreInvalid) {
+    if (!productTagNameResult.isValid || !fieldInputsAreInvalid) {
       throw new Error();
     }
 
     const productTag: Product.Mixed.Tag = {
-      name: productTagName,
+      name: productTagNameResult.data,
       fields: fields.map(field => ({
         ...field.current,
       }))

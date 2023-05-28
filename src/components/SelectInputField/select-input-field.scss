@@ -1,8 +1,8 @@
-.app-select-input {
+.select-input-field {
   background-color: var(--background-main-color);
   background-image: none;
   appearance: none;
-  border: 1px solid rgb(150, 150, 150);
+  border: .1rem solid rgb(150, 150, 150);
 
   select { 
     background-color: transparent;

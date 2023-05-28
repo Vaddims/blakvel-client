@@ -1,147 +1,126 @@
-import { faCheck, faRotateBack, faUserXmark, faWarning, faXmark, faXmarkCircle, faXRay, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faRotateBack, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useRef } from 'react';
+import { InputField as InputFieldNamespace } from '../../middleware/hooks/input-field-hook';
 import './input-field.scss';
-import AppInput from '../AppInput';
 
-export enum InputStatus {
-  Default = 'default',
-  Invalid = 'invalid',
-}
+export type FalsyType = false | null | undefined;
 
-export interface InputFieldDatalistElement {
-  readonly name: string;
-  readonly description?: string;
-}
-
-interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputFieldCommonProps {
   readonly label: string;
   readonly labelIcon?: IconDefinition;
   readonly inputIcon?: IconDefinition;
-  readonly anchor?: string;
-  readonly required?: boolean;
-  readonly hideOptionalLabel?: boolean;
+  readonly markAsRequired?: boolean;
   readonly helperText?: string;
-  readonly status?: InputStatus;
-  readonly inputDatalist?: InputFieldDatalistElement[];
-  readonly onInputRestore?: React.MouseEventHandler<HTMLButtonElement>;
-  readonly onInputClear?: React.MouseEventHandler<HTMLButtonElement>;
-  readonly shouldAllowInputRestore?: boolean;
-  readonly shouldAllowInputClear?: boolean;
+  readonly htmlFor?: string;
+  readonly status?: InputFieldNamespace.Status;
+  readonly onInputRestore?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
+  readonly onInputClear?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
+  readonly onUnbound?: (event: MouseEvent) => void;
+}
+
+export interface InputFieldProps extends InputFieldCommonProps {
+  readonly className?: string;
+}
+
+function hasChildElement(element: Element, targetElement: Element): boolean {
+  if (element === targetElement) {
+    return true;
+  }
+
+  return Array.from(element.children).some((child) => hasChildElement(child, targetElement));
 }
 
 export const InputField: React.FC<InputFieldProps> = (props) => {
-  const {
-    label,
-    labelIcon,
-    inputIcon,
-    required = false,
-    hideOptionalLabel = false,
-    helperText = '',
-    status = InputStatus.Default,
-    inputDatalist = [],
-    onInputRestore,
-    onInputClear,
-    value = '',
-    anchor = '',
-    className,
-    shouldAllowInputClear,
-    shouldAllowInputRestore,
-    ...inputProps
-  } = props;
-
-  const formatedLabelId = label.toLowerCase().replace(' ', '-');
+  const labelRef = useRef(null);
+  const formatedLabelId = props.label.toLowerCase().replace(' ', '-');
   const inputElementId = `input-${formatedLabelId}`;
-  const tagDatalistElementId = `datalist-${formatedLabelId}`;
+  const composedLabelClassName = ['input-field', props.className].join(' ');
+
+
+
+
+
+
+  useEffect(() => {
+    const handler = (event: MouseEvent) => {
+      if (labelRef.current && !hasChildElement(labelRef.current, event.target as Element)) {
+        props.onUnbound?.(event);
+      }
+    }
+
+    document.body.addEventListener('mouseup', handler);
+    return () => {
+      document.body.removeEventListener('mouseup', handler);
+    }
+  })
+
+
+
+
+
+
+
 
   return (
-    <AppInput
-      label={label}
+    <label
       htmlFor={inputElementId}
-      className='input-field'
-      required={required}
-      inputIcon={inputIcon}
-      onInputClear={onInputClear}
-      onInputRestore={onInputRestore}
-      labelIcon={labelIcon}
-      shouldAllowInputClear={shouldAllowInputClear}
-      shouldAllowInputRestore={shouldAllowInputRestore}
-      helperText={helperText}
+      className={composedLabelClassName}
+      data-status={props.status}
+      ref={labelRef}
     >
-      <input
-        {...inputProps}
-        id={inputElementId}
-        list={inputDatalist.length > 0 ? tagDatalistElementId : void 0}
-        value={value}
-        required={required}
-        readOnly={props.readOnly ?? !props.onChange}
-      />
-      <datalist id={tagDatalistElementId}>
-        {inputDatalist.map((element) => (
-          <option value={element.name} key={element.name}>{element.description}</option>
-        ))}
-      </datalist>
-      {/* <div className='input-management-actions'>
-        { onInputRestore && anchor !== value && anchor !== '' && (
-          <button className='action-icon' onClick={onInputRestore} title='Restore input'>
-            <FontAwesomeIcon icon={faRotateBack} size='lg' />
-          </button>
+      <header>
+        { props.labelIcon && (
+          <FontAwesomeIcon icon={props.labelIcon} className='label-icon' />
         )}
-        { onInputClear && value && (
-          <button className='action-icon' onClick={onInputClear} title='Clear input'>
-            <FontAwesomeIcon icon={faXmark} size='xl' />
-          </button>
-        )}
-      </div> */}
-    </AppInput>
-    // <label
-    //   htmlFor={inputElementId}
-    //   className={['input-field', className].join(' ')}
-    // >
-    //   <header>
-    //     { labelIcon && <FontAwesomeIcon icon={labelIcon} className='label-icon' /> }
-    //     <label>
-    //       <span className='field-label'>{label}</span>
-    //       { !required && !hideOptionalLabel && (
-    //         <>
-    //           <span className='optional-field-divider'> - </span>
-    //           <span className='optional-field-label'>Optional</span>
-    //         </>
-    //       )}
-    //     </label>
-    //   </header>
-    //   <section className={["input-bar", status].join(' ')}>
-    //     <div className='input-icon-wrapper'>
-    //       { inputIcon && <FontAwesomeIcon icon={inputIcon} className='input-icon' /> }
-    //     </div>
-    //     <input
-    //       {...inputProps}
-    //       id={inputElementId}
-    //       list={inputDatalist.length > 0 ? tagDatalistElementId : void 0}
-    //       value={value}
-    //       required={required}
-    //       readOnly={props.readOnly ?? !props.onChange}
-    //     />
-    //     <datalist id={tagDatalistElementId}>
-    //       {inputDatalist.map((element) => (
-    //         <option value={element.name} key={element.name}>{element.description}</option>
-    //       ))}
-    //     </datalist>
-    //     <div className='input-management-actions'>
-    //       { onInputRestore && anchor !== value && anchor !== '' && (
-    //         <button className='action-icon' onClick={onInputRestore} title='Restore input'>
-    //           <FontAwesomeIcon icon={faRotateBack} size='lg' />
-    //         </button>
-    //       )}
-    //       { onInputClear && value && (
-    //         <button className='action-icon' onClick={onInputClear} title='Clear input'>
-    //           <FontAwesomeIcon icon={faXmark} size='xl' />
-    //         </button>
-    //       )}
-    //     </div>
-    //   </section>
-    //   { helperText && (
-    //     <span className='input-helper-text'>{helperText}</span>
-    //   )}
-    // </label>
+        <label>
+          <span className='label-title'>{props.label}</span>
+          { !props.markAsRequired && (
+            <>
+              <span className='optional-divider'> - </span>
+              <span className='optional-label'>Optional</span>
+            </>
+          )}
+        </label>
+      </header>
+      <section className="input-section">
+        <div className='input-icon-wrapper'>
+          { props.inputIcon && <FontAwesomeIcon icon={props.inputIcon} className='input-icon' /> }
+        </div>
+        { props.children }
+        <div className='input-management-actions'>
+          { props.onInputRestore && (
+            <button className='action-icon' onClick={props.onInputRestore} title='Restore input'>
+              <FontAwesomeIcon icon={faRotateBack} size='lg' />
+            </button>
+          )}
+          { props.onInputClear && (
+            <button className='action-icon' onClick={props.onInputClear} title='Clear input'>
+              <FontAwesomeIcon icon={faXmark} size='xl' />
+            </button>
+          )}
+        </div>
+      </section>
+      { props.helperText && (
+        <span className='helper-text'>{props.helperText}</span>
+      )}
+    </label>
   )
+}
+
+export default InputField;
+
+export function extractInputFieldProps(props: InputFieldCommonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>): InputFieldCommonProps {
+  return {
+    label: props.label,
+    helperText: props.helperText,
+    inputIcon: props.inputIcon,
+    labelIcon: props.labelIcon,
+    onInputClear: props.onInputClear,
+    onInputRestore: props.onInputRestore,
+    onUnbound: props.onUnbound,
+    markAsRequired: props.markAsRequired,
+    status: props.status,
+    htmlFor: props.htmlFor,
+  }
 }

@@ -12,24 +12,23 @@
 
   .checkbox {
     min-width: max-content;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 2rem;
     min-height: fit-content;
     background-color: var(--background-main-color);
     outline: none;
     border: none;
     border-radius: .5rem;
     aspect-ratio: 1;
-    border: 1px solid rgb(150, 150, 150);
+    border: .1rem solid rgb(150, 150, 150);
 
     .checkbox-icon {
       visibility: hidden;
     }
+  }
 
-    &[data-checked=true] {
-      .checkbox-icon {
-        visibility: visible;
-      }
+  &[aria-selected=true] {
+    .checkbox .checkbox-icon {
+      visibility: visible;
     }
   }
 }

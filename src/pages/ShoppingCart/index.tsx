@@ -79,7 +79,6 @@ const ShoppingCart: React.FC = () => {
   const checkout = async () => {
     const data = await createCheckoutSession().unwrap();
     window.location.href = data.url;
-    console.log(data);
   }
 
   return (

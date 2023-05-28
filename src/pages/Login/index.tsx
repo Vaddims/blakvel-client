@@ -7,9 +7,9 @@ import { useLoginMutation, usersApi } from "../../services/api/usersApi";
 import { useAppDispatch } from "../../middleware/hooks/reduxAppHooks";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { AuthStatus, setAuthStatus } from "../../services/slices/authSlice";
-import { composedValueAbordSymbol, useInputFieldManagement } from "../../middleware/hooks/useInputFieldManagement";
-import { useCheckboxFieldManagement } from "../../middleware/hooks/useCheckboxFieldManagement";
+import useCheckboxField from "../../middleware/hooks/checkbox-field-hook";
 import { faEnvelope, faKey } from "@fortawesome/free-solid-svg-icons";
+import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 
 interface LoginPageState {
   emailField: string;
@@ -23,55 +23,49 @@ export default function Login() {
   const dispatch = useAppDispatch();
   const { refetchUser } = useAuthentication();
 
-  const emailInputField = useInputFieldManagement<string>({
+  const emailInput = useTextInputField({
     label: 'Email',
     required: true,
     inputIcon: faEnvelope,
     type: 'email',
-    initialInputValue: 'vadym.iefremov@gmail.com',
-    format(input) {
-      return input;
-    },
+    value: 'vadym.iefremov@gmail.com',
   })
 
-  const passwordInputField = useInputFieldManagement<string>({
+  const passwordInput = useTextInputField({
     label: 'Password',
     required: true,
     inputIcon: faKey,
     type: 'password',
-    initialInputValue: 'pass',
-    format(input) {
-      return input
-    },
+    value: 'pass',
   })
 
-  const rememberUserCheckbox = useCheckboxFieldManagement({
+  const rememberUserCheckbox = useCheckboxField({
     label: 'Remember me on this device'
   })
 
   const submitLogin: FormEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault();
 
-    const email = emailInputField.getValidatedInputResult();
-    const password = passwordInputField.getValidatedInputResult();
+    const emailResult = emailInput.validate();
+    const passwordResult = passwordInput.validate();
 
     dispatch(usersApi.util.resetApiState());
-    if (email === composedValueAbordSymbol || password === composedValueAbordSymbol) {
+    if (!emailResult.isValid || !passwordResult.isValid) {
       return;
     }
 
     try {
       await login({
-        email: email,
-        password: password,
-        remember: rememberUserCheckbox.checked,
+        email: emailResult.data,
+        password: passwordResult.data,
+        remember: rememberUserCheckbox.value,
       }).unwrap();
 
       dispatch(setAuthStatus(AuthStatus.LoggedIn));
       refetchUser();
       navigate('/');
     } catch {
-      console.log('no');
+      alert('Auth info is invalid');
     }
   }
   
@@ -79,8 +73,8 @@ export default function Login() {
     <Page id='login'>
       <main>
         <div className="login-box">
-          { emailInputField.render() }
-          { passwordInputField.render() }
+          { emailInput.render() }
+          { passwordInput.render() }
           { rememberUserCheckbox.render() }
           <button className="login-submit-button" onClick={submitLogin}>Login</button>
         </div>

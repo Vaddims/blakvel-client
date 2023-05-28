@@ -5,10 +5,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { createContext, useEffect, useState } from "react";
 import * as uuid from 'uuid';
 import './product-tag-field-inspection.scss';
-import { InputField, InputStatus } from "../../components/InputField";
-import { faHashtag } from "@fortawesome/free-solid-svg-icons";
-import { Product } from "../../models/product.model";
-import { UpdateProductTagRequest } from "../../models/update-product-tag-request.model";
 import { useProductTagInspector } from "../../middleware/component-hooks/product-tag-inspector/useProductTagInspector";
 import { LocationState } from "../../models/location-state.model";
 import { StaticRoutes } from "../../middleware/utils/static-routes.enum";
@@ -140,7 +136,7 @@ export const InspectProductTag = () => {
         ...locationState,
         awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
       }
-      console.log(locationState)
+
       navigate(path, { replace: true, state: newLocationState });
     } catch {}
   }

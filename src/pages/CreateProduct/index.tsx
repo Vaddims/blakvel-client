@@ -14,21 +14,22 @@ const CreateProduct: React.FC = () => {
   const navigate = useNavigate();
   
   const requestProductCreation = async () => {
-    try {
-      const inputProduct = productInspector.validateInputs();
+    const inputProduct = productInspector.validateInputs();
+    if (!inputProduct) {
+      return;
+    }
 
-      const product = await createProduct({
-        ...inputProduct,
-        tags: inputProduct.tags.map(tag => tag.id),
-        specifications: inputProduct.specifications.map(spec => ({
-          value: spec.value,
-          fieldId: spec.field.id,
-        }))
-      } as any).unwrap();
+    const product = await createProduct({
+      ...inputProduct,
+      tags: inputProduct.tags.map(tag => tag.id),
+      specifications: inputProduct.specifications.map(spec => ({
+        value: spec.value,
+        fieldId: spec.field.id,
+      }))
+    } as any).unwrap();
 
-      await productInspector.imageEditor.uploadImages(product.id);
-      navigate(`/products/${product.id}`, { replace: true });
-    } catch {}
+    await productInspector.imageEditor.uploadImages(product.id);
+    navigate(`/products/${product.id}`, { replace: true });
   }
 
   const headerTools = (

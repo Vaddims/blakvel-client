@@ -1,42 +1,70 @@
 import { faBoxes, faCalendarMinus, faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
-import { InputFieldDatalistElement, InputStatus } from "../../../components/InputField";
+import { InputFieldDatalistElement } from "../../../components/TextInputField";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
 import { Product } from "../../../models/product.model";
 import { InputFieldStatusDescriptor } from "../../../pages/InspectProduct";
 import { ProductTagRepresenter } from "../../../pages/InspectProduct/ProductTagRepresenter";
 import { productsApi, useGetProductQuery, useGetProductTagsQuery } from "../../../services/api/productsApi";
-import { composedValueAbordSymbol, InputFieldManagementHook, useInputFieldManagement, ValidationTiming } from "../../hooks/useInputFieldManagement";
-import { useCheckboxFieldManagement } from "../../hooks/useCheckboxFieldManagement";
-import useAppSelectComponent from "../app-select-component/useAppSelectComponent";
+import useCheckboxField from "../../hooks/checkbox-field-hook";
+import useSelectInputField from "../../hooks/select-input-field-hook";
 import statusSelections from './status.selection.json';
-import useAppTextareaComponent from "../app-textarea-component/useAppTextareaComponent";
+import useAppTextareaComponent from "../../hooks/textarea-input-field-hook";
 import * as uuid from 'uuid';
 import './product-inspector.scss';
+import { InputField, InputFieldError, validateComponentStateInputs } from "../../hooks/input-field-hook";
+import useTextInputField from "../../hooks/text-input-field-hook";
 
 interface ProductInspectorOptions {
   readonly productId?: string;
   readonly disableSkeletonLayout?: boolean;
 }
 
+const discountPriceValidator = (discountInput: string, priceResult: InputField.State.ValidationResult<any>) => {
+  if (discountInput.trim() === '') {
+    throw new InputFieldError('Input is empty')
+  }
+
+  const discount = Number(discountInput);
+  if (Number.isNaN(discount)) {
+    throw new InputFieldError('Input is not a number');
+  }
+
+  if (discount < 0) {
+    throw new InputFieldError(`Price can't be negative`);
+  }
+
+  if (!priceResult.isValid) {
+    return discount;
+  }
+
+  if (discount > priceResult.data) {
+    throw new InputFieldError(`Discount can't be higher than the price`);
+  }
+
+  if (discount === priceResult.data) {
+    throw new InputFieldError(`Discount can't be equal to the price`);
+  }
+
+  return discount;
+}
+
 export const useProductInspector = (options?: ProductInspectorOptions) => {
-  const {
-    productId,
-  } = options ?? {};
+  const productId = options?.productId ?? '';
+  const productIdProvided = typeof options?.productId === 'string';
 
-  const { data: product } = useGetProductQuery(productId ?? '', { skip: typeof productId !== 'string' });
+  const { data: product } = useGetProductQuery(productId, { skip: !productIdProvided });
   const { data: globalProductTags } = useGetProductTagsQuery();
-
   const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(product?.tags ?? []);
 
   useEffect(() => {
-    if (!product) {
-      return;
+    if (product) {
+      applyProductValues(product);
     }
-
-    applyProductValues(product);
   }, [product]);
 
+
+  // TODO REWORK
   const [ 
     draftProductSpecifications, 
     setDraftProductSpecifications 
@@ -47,11 +75,11 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     setDraftProductSpecificationStatusDescriptors
   ] = useState<InputFieldStatusDescriptor[]>((product?.specifications ?? []).map(spec => ({
     fieldId: spec.field.id,
-    status: InputStatus.Default,
+    status: InputField.Status.Default,
     description: '',
   })));
 
-  const updateDraftProductSpecificationStatusDescriptor = (fieldId: string, status: InputStatus, description?: string) => {
+  const updateDraftProductSpecificationStatusDescriptor = (fieldId: string, status: InputField.Status, description?: string) => {
     setDraftProductSpecificationStatusDescriptors(prevState => {
       const targetSpec = prevState.find(spec => spec.fieldId === fieldId);
   
@@ -86,98 +114,76 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const getProductSpecificationInitialState = (specFieldId: string) => {
     return product?.specifications?.find(spec => spec.field.id === specFieldId);
   }
+  // TODO REWORK END
 
-  const getUniqueTagDatalist = (targetProductTags: Product.Tag[]): InputFieldDatalistElement[] => {
-    const unassignedTags = globalProductTags?.filter(globalProductTag => (
-      !targetProductTags.find(productTag => productTag.name === globalProductTag.name)
-    ));
-
-    const unassignedTagDatalist = unassignedTags?.map(unassignedTag => ({
-      name: unassignedTag.name,
-      description: `${unassignedTag.fields.length} fields`
-    }));
-
-    return unassignedTagDatalist ?? [];
-  }
-
-  // Product name input management
-  const productNameInputField = useInputFieldManagement({
+  const nameInput = useTextInputField({
     label: 'Name',
     required: true,
-    format: (input) => {
+    validationTimings: [InputField.ValidationTiming.Blur],
+    validate: (input) => {
       if (input.trim() === '') {
-        throw new Error('Name not provided');
+        throw new InputFieldError('Name not provided');
       }
 
       return input;
     }
   });
 
-  // Product price input management
-  const productPriceInputField = useInputFieldManagement({
+  const priceInput = useTextInputField({
     label: 'Price',
     required: true,
     inputIcon: faDollar,
-    format: (input) => {
+    validationTimings: [InputField.ValidationTiming.Blur],
+    validate: (input) => {
       if (input.trim() === '') {
-        throw new Error('Price not provided');
+        throw new InputFieldError('Price not provided');
       }
 
       const number = Number(input);
       if (Number.isNaN(number)) {
-        throw new Error('Input is not a number');
+        throw new InputFieldError('Input is not a number');
       }
 
       if (number < 0) {
-        throw new Error(`Price can't be negative`);
+        throw new InputFieldError(`Price can't be negative`);
       }
 
       return number;
     },
+    onChange(data) {
+      if (!discountCheckboxInput.value) {
+        return;
+      }
+
+      const priceResult = priceInput.validateCustomValue(data, this.validate, true);
+      if (priceResult.isValid) {
+        const customDiscountPriceValidator = () => discountPriceValidator(discountPriceInput.value, priceResult);
+        discountPriceInput.validateCustomValue(discountPriceInput.value, customDiscountPriceValidator);
+      }
+    },
   });
 
-  const discountCheckboxField = useCheckboxFieldManagement({
+  const discountCheckboxInput = useCheckboxField({
     label: 'Use Discount',
   });
 
-  // Product original price input management
-  const productDiscountPriceInputField = useInputFieldManagement({
+  const discountPriceInput = useTextInputField({
     label: 'Discount Price',
     inputIcon: faDollar,
     required: true,
-    format: (input) => {
-      if (input.trim() === '') {
-        throw new Error('Input is empty')
-      }
-
-      const discount = Number(input);
-      if (Number.isNaN(discount)) {
-        throw new Error('Input is not a number');
-      }
-
-      if (discount < 0) {
-        throw new Error(`Price can't be negative`);
-      }
-
-      const price = productPriceInputField.getFormattedInputResult();
-      if (price === composedValueAbordSymbol) {
-        return discount;
-      }
-
-      if (discount > price) {
-        throw new Error(`Discount can't be higher than the price`);
-      }
-
-      return discount;
-    }
+    validationTimings: [InputField.ValidationTiming.Blur],
+    validate(input) {
+      return discountPriceValidator(input, priceInput.validate(true));
+    }, 
   });
 
-  const productDiscountExpirationDateInputField = useInputFieldManagement<Date | undefined>({
+  const discountExpirationDateInput = useTextInputField<Date | undefined>({
     label: 'Expiration Date',
     helperText: 'If an expiration date is not provided, the discount will remain active until it is manually changed.',
     inputIcon: faCalendarMinus,
     type: 'datetime-local',
-    format: (input) => {
+    validationTimings: [InputField.ValidationTiming.Blur],
+    validate: (input) => {
       if (input === '') {
         return;
       }
@@ -185,11 +191,11 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       const date = new Date(input);
 
       if (Number.isNaN(date.getTime())) {
-        throw new Error('Invalid date');
+        throw new InputFieldError('Invalid date');
       }
 
       if (date.getTime() - Date.now() <= 0) {
-        throw new Error('The expiration date must be in the feature')
+        throw new InputFieldError('The expiration date must be in the feature')
       }
 
       return date;
@@ -200,65 +206,59 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     label: 'Description',
   })
 
-  // Product stock input management
-  const productStockInputField = useInputFieldManagement({
+  const stateSelectionInput = useSelectInputField({
+    label: 'State',
+    options: statusSelections,
+    value: statusSelections.find(option => option.value === 'prepublic'),
+    required: true,
+  });
+
+  const physicalIdInput = useTextInputField({
+    label: 'Physical ID',
+  })
+
+  const stockInput = useTextInputField({
     label: 'In Stock',
     required: true,
     labelIcon: faBoxes,
-    format: (input) => {
+    validationTimings: [InputField.ValidationTiming.Blur],
+    validate: (input) => {
       if (input.trim() === '') {
-        throw new Error('Price not provided');
+        throw new InputFieldError('Price not provided');
       }
 
       const number = Number(input);
       if (Number.isNaN(number)) {
-        throw new Error('Input is not a number');
+        throw new InputFieldError('Input is not a number');
       }
 
       if (number < 0) {
-        throw new Error(`Price can't be negative`);
+        throw new InputFieldError(`Price can't be negative`);
       }
 
       return number;
     }
   });
 
-  const physicalIdInputField = useInputFieldManagement({
-    label: 'Product Physical ID',
-    format: (input) => input,
-    validationTimings: [],
-  })
-
-  // status is for error and state combined
-
-  const stateSelection = useAppSelectComponent({
-    label: 'State',
-    options: statusSelections,
-    initialTargetValue: product?.state ?? 'prepublic',
-    required: true,
-  });
-
-  // Product tag input mamangement
-  const productTagSearchInputField = useInputFieldManagement<Product.Tag>({
+  const tagSearchInput = useTextInputField<Product.Tag>({
     label: 'Add Tag',
-    hideOptionalLabel: true,
     placeholder: 'Search',
     labelIcon: faHashtag,
     inputIcon: faSearch,
-    validationTimings: [],
-    format: (input) => {
+    validationTimings: [InputField.ValidationTiming.Submit],
+    validate: (input) => {
       const uniFormattedInput = input.toUpperCase().trim();
       const targetTag = globalProductTags?.find(globalProductTag => (
         globalProductTag.name.toUpperCase() === uniFormattedInput
       ));
 
       if (!targetTag) {
-        throw new Error(`Tag with the name ${input.toLocaleUpperCase()} doesn't exist`);
+        throw new InputFieldError(`Tag with the name ${input.toLocaleUpperCase()} doesn't exist`);
       }
       
       const productHasTargetTag = draftProductTags.find(draftProductTag => draftProductTag.id === targetTag.id);
       if (productHasTargetTag) {
-        throw new Error(`Tag with the name ${targetTag.name.toLocaleUpperCase()} is already added`);
+        throw new InputFieldError(`Tag with the name ${targetTag.name.toLocaleUpperCase()} is already added`);
       }
 
       return targetTag;
@@ -266,18 +266,37 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     onSubmit(targetProductTag) {
       const newDraftProductTags = [targetProductTag, ...draftProductTags];
       setDraftProductTags(newDraftProductTags);
-      productTagSearchInputField.setInputDatalist(getUniqueTagDatalist(newDraftProductTags));
-      productTagSearchInputField.restoreInputValue()
-    },
+      // productTagSearchInput.setInputDatalist(getUniqueTagDatalist(newDraftProductTags));
+      tagSearchInput.restoreValue()
+    }
   });
 
+  const staticInputs = {
+    nameInput, 
+    priceInput, 
+    stockInput, 
+    descriptionInput, 
+    physicalIdInput, 
+    discountCheckboxInput,
+    stateSelectionInput,
+  };
+
+  // TODO REWORK
   const imageEditor = useProductImageShowcaseEditor(product);
 
+  // TODO Trasnfer somewhere else
   const calculateDiscountPercent = () => {
-    const price = productPriceInputField.getFormattedInputResult();
-    const discountPrice = productDiscountPriceInputField.getFormattedInputResult();
+    const priceResult = priceInput.validate(true);
+    const discountPriceResult = discountPriceInput.validate(true);
 
-    if (price === composedValueAbordSymbol || discountPrice === composedValueAbordSymbol || price < discountPrice) {
+    if (!priceResult.isValid || !discountPriceResult.isValid) {
+      return null;
+    }
+
+    const price = priceResult.data;
+    const discountPrice = discountPriceResult.data;
+
+    if (price < discountPrice) {
       return null;
     }
 
@@ -286,12 +305,14 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   }
 
   const applyProductValues = (targetProduct: Product) => {
-    productNameInputField.setInputValue(targetProduct.name, true);
-    productStockInputField.setInputValue(targetProduct.stock.toString(), true);
-    productPriceInputField.setInputValue(targetProduct.price.toString(), true);
-    physicalIdInputField.setInputValue(targetProduct.physicalId, true);
-    descriptionInput.setInputValue(targetProduct.description, true);
-    stateSelection.setInputValue(targetProduct.state, true);
+    nameInput.setValue(targetProduct.name, true);
+    descriptionInput.setValue(targetProduct.description, true);
+    priceInput.setValue(targetProduct.price.toString(), true);
+    physicalIdInput.setValue(targetProduct.physicalId, true);
+    stockInput.setValue(targetProduct.stock.toString(), true);
+
+    const stateSelecitonOption = statusSelections.find(option => option.value === targetProduct.state);
+    stateSelectionInput.setValue(stateSelecitonOption ?? stateSelectionInput.defaultOption, true);
 
     let shouldShowDiscount = true;
     const { discountPrice } = targetProduct;
@@ -307,42 +328,36 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         } else {
           const offsetInMs = new Date().getTimezoneOffset() * 60 * 1000;
           const valueFormattedDateWithOffset = new Date(expirationDate.getTime() - offsetInMs).toISOString().replace('Z', '');
-          productDiscountExpirationDateInputField.setInputValue(valueFormattedDateWithOffset, true);
+          discountExpirationDateInput.setValue(valueFormattedDateWithOffset, true);
         }
       }
 
       if (shouldShowDiscount) {
-        discountCheckboxField.update(true, true);
-        productDiscountPriceInputField.setInputValue(discountPrice?.toString(), true);
+        discountCheckboxInput.setValue(true, true);
+        discountPriceInput.setValue(discountPrice?.toString(), true);
       }
     }
-
-    productTagSearchInputField.setInputDatalist(getUniqueTagDatalist(targetProduct.tags));
 
     setDraftProductTags(targetProduct.tags);
     setDraftProductSpecifications(targetProduct.specifications)
   }
 
   const restoreProductValues = () => {
-    productNameInputField.restoreInputValue()
-    productPriceInputField.restoreInputValue()
-    productStockInputField.restoreInputValue()
-    
-    discountCheckboxField.restoreInput();
-    productDiscountPriceInputField.restoreInputValue()
-    productDiscountExpirationDateInputField.restoreInputValue()
+    const staticInputsArray = Array.from(Object.values(staticInputs));
+    staticInputsArray.forEach((input) => input.restoreValue());
+    staticInputsArray.forEach(input => input.statusApplier.restoreDefault());
     
     setDraftProductTags(product?.tags ?? []);
     setDraftProductSpecifications(product?.specifications ?? []);
     setDraftProductSpecificationStatusDescriptors((product?.specifications ?? []).map(spec => ({
       fieldId: spec.field.id,
-      status: InputStatus.Default,
+      status: InputField.Status.Default,
       description: '',
     })))
   }
 
   const updateSpecification = (field: Product.Tag.Field): React.ChangeEventHandler<HTMLInputElement> => (event) => {
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default, '');
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default, '');
     const specificationIndex = draftProductSpecifications.findIndex(draftSpecification => draftSpecification.field.id === field.id);
     const newDraftProductSpecification = [...draftProductSpecifications];
     
@@ -368,11 +383,11 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       return;
     }
 
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default);
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default);
   }
 
   const click = (field: Product.Tag.Field): React.MouseEventHandler<HTMLInputElement> => (event) => {
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default, '');
+    updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default, '');
   }
 
   const restoreTagSpecifications = (tag: Product.Tag) => {
@@ -384,7 +399,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           field,
           value: target?.value ?? '',
         });
-        updateDraftProductSpecificationStatusDescriptor(field.id, InputStatus.Default, '');
+        updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default, '');
       }
 
       return clear;
@@ -454,22 +469,16 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     })
   }
 
-  const validateInputs = (): Omit<Product, 'id' | 'urn'> => {
-    const name = productNameInputField.getValidatedInputResult();
-    const price = productPriceInputField.getValidatedInputResult();
-    const stock = productStockInputField.getValidatedInputResult();
-    const description = descriptionInput.value;
-    const state = stateSelection.value;
-    const physicalId = physicalIdInputField.inputValue;
+  const validateInputs = (): Omit<Product, 'id' | 'urn'> | null => {
+    const validatedResults = validateComponentStateInputs(staticInputs);
     
-    const useDiscount = discountCheckboxField.checked;
-    const discountPrice = useDiscount ?
-      productDiscountPriceInputField.getValidatedInputResult() :
-      undefined;
+    const discountPriceResult = validatedResults?.discountCheckboxInput.data 
+    ? discountPriceInput.validate() 
+    : void 0;
 
-    const discountExpirationDate = useDiscount ?
-      productDiscountExpirationDateInputField.getValidatedInputResult() :
-      undefined;
+    const discountExpirationDateResult = validatedResults?.discountCheckboxInput.data 
+    ? discountExpirationDateInput.validate()
+    : void 0;
 
     let specificationInputsAreInvalid = false;
     const definedSpecifications: Product.Specification[] = [];
@@ -480,7 +489,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
       if (!draftSpecification) {
         if (tagField.required) {
-          updateDraftProductSpecificationStatusDescriptor(tagField.id, InputStatus.Invalid, 'Field is required');
+          updateDraftProductSpecificationStatusDescriptor(tagField.id, InputField.Status.Error, 'Field is required');
           specificationInputsAreInvalid = true;
           continue;
         }
@@ -494,32 +503,30 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       }
 
       if (draftSpecification.field.required) {
-        updateDraftProductSpecificationStatusDescriptor(draftSpecification.field.id, InputStatus.Invalid, 'Field is required')
+        updateDraftProductSpecificationStatusDescriptor(draftSpecification.field.id, InputField.Status.Error, 'Field is required')
         specificationInputsAreInvalid = true;
       }
     }
-
+    
     if (
-      name === composedValueAbordSymbol ||
-      stock === composedValueAbordSymbol ||
-      price === composedValueAbordSymbol ||
-      discountPrice === composedValueAbordSymbol ||
-      discountExpirationDate === composedValueAbordSymbol ||
+      !validatedResults || 
+      !discountPriceResult?.isValid ||
+      !discountExpirationDateResult?.isValid ||
       specificationInputsAreInvalid
     ) {
-      throw new Error();
+      return null;
     }
 
     const product: Omit<Product, 'id' | 'urn'> = {
-      name,
-      price,
+      name: validatedResults.nameInput.data,
+      price: validatedResults.priceInput.data,
       creationDate: new Date().toString(),
-      description,
-      physicalId,
-      state: state as any,
-      discountPrice: discountPrice ?? null,
-      discountExpirationDate: discountExpirationDate?.toString() ?? null,
-      stock,
+      description: validatedResults.descriptionInput.data,
+      physicalId: validatedResults.physicalIdInput.data,
+      state: validatedResults.stateSelectionInput.data.value as Product['state'],
+      discountPrice: discountPriceResult?.data ?? null,
+      discountExpirationDate: discountExpirationDateResult?.data?.toString() ?? null,
+      stock: validatedResults.stockInput.data,
       tags: draftProductTags,
       specifications: definedSpecifications,
     }
@@ -530,11 +537,12 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const discountPercent = calculateDiscountPercent();
 
   const render = () => (
-    <Fragment>
+    <div className='product-inspector-area'>
       <article className="product-image-showcase-editor">
         {imageEditor.render()}
       </article>
       <main className="product-information-panel">
+
         <section className="info-row">
           <header className="row-divider">
             General Information
@@ -542,29 +550,32 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           </header>
           <div className="cluster">
             <article className="product-information-fields">
-              { productNameInputField.render() }
+              { nameInput.render() }
               { descriptionInput.render() }
-              { productPriceInputField.render() }
+              { priceInput.render() }
               <div className='discount-information'>
                 <header>
-                  { discountCheckboxField.render() }
-                  { discountCheckboxField.checked && discountPercent && <span className=''>-{discountPercent}%</span> }
+                  { discountCheckboxInput.render() }
+                  { discountCheckboxInput.value && discountPercent !== null && (
+                    <span className=''>-{discountPercent}%</span> 
+                  )}
                 </header>
-                { discountCheckboxField.checked && (
+                { discountCheckboxInput.value && (
                   <div className='discount-input-fields'>
-                    {productDiscountPriceInputField.render()}
-                    {productDiscountExpirationDateInputField.render()}
+                    {discountPriceInput.render()}
+                    {discountExpirationDateInput.render()}
                   </div>
                 ) }
               </div>
             </article>
             <article>
-              { physicalIdInputField.render() }
-              { stateSelection.render() }
-              { productStockInputField.render() }
+              { stateSelectionInput.render() }
+              { physicalIdInput.render() }
+              { stockInput.render() }
             </article>
           </div>
         </section>
+
         <section className="info-row">
           <header className="row-divider">
             Specifications
@@ -572,7 +583,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           </header>
           <div className="cluster">
             <article className="product-tag-management">
-              { productTagSearchInputField.render() }
+              { tagSearchInput.render() }
               <div className="product-tag-cluster">
                 {draftProductTags?.map(productTag => (
                   <ProductTagRepresenter
@@ -607,7 +618,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           </div>
         </section>
       </main>
-    </Fragment>
+    </div>
   );
 
   return {

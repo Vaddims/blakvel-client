@@ -3,9 +3,8 @@ import { faRedo, faRotateLeft, faTrash } from '@fortawesome/free-solid-svg-icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChangeEventHandler, FC, useState } from 'react';
 import './product-tag-field-inspector.scss';
-import { useCheckboxFieldManagement } from '../../../hooks/useCheckboxFieldManagement';
-import { Product } from '../../../../models/product.model';
-import { InputField, InputStatus } from '../../../../components/InputField';
+import useCheckboxField from '../../../hooks/checkbox-field-hook';
+import InputField from '../../../../components/TextInputField';
 import { ProductTagFieldState } from '../useProductTagInspector';
 import { InputFieldCollectionManagement } from '../../../hooks/useInputFieldCollectionManagement';
 
@@ -34,9 +33,9 @@ export const ProductTagFieldInspector: FC<ProductTagFieldInspectionState> = (pro
     inputFieldCollectionManagement,
   } = props;
 
-  const requiredFieldCheckbox = useCheckboxFieldManagement({
+  const requiredFieldCheckbox = useCheckboxField({
     label: 'Require field to be filled in',
-    initialyChecked: fieldState.current.required,
+    value: fieldState.current.required,
     onChange(checked) {
       const inputFieldId = createFieldUid(fieldState, 'required');
       updateField(getNewChangedFieldState(fieldState, 'required', checked), inputFieldId);

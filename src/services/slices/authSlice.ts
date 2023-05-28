@@ -26,11 +26,9 @@ export const authSlice = createSlice({
       state.status = AuthStatus.LoggedIn;
     },
     setAuthStatus(state, action: PayloadAction<AuthStatus>) {
-      console.log('set status', action.payload);
       state.status = action.payload;
     },
     logout(state) {
-      console.log('is logged out')
       state.status = AuthStatus.LoggedOut;
       state.token = null;
     }

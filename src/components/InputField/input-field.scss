@@ -1,4 +1,4 @@
-.input-field {
+label.input-field {
   border: none;
   width: 100%;
   display: flex;
@@ -23,11 +23,11 @@
         color: rgb(198, 198, 198);
       }
 
-      .field-label {
+      .label-title {
         text-transform: uppercase;
       }
 
-      .optional-field-label {
+      .optional-label {
         font-style: italic;
       }
     }
@@ -40,10 +40,11 @@
     display: flex;
     flex-direction: row;
     box-sizing: border-box;
-    height: 2.5rem;
+    min-height: 2.5rem;
+    height: fit-content;
 
     transition: border .25s ease;
-    border: 1px solid rgb(150, 150, 150);
+    border: .1rem solid rgb(150, 150, 150);
     border-radius: .5rem;
     padding: 0;
     overflow: hidden;
@@ -77,7 +78,7 @@
     }
 
     &:hover {
-      border: 1px solid rgb(190, 190, 190);
+      border: .1rem solid rgb(190, 190, 190);
 
       .input-management-actions {
         display: flex;
@@ -93,52 +94,7 @@
     }
 
     &:focus-within {
-      border: 1px solid var(--background-highlight-color);
-    }
-
-    // &.valid {
-    //   border: 1px solid rgb(64, 199, 66);
-
-    //   & + .input-helper-text {
-    //     color: rgb(64, 199, 66);
-    //   }
-    // }
-
-    &.warn {
-      border: 1px solid rgb(255, 153, 51);
-
-      & + .input-helper-text {
-        color: rgb(255, 153, 51);
-      }
-    }
-
-    &.invalid {
-      border: 1px solid rgb(225, 40, 50);
-
-      & + .input-helper-text {
-        color: rgb(225, 40, 50);
-      }
-    }
-
-    input {
-      width: 100%;
-      color: white;
-      background-color: transparent;
-      outline: none;
-      padding: 0 .5rem;
-      height: 100%;
-      border: none;
-      position: relative;
-
-      &[type=datetime-local]::-webkit-calendar-picker-indicator {
-        color: transparent;
-        background: none;
-        cursor: pointer;
-        position: absolute;
-        background-color: transparent;
-        height: 100%;
-        width: 100%;
-      }
+      border: .1rem solid var(--background-highlight-color);
     }
 
     .action-icon path {
@@ -146,7 +102,25 @@
     }
   }
 
-  .input-helper-text {
+  &[data-status=error] {
+    .input-section {
+      border: .1rem solid rgb(225, 40, 50);
+
+      & + .helper-text {
+        color: rgb(225, 40, 50);
+      }
+    }
+  }
+
+  &[data-status=warn] {
+    border: .1rem solid rgb(255, 153, 51);
+
+    & + .helper-text {
+      color: rgb(255, 153, 51);
+    }
+  }
+
+  .helper-text {
     color: rgb(198, 198, 198);
     margin-top: .5rem;
     padding: 0 .5rem;

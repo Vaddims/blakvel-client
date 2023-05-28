@@ -87,8 +87,6 @@ export const useProductImageShowcaseEditor = (product?: Product) => {
     }
   }
 
-  console.log(selectableFilenames, selections);
-
   const normalizeImage = (file: File) => {
     const fileExtension = path.extname(file.name);
     const blob = new Blob([file], { type: file.type });

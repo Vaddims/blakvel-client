@@ -1,10 +1,11 @@
 import { faRedo, faRotateLeft, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChangeEventHandler, FC, useState } from 'react';
-import { InputField, InputStatus } from '../../../components/InputField';
+import TextInputField from '../../../components/TextInputField';
 import { Product } from '../../../models/product.model';
 import './product-tag-field-inspection.scss';
-import { useCheckboxFieldManagement } from '../../../middleware/hooks/useCheckboxFieldManagement';
+import useCheckboxField from '../../../middleware/hooks/checkbox-field-hook';
+import { InputField } from '../../../middleware/hooks/input-field-hook';
 
 export interface ProductTagFieldBundle extends Omit<Product.Tag.Field, 'id'> {
   initialField?: Omit<Product.Tag.Field, 'id'>;
@@ -20,18 +21,18 @@ export interface ProductTagFieldInspectionState {
 export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (props) => {
   const { field, fields, updateField, removeField } = props;
 
-  const requiredFieldCheckbox = useCheckboxFieldManagement({
+  const requiredFieldCheckbox = useCheckboxField({
     label: 'Required',
-    initialyChecked: field.required,
+    value: field.required,
     onChange(checked) {
       updateField({ ...field, required: checked });
     },
   });
 
   const [ fieldNameHelperText, setFieldNameHelperText ] = useState('');
-  const [ fieldNameInputState, setFieldNameInputState ] = useState(InputStatus.Default);
+  const [ fieldNameInputState, setFieldNameInputState ] = useState(InputField.Status.Default);
 
-  const [ exampleInputState, setExampleInputState ] = useState(InputStatus.Default);
+  const [ exampleInputState, setExampleInputState ] = useState(InputField.Status.Default);
 
   const onFieldNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     updateField({ ...field, name: event.target.value });
@@ -55,8 +56,8 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
       initialField: initialField,
     });
 
-    setFieldNameInputState(InputStatus.Default);
-    setExampleInputState(InputStatus.Default);
+    setFieldNameInputState(InputField.Status.Default);
+    setExampleInputState(InputField.Status.Default);
   }
 
   const onFieldNameBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
@@ -64,23 +65,23 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
     setFieldNameHelperText('');
 
     if (newFieldName.length === 0) {
-      setFieldNameInputState(InputStatus.Default);
+      setFieldNameInputState(InputField.Status.Default);
       return;
     }
 
     const existingLocalTagName = fields.find((localField) => localField.name.toLowerCase() === field.name.trim().toLowerCase() && localField !== field)
     if (existingLocalTagName) {
-      setFieldNameInputState(InputStatus.Invalid);
+      setFieldNameInputState(InputField.Status.Error);
       setFieldNameHelperText(`Tag field with the name \`${existingLocalTagName.name}\` already exist`);
       return;
     }
 
     if (field.initialField?.name === newFieldName) {
-      setFieldNameInputState(InputStatus.Default);
+      setFieldNameInputState(InputField.Status.Default);
       return;
     }
     
-    setFieldNameInputState(InputStatus.Default);
+    setFieldNameInputState(InputField.Status.Default);
   }
 
   const onExampleBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
@@ -88,11 +89,11 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
     setFieldNameHelperText('');
 
     if (newExample.length === 0 || field.initialField?.example === newExample) {
-      setExampleInputState(InputStatus.Default);
+      setExampleInputState(InputField.Status.Default);
       return;
     }
     
-    setExampleInputState(InputStatus.Default);
+    setExampleInputState(InputField.Status.Default);
   }
   
   return (
@@ -110,7 +111,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
           </button>
         </div>
       </header>
-      <InputField
+      <TextInputField
         label="Field Name"
         status={fieldNameInputState}
         helperText={fieldNameHelperText}
@@ -118,7 +119,7 @@ export const ProductTagFieldInspection: FC<ProductTagFieldInspectionState> = (pr
         onChange={onFieldNameChange}
         onBlur={onFieldNameBlur}
       />
-      <InputField
+      <TextInputField
         label="Format Example"
         status={exampleInputState}
         value={field.example}

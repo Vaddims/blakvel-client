@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AppTableContext } from "../AppTable";
-import { CheckboxField } from "../../components/CheckboxField";
+import CheckboxField from "../../components/CheckboxField";
 
 export interface AppTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   onCheckboxClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -22,7 +22,7 @@ const AppTableRow: React.FC<AppTableRowProps> = (props) => {
       { useSelectionCheckbox && (
         <td className='app-table-row-checkbox'>
           <div className="stablizer">
-            <CheckboxField checked={!!trProps['aria-selected']} onClick={onCheckboxClick} />
+            <CheckboxField label='' select={!!trProps['aria-selected']} onClick={onCheckboxClick} />
           </div>
         </td>
       ) }

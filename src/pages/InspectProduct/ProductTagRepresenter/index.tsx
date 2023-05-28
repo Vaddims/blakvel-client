@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 import { InputFieldStatusDescriptor } from "..";
-import { InputField } from "../../../components/InputField";
+import InputField from "../../../components/TextInputField";
 import { Product } from "../../../models/product.model";
 import { ProductTagField } from "../../CreateProductTag/ProductTagFieldInspection";
 import './product-tag-representer.scss';
@@ -106,7 +106,7 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
               key={field.id}
               status={draftProductSpecificationStatusDescriptors.find(spec => spec.fieldId === field.id)?.status}
               helperText={draftProductSpecificationStatusDescriptors.find(spec => spec.fieldId === field.id)?.description}
-              required={field.required}
+              markAsRequired={field.required}
               label={field.name} 
               value={specifications.find(spec => spec.field.id === field.id)?.value ?? ''} 
               placeholder={`ex. ${field.example}`} 
@@ -115,7 +115,6 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
               onClick={onClick(field)}
               onInputRestore={onRestore(field)}
               onInputClear={onClear(field)}
-              anchor={getProductSpecificationInitialState(field.id)?.value ?? ''}
             />
           ))}
         </div>

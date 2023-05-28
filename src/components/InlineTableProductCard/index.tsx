@@ -31,7 +31,7 @@ const InlineTableProductCard: React.FC<InlineTableProductCardProps> = (props) =>
           </span>
         </div>
       </td>
-      <td>Public</td>
+      <td>{product.state.toUpperCase()}</td>
       <td className='discount-percent discount-related'>
         {discountExists && (
           <div>

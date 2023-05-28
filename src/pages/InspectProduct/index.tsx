@@ -6,16 +6,12 @@ import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
 import * as uuid from 'uuid';
 import './inspect-product.scss';
-import { ProductTagRepresenter } from "./ProductTagRepresenter";
-import { useInputFieldManagement, ValidationTiming } from "../../middleware/hooks/useInputFieldManagement";
-import { InputFieldDatalistElement, InputStatus } from "../../components/InputField";
-import { Product } from "../../models/product.model";
-import { faBoxesStacked, faDollarSign, faHashtag, faHeading, faMoneyBill, faSignature, faTag } from "@fortawesome/free-solid-svg-icons";
 import { useProductInspector } from "../../middleware/component-hooks/product-inspector/useProductInspector";
+import { InputField } from "../../middleware/hooks/input-field-hook";
 
 export interface InputFieldStatusDescriptor {
   readonly fieldId: string;
-  readonly status: InputStatus;
+  readonly status: InputField.Status;
   readonly description?: string;
 }
 
@@ -35,28 +31,35 @@ const InspectProduct = () => {
       return;
     }
 
-    try {
-      const inputProduct = productInspector.validateInputs();
+    const inputProduct = productInspector.validateInputs();
+    if (!inputProduct) {
+      return;
+    }
 
-      await updateProduct({
-        ...inputProduct,
-        discountExpirationDate: inputProduct.discountExpirationDate || void 0,
-        id: product.id,
-        tags: inputProduct.tags.map(tag => tag.id),
-        specifications: inputProduct.specifications.map(specification => ({
-          value: specification.value,
-          fieldId: specification.field.id,
-        }))
-      });
+    await updateProduct({
+      ...inputProduct,
+      discountExpirationDate: inputProduct.discountExpirationDate || void 0,
+      id: product.id,
+      tags: inputProduct.tags.map(tag => tag.id),
+      specifications: inputProduct.specifications.map(specification => ({
+        value: specification.value,
+        fieldId: specification.field.id,
+      }))
+    });
 
-      await productInspector.imageEditor.uploadImages(product.id);
-      navigate(`/products/${product.id}`, { replace: true });
-    } catch {}
+    await productInspector.imageEditor.uploadImages(product.id);
+    navigate(`/products/${product.id}`, { replace: true });
+  }
+
+  const restoreProductHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    productInspector.restoreProductValues();
   }
 
   const headerTools = (
     <>
-      <button className="panel-tool outline-highlight" onClick={productInspector.restoreProductValues}>Restore</button>
+      <button className="panel-tool outline-highlight" onMouseUp={restoreProductHandler}>Restore</button>
       <button className="panel-tool highlight" onClick={requestProductUpdate}>Update</button>
     </>
   )

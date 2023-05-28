@@ -4,10 +4,6 @@ import { ProductTagField, ProductTagFieldInspection } from "./ProductTagFieldIns
 import { useLocation, useNavigate } from "react-router-dom";
 import { createContext, useContext, useState } from "react";
 import './product-tag-field-inspection.scss';
-import { InputField, InputStatus } from "../../components/InputField";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHashtag, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { Product } from "../../models/product.model";
 import { useProductTagInspector } from "../../middleware/component-hooks/product-tag-inspector/useProductTagInspector";
 import { useCreateProductTagMutation } from "../../services/api/productsApi";
 import { LocationState } from "../../models/location-state.model";
@@ -49,7 +45,7 @@ export const CreateProductTag = () => {
         ...locationState,
         awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
       }
-      console.log(locationState)
+
       navigate(path, { replace: true, state: newLocationState });
     } catch {}
   }
