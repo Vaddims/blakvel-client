@@ -7,7 +7,7 @@ import './input-field.scss';
 export type FalsyType = false | null | undefined;
 
 export interface InputFieldCommonProps {
-  readonly label: string;
+  readonly label?: string;
   readonly labelIcon?: IconDefinition;
   readonly inputIcon?: IconDefinition;
   readonly markAsRequired?: boolean;
@@ -33,14 +33,9 @@ function hasChildElement(element: Element, targetElement: Element): boolean {
 
 export const InputField: React.FC<InputFieldProps> = (props) => {
   const labelRef = useRef(null);
-  const formatedLabelId = props.label.toLowerCase().replace(' ', '-');
+  const formatedLabelId = props.label?.toLowerCase().replace(' ', '-');
   const inputElementId = `input-${formatedLabelId}`;
   const composedLabelClassName = ['input-field', props.className].join(' ');
-
-
-
-
-
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -55,13 +50,6 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
     }
   })
 
-
-
-
-
-
-
-
   return (
     <label
       htmlFor={inputElementId}
@@ -69,20 +57,22 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
       data-status={props.status}
       ref={labelRef}
     >
-      <header>
-        { props.labelIcon && (
-          <FontAwesomeIcon icon={props.labelIcon} className='label-icon' />
-        )}
-        <label>
-          <span className='label-title'>{props.label}</span>
-          { !props.markAsRequired && (
-            <>
-              <span className='optional-divider'> - </span>
-              <span className='optional-label'>Optional</span>
-            </>
+      {props.label && (
+        <header>
+          { props.labelIcon && (
+            <FontAwesomeIcon icon={props.labelIcon} className='label-icon' />
           )}
-        </label>
-      </header>
+          <label>
+            <span className='label-title'>{props.label}</span>
+            { !props.markAsRequired && (
+              <>
+                <span className='optional-divider'> - </span>
+                <span className='optional-label'>Optional</span>
+              </>
+            )}
+          </label>
+        </header>
+      )}
       <section className="input-section">
         <div className='input-icon-wrapper'>
           { props.inputIcon && <FontAwesomeIcon icon={props.inputIcon} className='input-icon' /> }

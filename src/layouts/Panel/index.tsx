@@ -6,7 +6,8 @@ import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
 export interface PanelProps {
   readonly title: string;
-  readonly headerTools?: ReactNode;
+  readonly headerCenterTools?: ReactNode | ReactNode[];
+  readonly headerTools?: ReactNode | ReactNode[];
   readonly subheader?: ReactNode | ReactNode[];
   readonly extensions?: ReactNode | ReactNode[];
   readonly children?: ReactNode;
@@ -21,6 +22,7 @@ export default function Panel(props: PanelProps) {
     subheader,
     children, 
     extensions, 
+    headerCenterTools,
     collapseExtensions = false ,
     displayBackNavigation = false,
   } = props;
@@ -41,6 +43,9 @@ export default function Panel(props: PanelProps) {
               {title}
             </h1>
           </div>
+        </div>
+        <div className='center-panel-tools'>
+          {headerCenterTools}
         </div>
         <div className="panel-tools">
           {headerTools}

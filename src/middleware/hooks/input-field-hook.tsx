@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { InputFieldCommonProps } from "../../components/InputField";
 
@@ -8,11 +8,23 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
   const [ status, setRawStatus ] = useState(InputField.Status.Default);
   const [ helperText, setRawHelperText ] = useState<string | null>(options.helperText ?? null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (options.validationTimings?.includes(InputField.ValidationTiming.Change)) {
       validate();
     }
   }, [value]);
+
+  useEffect(() => {
+    if (options.trackValue && value !== options.value) {
+      setValue(options.value);
+    }
+  }, [options.value]);
+
+  useEffect(() => {
+    if (options.trackAnchor && anchor !== options.anchor) {
+      setAnchor(options.anchor);
+    }
+  }, [options.anchor]);
 
   const setValue: InputField.State.SetValueFunction<T> = (data, useAsAnchor = false) => {
     setRawValue(data);
@@ -94,6 +106,7 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
     helperText,
     anchor,
     statusApplier,
+    validationTimings: options.validationTimings ?? [],
     appInputComponentProps,
     setValue,
     setAnchor,
@@ -113,7 +126,7 @@ export type InputCollectionResults<T> = {
 
 export function validateComponentStateInputs<T>(inputCollection: T extends { [k: string]: InputField.ComponentState<any, any> } ? T : never) {
   const validationResults = {} as any;
-  for (const key in Object.keys(inputCollection)) {
+  for (const key in inputCollection) {
     const result = inputCollection[key].validate();
     if (!result.isValid) {
       return null;
@@ -174,6 +187,8 @@ export namespace InputField {
   export interface Options<T, K> extends AppInputComponentOptions {
     readonly value: T;
     readonly anchor: T;
+    readonly trackValue?: boolean;
+    readonly trackAnchor?: boolean;
     readonly helperText?: string | null;
     readonly disableValidationTimings?: boolean;
     readonly validationTimings?: ValidationTiming[];
@@ -185,8 +200,12 @@ export namespace InputField {
   type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
   export interface ComponentOptions<T, K> extends Omit<PartialBy<Options<T, K>, 'value' | 'anchor' | 'validate'>, 'onValueChange'> {
+    readonly value?: T | undefined;
+    readonly anchor?: T | undefined;
     readonly onChange?: InputField.State.ChangeInputFunction<T>;
     readonly onSubmit?: InputField.State.SubmitInputFunction<K>;
+    readonly onRestore?: State.RestoreInputFunction;
+    readonly onClear?: State.ClearInputFunction;
   }
 
   export namespace State {
@@ -216,6 +235,14 @@ export namespace InputField {
 
     export interface ChangeInputFunction<T> {
       (data: T): void;
+    }
+
+    export interface RestoreInputFunction {
+      (): void;
+    }
+
+    export interface ClearInputFunction {
+      (): void;
     }
 
     export namespace ValidationResult {
@@ -253,6 +280,7 @@ export namespace InputField {
     readonly helperText: string | null;
 
     readonly statusApplier: State.StatusApplier;
+    readonly validationTimings: ValidationTiming[];
 
     readonly setValue: State.SetValueFunction<T>;
     readonly setAnchor: State.SetAnchorFunction<T>;

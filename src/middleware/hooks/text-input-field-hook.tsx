@@ -10,9 +10,7 @@ export interface GenericInputOptions {
 
 type TextInputFieldHook<T> = InputField.GenericHook<GenericInputOptions, {}, string, T>;
 const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputFieldHook<T>>[0]): ReturnType<TextInputFieldHook<T>> {
-  const appInput = useInputField({
-    value: '',
-    anchor: '',
+  const inputField = useInputField({
     validate: (data) => {
       console.warn(`No validation function provided for the (${options.label}) TextInputField hook. By default no formation will be applied for the validated returned value`)
       return data as any;
@@ -21,6 +19,8 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       options.onChange?.(data);
     },
     ...options,
+    value: options.value?.toString() ?? '',
+    anchor: options.anchor?.toString() ?? '',
   });
 
   const [ onceFocused , setOnceFocused] = useState(false);
@@ -28,12 +28,12 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
 
   const inputBlurHandler = () => {
     if (options.validationTimings?.includes(InputField.ValidationTiming.Blur)) {
-      appInput.validate();
+      inputField.validate();
     }
   }
 
   const inputClickHandler: React.MouseEventHandler<HTMLInputElement> = (event) => {
-    appInput.statusApplier.restoreDefault()
+    inputField.statusApplier.restoreDefault()
   }
 
   const keyPressHandler: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -45,7 +45,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       return;
     }
 
-    const validatedResult = appInput.validate();
+    const validatedResult = inputField.validate();
     if (!validatedResult.isValid) {
       return;
     }
@@ -68,7 +68,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
 
   const changeHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     options.onChange?.(event.target.value);
-    appInput.setValue(event.target.value)
+    inputField.setValue(event.target.value)
   }
 
   const focusHandler: React.FocusEventHandler<HTMLInputElement> = () => {
@@ -78,23 +78,25 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
   }
 
   const restoreValue = () => {
-    appInput.setValue(appInput.anchor);
+    inputField.setValue(inputField.anchor);
+    options?.onRestore?.();
   }
 
   const clearValue = () => {
-    appInput.setValue('');
+    inputField.setValue('');
+    options?.onClear?.();
   }
 
-  const shouldAllowInputClear = !!appInput.value;
-  const shouldAllowInputRestore = appInput.value !== appInput.anchor && appInput.anchor !== '';
+  const shouldAllowInputClear = !!inputField.value;
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor !== '';
 
   const render = () => (
     <TextInputField
       label=''
       type={options.type}
-      value={appInput.value}
+      value={inputField.value}
       placeholder={options.placeholder}
-      {...appInput.appInputComponentProps}
+      {...inputField.appInputComponentProps}
       onInputClear={shouldAllowInputClear && clearValue}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       
@@ -107,7 +109,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
   )
 
   return {
-    ...appInput,
+    ...inputField,
     restoreValue,
     clearValue,
     render,

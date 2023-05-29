@@ -8,10 +8,10 @@ interface TextareaInputFieldOptions {
 export type AppTextareaInputHook = InputField.GenericHook<TextareaInputFieldOptions, {}, string, string>;
 const useTextareaInputField: AppTextareaInputHook = (options) => {
   const appInput = useInputField({
-    value: '',
-    anchor: '',
     validate: (data) => data,
     ...options,
+    value: options.value ?? '',
+    anchor: options.anchor ?? '',
   })
 
   const {

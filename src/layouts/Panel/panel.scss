@@ -6,11 +6,11 @@
 
   .panel-header {
     background-color: var(--background-main-color);
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    text-align: center;
+    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     gap: 2rem;
     padding: 1rem 0;
     z-index: 1000;
@@ -24,6 +24,7 @@
       flex-direction: row;
       align-items: center;
       gap: 1rem;
+      grid-column: 1 / 2;
 
       .previous-page-button {
         $size: 2.5rem;
@@ -40,6 +41,7 @@
       }
 
       .panel-title-box {
+        grid-area: 'toolbar';
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -55,7 +57,14 @@
       }
     }
 
+    .center-panel-tools {
+      justify-self: center;
+      grid-column: 2 / 3;
+    }
+
     .panel-tools {
+      grid-column: 3 / 4;
+      justify-content: right;
       display: flex;
       flex-direction: row;
       gap: .5rem;

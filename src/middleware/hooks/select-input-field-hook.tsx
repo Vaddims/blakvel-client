@@ -33,8 +33,8 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
   }
 
   const appInput = useInputField<Option, Option>({
-    ...selectorOptions,
     validate: (option) => option,
+    ...selectorOptions,
     value: selectorOptions.value ?? defaultOption,
     anchor: selectorOptions.anchor ?? defaultOption,
   });

@@ -9,7 +9,7 @@ import { productsApi, useGetProductQuery, useGetProductTagsQuery } from "../../.
 import useCheckboxField from "../../hooks/checkbox-field-hook";
 import useSelectInputField from "../../hooks/select-input-field-hook";
 import statusSelections from './status.selection.json';
-import useAppTextareaComponent from "../../hooks/textarea-input-field-hook";
+import useTextareaInput from "../../hooks/textarea-input-field-hook";
 import * as uuid from 'uuid';
 import './product-inspector.scss';
 import { InputField, InputFieldError, validateComponentStateInputs } from "../../hooks/input-field-hook";
@@ -119,6 +119,10 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const nameInput = useTextInputField({
     label: 'Name',
     required: true,
+    value: product?.name,
+    anchor: product?.name,
+    trackValue: true,
+    trackAnchor: true,
     validationTimings: [InputField.ValidationTiming.Blur],
     validate: (input) => {
       if (input.trim() === '') {
@@ -129,9 +133,13 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
   });
 
-  const priceInput = useTextInputField({
+  const priceInput = useTextInputField<number>({
     label: 'Price',
     required: true,
+    value: product?.price.toString(),
+    anchor: product?.price.toString(),
+    trackValue: true,
+    trackAnchor: true,
     inputIcon: faDollar,
     validationTimings: [InputField.ValidationTiming.Blur],
     validate: (input) => {
@@ -165,10 +173,18 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
   const discountCheckboxInput = useCheckboxField({
     label: 'Use Discount',
+    value: typeof product?.discountPrice === 'number',
+    anchor: typeof product?.discountPrice === 'number',
+    trackValue: true,
+    trackAnchor: true,
   });
 
   const discountPriceInput = useTextInputField({
     label: 'Discount Price',
+    value: product?.discountPrice?.toString(),
+    anchor: product?.discountPrice?.toString(),
+    trackValue: true,
+    trackAnchor: true,
     inputIcon: faDollar,
     required: true,
     validationTimings: [InputField.ValidationTiming.Blur],
@@ -202,24 +218,39 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
   });
 
-  const descriptionInput = useAppTextareaComponent({
+  const descriptionInput = useTextareaInput({
     label: 'Description',
-  })
+    value: product?.description,
+    anchor: product?.description,
+    trackValue: true,
+    trackAnchor: true,
+  });
 
   const stateSelectionInput = useSelectInputField({
     label: 'State',
     options: statusSelections,
-    value: statusSelections.find(option => option.value === 'prepublic'),
+    value: statusSelections.find(option => option.value === (product?.state ?? 'prepublic')),
+    anchor: statusSelections.find(option => option.value === (product?.state ?? 'prepublic')),
+    trackValue: true,
+    trackAnchor: true,
     required: true,
   });
 
   const physicalIdInput = useTextInputField({
     label: 'Physical ID',
+    value: product?.physicalId,
+    anchor: product?.physicalId,
+    trackValue: true,
+    trackAnchor: true,
   })
 
   const stockInput = useTextInputField({
     label: 'In Stock',
     required: true,
+    value: product?.stock.toString(),
+    anchor: product?.stock.toString(),
+    trackValue: true,
+    trackAnchor: true,
     labelIcon: faBoxes,
     validationTimings: [InputField.ValidationTiming.Blur],
     validate: (input) => {
@@ -266,7 +297,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     onSubmit(targetProductTag) {
       const newDraftProductTags = [targetProductTag, ...draftProductTags];
       setDraftProductTags(newDraftProductTags);
-      // productTagSearchInput.setInputDatalist(getUniqueTagDatalist(newDraftProductTags));
       tagSearchInput.restoreValue()
     }
   });
@@ -305,14 +335,14 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   }
 
   const applyProductValues = (targetProduct: Product) => {
-    nameInput.setValue(targetProduct.name, true);
-    descriptionInput.setValue(targetProduct.description, true);
-    priceInput.setValue(targetProduct.price.toString(), true);
-    physicalIdInput.setValue(targetProduct.physicalId, true);
-    stockInput.setValue(targetProduct.stock.toString(), true);
+    // nameInput.setValue(targetProduct.name, true);
+    // descriptionInput.setValue(targetProduct.description, true);
+    // priceInput.setValue(targetProduct.price.toString(), true);
+    // physicalIdInput.setValue(targetProduct.physicalId, true);
+    // stockInput.setValue(targetProduct.stock.toString(), true);
 
-    const stateSelecitonOption = statusSelections.find(option => option.value === targetProduct.state);
-    stateSelectionInput.setValue(stateSelecitonOption ?? stateSelectionInput.defaultOption, true);
+    // const stateSelecitonOption = statusSelections.find(option => option.value === targetProduct.state);
+    // stateSelectionInput.setValue(stateSelecitonOption ?? stateSelectionInput.defaultOption, true);
 
     let shouldShowDiscount = true;
     const { discountPrice } = targetProduct;

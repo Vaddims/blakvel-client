@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ElementSelectorButtonOptions from "../../../components/ElementSelectorOption/element-selector-options.interface";
 import { useElementSelection } from "../../hooks/useElementSelection";
 import RadioButton from "../../../components/ElementSelectorOption";
@@ -13,6 +13,7 @@ export interface ElementSelectorOptions<T> {
   readonly collapse?: boolean;
   readonly collapsible?: boolean;
   readonly dependencies?: unknown[];
+  readonly trackInitialTarget?: boolean;
   readonly buttonOptions?: ElementSelectorButtonOptions<T>[];
   readonly identifyOptions?: (element: ElementSelectorButtonOptions<T>) => PrimitiveIdentifier;
 }
@@ -55,7 +56,8 @@ const useElementSelectorComponent = function<T>(props: RadioSelectorProps<T>) {
     }
 
     if (multiple) {
-      return [...((buttonOptions.find(b => b.defaultSelection) ?? []) as any)] 
+      const options = buttonOptions.filter(option => option.defaultSelection) ?? []
+      return [...options];
     }
 
     return buttonOptions.filter(b => b.defaultSelection) ?? [];
@@ -65,6 +67,14 @@ const useElementSelectorComponent = function<T>(props: RadioSelectorProps<T>) {
     targets: getTargets(),
     identifier: identifyOptions,
   });
+
+  
+  const initialTargetsAsArray = initialTarget ? Array.isArray(initialTarget) ? initialTarget : [initialTarget] : [];
+  useEffect(() => {
+    if (props.trackInitialTarget) {
+      elementSelection.selectMultipleElements(initialTargetsAsArray);
+    }
+  }, [initialTargetsAsArray.map(option => option.title).join('&')]);
 
   const onRadioButtonClick = (radioButtonOptions: ElementSelectorButtonOptions<T>) => () => {
     if (radioButtonOptions.disabled) {

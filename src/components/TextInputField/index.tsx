@@ -11,7 +11,7 @@ interface TextInputField extends InputFieldCommonProps, React.DetailedHTMLProps<
 }
 
 const TextInputField: React.FC<TextInputField> = (props) => {
-  const formatedLabelId = props.label.toLowerCase().replace(' ', '-');
+  const formatedLabelId = props.label?.toLowerCase().replace(' ', '-');
   const inputElementId = `input-${formatedLabelId}`;
   const tagDatalistElementId = `datalist-${formatedLabelId}`;
 

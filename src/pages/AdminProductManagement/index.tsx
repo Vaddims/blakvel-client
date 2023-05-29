@@ -7,8 +7,9 @@ import InlineTableProductCard from '../../components/InlineTableProductCard';
 import * as sortOptions from './sort.options.json';
 import { ReactNode, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconDefinition, faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
+import { IconDefinition, faFilterCircleXmark, faMagnifyingGlassMinus, faSearch, faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
 import discountFilterOptions from './discount-filter.options.json';
+import stateFilterOptions from './state-filter.options.json';
 import useElementSelectorComponent from '../../middleware/component-hooks/element-selector-component/useElementSelectorComponent';
 import AppTable from '../../layouts/AppTable';
 import AppTableRow from '../../layouts/AppTableRow';
@@ -16,6 +17,8 @@ import useSearchParamState from '../../middleware/hooks/useSearchParamState';
 import { stringToBoolean } from '../../utils/converters';
 import './product-management.scss';
 import { useAuthentication } from '../../middleware/hooks/useAuthentication';
+import useTextInputField from '../../middleware/hooks/text-input-field-hook';
+import { InputField } from '../../middleware/hooks/input-field-hook';
 
 export type SortOptionType = keyof typeof sortOptions['clusters'];
 export interface SortOption {
@@ -31,6 +34,7 @@ export interface ElementSelectorButtonDiscountFilterPayload {
 const AdminProductManagement: React.FC = () => {  
   const {
     paramCluster,
+    clear: clearSearchCluster,
     urlSearchParams,
     applySearchCluster,
   } = useSearchParamState();
@@ -43,7 +47,10 @@ const AdminProductManagement: React.FC = () => {
   }
   
   const navigate = useNavigate();
-  const { data: products = [] } = useGetProductsQuery(requestSearchParams.toString());
+  const { 
+    data: products = [], 
+    isLoading: productsAreLoading,
+  } = useGetProductsQuery(requestSearchParams.toString());
   const [ deleteProduct ] = useDeleteProductMutation();
 
   const { 
@@ -57,24 +64,64 @@ const AdminProductManagement: React.FC = () => {
     identifier: (product) => product.id,
   });
 
-  const filterSelector = useElementSelectorComponent<ElementSelectorButtonDiscountFilterPayload>({
+  const globalSearchInput = useTextInputField({
+    inputIcon: faSearch,
+    placeholder: 'Search',
+    value: paramCluster.search.value ?? '',
+    trackValue: true,
+    validationTimings: [InputField.ValidationTiming.Submit],
+    onSubmit(data) {
+      paramCluster.search.set(data.length === 0 ? null : data);
+      applySearchCluster();
+    },
+    onClear() {
+      paramCluster.search.set(null);
+      applySearchCluster();
+    }
+  })
+
+  const discountFilterSelector = useElementSelectorComponent<ElementSelectorButtonDiscountFilterPayload>({
     title: 'Discount Filter',
     multiple: false,
+    trackInitialTarget: true,
     identifyOptions: (option) => option.title,
     buttonOptions: discountFilterOptions,
     initialTarget: discountFilterOptions.find(option => (
       typeof paramCluster.hasDiscount.value === 'string' &&
       option.payload.value === stringToBoolean(paramCluster.hasDiscount.value)
-    ))
+    )) ?? discountFilterOptions.find(option => option.defaultSelection)
   });
 
+  const stateFilterSelector = useElementSelectorComponent({
+    title: 'State Filter',
+    multiple: true,
+    trackInitialTarget: true,
+    identifyOptions: (option) => option.title,
+    buttonOptions: stateFilterOptions,
+    initialTarget: stateFilterOptions.filter(option => (
+      paramCluster.hasState.all.includes(option.payload)
+    )) ?? stateFilterOptions.filter(option => option.defaultSelection),
+  })
+
+  const filters: {name: string, value: string}[] = [
+    ...discountFilterSelector.selections.filter(option => option.payload.type).map(option => ({ name: option.title, value: option.title as string })),
+    ...stateFilterSelector.selections.map(option => ({ name: option.title, value: option.payload as string })),
+  ]
+
+  if (paramCluster.search.value) {
+    filters.unshift({ name: 'Search', value: `${paramCluster.search.value}` })
+  }
+
   useEffect(() => {
-    if (filterSelector.selections[0]) {
-      const selva = filterSelector.selections[0]?.payload.value ?? null;
-      paramCluster.hasDiscount.set(selva === null ? null : selva.toString())
-      applySearchCluster();
-    }
-  }, [filterSelector.getSelectionsInSequentialString()]);
+    const selectionValue = discountFilterSelector.selections[0]?.payload.value ?? null;
+    paramCluster.hasDiscount.set(selectionValue?.toString() ?? null)
+    applySearchCluster();
+  }, [discountFilterSelector.getSelectionsInSequentialString()]);
+
+  useEffect(() => {
+    paramCluster.hasState.set(stateFilterSelector.selections.map(selection => selection.payload));
+    applySearchCluster();
+  }, [stateFilterSelector.getSelectionsInSequentialString()]);
   
   const applySortOption = (sortOption: SortOption | null) => {
     paramCluster.sort.set(sortOption?.type ?? null);
@@ -139,16 +186,6 @@ const AdminProductManagement: React.FC = () => {
     <Link to='/products/create' className="panel-tool highlight">New Product</Link>
   );
 
-  const selectionHeaderTools = (
-    <>
-      <button className="panel-tool outline-highlight">Mark as Fixed</button>
-      <button className="panel-tool edit highlight" onClick={redirectToProductInspector}>Edit</button>
-      <button className="panel-tool delete" onClick={deleteAllSelections}>Delete</button>
-    </>
-  );
-
-  const headerTools = selections.length > 0 ? selectionHeaderTools : defaultHeaderTools;
-
   const getSortIcon = (sortOptionType: SortOptionType) => {
     const active = paramCluster.sort.value !== null && paramCluster.sort.value === sortOptionType;
 
@@ -180,62 +217,112 @@ const AdminProductManagement: React.FC = () => {
     : 'none'
   );
 
-  const extensions: ReactNode[] = [
-    filterSelector.render(),
+  const selectionHeaderTools = (
+    <>
+      <button className="panel-tool outline-highlight">Mark as Fixed</button>
+      <button className="panel-tool edit highlight" onClick={redirectToProductInspector}>Edit</button>
+      <button className="panel-tool delete" onClick={deleteAllSelections}>Delete</button>
+    </>
+  );
+
+  const selectionHeaderCentralTools = [
+    globalSearchInput.render(),
   ]
+
+  const headerTools = selections.length > 0 ? selectionHeaderTools : defaultHeaderTools;
+
+
+  const extensions: ReactNode[] = [
+    discountFilterSelector.render(),
+    stateFilterSelector.render(),
+  ];
+
+  const subheader: ReactNode[] = [
+    <span>Showing <span className='highlight'>{ products.length }</span> products</span>,
+  ]
+
+  if (filters.length > 0) {
+    subheader.push((
+      <span>Active Fitlers:{filters.map((filter, index) => (
+        <span> {index === 0 ? '' : '·'} <span className='highlight'>{filter.value.toUpperCase()}</span></span>
+      ))}</span>
+    ))
+  }
+
+  const clearFilters = () => {
+    clearSearchCluster();
+    applySearchCluster();
+  }
 
   return (
     <Page id='admin-product-management' onClick={deselectAllSelections}>
-      <AdminPanel title="Product Management" headerTools={headerTools} extensions={extensions}>
-        <AppTable useSelectionCheckbox>
-          <thead>
-            <AppTableRow 
-              onCheckboxClick={bulkSelectionHandler} 
-              aria-selected={allElementsAreSelected()}
-            >
-              <td 
-                className='name' 
-                onClick={onTablePropertySortChange('name')} 
-                aria-sort={getTypeAriaSort('name')}
+      <AdminPanel 
+        title="Product Management" 
+        headerTools={headerTools} 
+        headerCenterTools={selectionHeaderCentralTools}
+        extensions={extensions}
+        subheader={subheader}
+      >
+        {productsAreLoading ? (
+          <h1>Loading</h1>
+        ) : products.length > 0 ? (
+          <AppTable useSelectionCheckbox>
+            <thead>
+              <AppTableRow 
+                onCheckboxClick={bulkSelectionHandler} 
+                aria-selected={allElementsAreSelected()}
               >
-                { getSortIcon('name') } Product
-              </td>
-              <td aria-sort={getTypeAriaSort('status')} >
-                Status
-              </td>
-              <td 
-                onClick={onTablePropertySortChange('discountPercentage')}
-                aria-sort={getTypeAriaSort('discountPercentage')}
-              >
-                { getSortIcon('discountPercentage') } Discount
-              </td>
-              <td 
-                onClick={onTablePropertySortChange('inactivePrice')}
-                aria-sort={getTypeAriaSort('inactivePrice')}
-              >
-                { getSortIcon('inactivePrice') } Prior Price
-              </td>
-              <td 
-                onClick={onTablePropertySortChange('activePrice')}
-                aria-sort={getTypeAriaSort('activePrice')}
-              >
-                { getSortIcon('activePrice') } Price
-              </td>
-            </AppTableRow>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <InlineTableProductCard
-                key={product.id}
-                product={product} 
-                onClick={handleSelectionEvent(product)}
-                onDoubleClick={() => navigate(`/products/${product.id}/inspect`)}
-                aria-multiselectable
-                aria-selected={elementIsSelected(product)}
-              />
-            ))}
-          </tbody>
-        </AppTable>
+                <td 
+                  className='name' 
+                  onClick={onTablePropertySortChange('name')} 
+                  aria-sort={getTypeAriaSort('name')}
+                >
+                  { getSortIcon('name') } Product
+                </td>
+                <td aria-sort={getTypeAriaSort('status')} >
+                  Status
+                </td>
+                <td 
+                  onClick={onTablePropertySortChange('discountPercentage')}
+                  aria-sort={getTypeAriaSort('discountPercentage')}
+                >
+                  { getSortIcon('discountPercentage') } Discount
+                </td>
+                <td 
+                  onClick={onTablePropertySortChange('inactivePrice')}
+                  aria-sort={getTypeAriaSort('inactivePrice')}
+                >
+                  { getSortIcon('inactivePrice') } Prior Price
+                </td>
+                <td 
+                  onClick={onTablePropertySortChange('activePrice')}
+                  aria-sort={getTypeAriaSort('activePrice')}
+                >
+                  { getSortIcon('activePrice') } Price
+                </td>
+              </AppTableRow>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <InlineTableProductCard
+                  key={product.id}
+                  product={product} 
+                  onClick={handleSelectionEvent(product)}
+                  onDoubleClick={() => navigate(`/products/${product.id}/inspect`)}
+                  aria-multiselectable
+                  aria-selected={elementIsSelected(product)}
+                />
+              ))}
+            </tbody>
+          </AppTable>
+        ) : (
+          <div className='product-absence'>
+            <FontAwesomeIcon icon={faFilterCircleXmark} size={'5x'} />
+            <h1 className='title'>No products found</h1>
+            <span className='description'>Maybe the applied filters are too specific</span>
+            <button className='action' onClick={clearFilters}>Clear Filters</button>
+          </div>
+        )}
       </AdminPanel>
     </Page>
   );

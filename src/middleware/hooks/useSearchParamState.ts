@@ -27,7 +27,16 @@ const useSearchParamState = () => {
     const cachedParams: CachedParamState = {};
 
     for (const [ key, value ] of urlSearchParams.entries()) {
-      cachedParams[key] = value;
+      if (key in cachedParams) {
+        const cachedValue = cachedParams[key];
+        if (Array.isArray(cachedValue)) {
+          cachedValue.push(value);
+        } else if (cachedValue !== null) {
+          cachedParams[key] = [cachedValue, value];
+        }
+      } else {
+        cachedParams[key] = value;
+      }
     }
 
     return cachedParams;
@@ -87,6 +96,7 @@ const useSearchParamState = () => {
 
   const asArr = (key: string): string[] => {
     const data = cachedParams[key];
+
     if (data === null) {
       return [];
     }
@@ -95,7 +105,6 @@ const useSearchParamState = () => {
       return data;
     }
 
-    // console.log('>>', typeof data, data);
     return [data];
   }
 
@@ -115,11 +124,16 @@ const useSearchParamState = () => {
 
       return createReturnObject(key);
     }
-  })
+  });
+
+  const clearCachedParams = () => {
+    setCachedParams({});
+  }
 
   return {
     urlSearchParams,
     paramCluster,
+    clear: clearCachedParams,
     applySearchCluster: () => applySearchParams(),
   }
 }

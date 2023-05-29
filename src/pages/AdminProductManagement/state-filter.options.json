@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Public",
+    "defaultSelection": true,
+    "disabled": false,
+    "payload": "public"
+  },
+  {
+    "title": "Prepublic",
+    "disabled": false,
+    "defaultSelection": true,
+    "payload": "prepublic"
+  },
+  {
+    "title": "Internal",
+    "disabled": false,
+    "defaultSelection": true,
+    "payload": "internal"
+  },
+  {
+    "title": "Archive",
+    "disabled": false,
+    "defaultSelection": true,
+    "payload": "archive"
+  }
+]
