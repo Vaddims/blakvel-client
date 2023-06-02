@@ -118,6 +118,28 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
 
 export default useInputField;
 
+export const useInputFieldUnbounding = (handler?: Function) => {
+  const [ onceFocused , setOnceFocused] = useState(false);
+  const [ focused, setFocus ] = useState<boolean>();
+  
+  return {
+    onFocus: () => {
+      if (!focused) {
+        setFocus(true);
+        setOnceFocused(true);
+      }
+    },
+    onUnbound: () => {
+      if (focused) {
+        setFocus(false);
+        if (onceFocused) {
+          handler?.();
+        }
+      }
+    }
+  }
+}
+
 export type InputCollectionResults<T> = {
   [key in keyof T]: T[key] extends InputField.ComponentState<any, infer U> 
   ? InputField.State.ValidationResult.Success<U> 

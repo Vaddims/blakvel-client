@@ -14,6 +14,8 @@ import * as uuid from 'uuid';
 import './product-inspector.scss';
 import { InputField, InputFieldError, validateComponentStateInputs } from "../../hooks/input-field-hook";
 import useTextInputField from "../../hooks/text-input-field-hook";
+import useInputFieldCollection, { InputFieldCollection } from "../../hooks/use-input-field-collection-hook";
+import SubProductTagInspector from "./SubProductTagInspector";
 
 interface ProductInspectorOptions {
   readonly productId?: string;
@@ -57,64 +59,18 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const { data: globalProductTags } = useGetProductTagsQuery();
   const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(product?.tags ?? []);
 
+  const removeDraftProductTag = (id: string) => {
+    setDraftProductTags((productTags) => {
+      const newProductTags = productTags.filter(productTag => productTag.id !== id);
+      return newProductTags;
+    });
+  }
+
   useEffect(() => {
     if (product) {
       applyProductValues(product);
     }
   }, [product]);
-
-
-  // TODO REWORK
-  const [ 
-    draftProductSpecifications, 
-    setDraftProductSpecifications 
-  ] = useState<Product.Specification[]>(product?.specifications ?? []);
-
-  const [ 
-    draftProductSpecificationStatusDescriptors,
-    setDraftProductSpecificationStatusDescriptors
-  ] = useState<InputFieldStatusDescriptor[]>((product?.specifications ?? []).map(spec => ({
-    fieldId: spec.field.id,
-    status: InputField.Status.Default,
-    description: '',
-  })));
-
-  const updateDraftProductSpecificationStatusDescriptor = (fieldId: string, status: InputField.Status, description?: string) => {
-    setDraftProductSpecificationStatusDescriptors(prevState => {
-      const targetSpec = prevState.find(spec => spec.fieldId === fieldId);
-  
-      if (!targetSpec) {
-        return [
-          ...prevState,
-          {
-            fieldId,
-            status,
-            description: description ?? '',
-          },
-        ];
-      }
-  
-      const newDraftProductSpecificationStatusDescriptors = prevState.filter(
-        spec => spec.fieldId !== targetSpec.fieldId
-      );
-  
-      return [
-        ...newDraftProductSpecificationStatusDescriptors,
-        {
-          fieldId,
-          status,
-          description: description ?? targetSpec.description,
-        },
-      ];
-
-      // TODO Overhaul to be memory save (delete descriptor when specification is deleted)
-    });
-  };
-
-  const getProductSpecificationInitialState = (specFieldId: string) => {
-    return product?.specifications?.find(spec => spec.field.id === specFieldId);
-  }
-  // TODO REWORK END
 
   const nameInput = useTextInputField({
     label: 'Name',
@@ -272,8 +228,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   });
 
   const tagSearchInput = useTextInputField<Product.Tag>({
-    label: 'Add Tag',
-    placeholder: 'Search',
+    placeholder: 'Search for Tag',
     labelIcon: faHashtag,
     inputIcon: faSearch,
     validationTimings: [InputField.ValidationTiming.Submit],
@@ -284,7 +239,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       ));
 
       if (!targetTag) {
-        throw new InputFieldError(`Tag with the name ${input.toLocaleUpperCase()} doesn't exist`);
+        throw new InputFieldError(`Tag (${input.toLocaleUpperCase()}) doesn't exist`);
       }
       
       const productHasTargetTag = draftProductTags.find(draftProductTag => draftProductTag.id === targetTag.id);
@@ -335,15 +290,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   }
 
   const applyProductValues = (targetProduct: Product) => {
-    // nameInput.setValue(targetProduct.name, true);
-    // descriptionInput.setValue(targetProduct.description, true);
-    // priceInput.setValue(targetProduct.price.toString(), true);
-    // physicalIdInput.setValue(targetProduct.physicalId, true);
-    // stockInput.setValue(targetProduct.stock.toString(), true);
-
-    // const stateSelecitonOption = statusSelections.find(option => option.value === targetProduct.state);
-    // stateSelectionInput.setValue(stateSelecitonOption ?? stateSelectionInput.defaultOption, true);
-
     let shouldShowDiscount = true;
     const { discountPrice } = targetProduct;
     const expirationDate = targetProduct.discountExpirationDate 
@@ -369,7 +315,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
 
     setDraftProductTags(targetProduct.tags);
-    setDraftProductSpecifications(targetProduct.specifications)
+    // setDraftProductSpecifications(targetProduct.specifications)
   }
 
   const restoreProductValues = () => {
@@ -378,125 +324,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     staticInputsArray.forEach(input => input.statusApplier.restoreDefault());
     
     setDraftProductTags(product?.tags ?? []);
-    setDraftProductSpecifications(product?.specifications ?? []);
-    setDraftProductSpecificationStatusDescriptors((product?.specifications ?? []).map(spec => ({
-      fieldId: spec.field.id,
-      status: InputField.Status.Default,
-      description: '',
-    })))
-  }
-
-  const updateSpecification = (field: Product.Tag.Field): React.ChangeEventHandler<HTMLInputElement> => (event) => {
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default, '');
-    const specificationIndex = draftProductSpecifications.findIndex(draftSpecification => draftSpecification.field.id === field.id);
-    const newDraftProductSpecification = [...draftProductSpecifications];
-    
-    if (specificationIndex >= 0) {
-      newDraftProductSpecification.splice(specificationIndex, 1);
-    }
-
-    newDraftProductSpecification.push({
-      field: field,
-      value: event.target.value,
-    });
-
-    setDraftProductSpecifications(newDraftProductSpecification)
-  }
-
-  const blurSpecification = (field: Product.Tag.Field): React.FocusEventHandler<HTMLInputElement> => (event) => {
-    if (event.target.value === '') {
-      return;
-    }
-
-    const t = product?.specifications.find(spec => spec.field.id === field.id);
-    if (t && event.target.value === t.value) {
-      return;
-    }
-
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default);
-  }
-
-  const click = (field: Product.Tag.Field): React.MouseEventHandler<HTMLInputElement> => (event) => {
-    updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default, '');
-  }
-
-  const restoreTagSpecifications = (tag: Product.Tag) => {
-    setDraftProductSpecifications(prevState => {
-      const clear = prevState.filter(spec => !tag.fields.some(field => field.id === spec.field.id));
-      for (const field of tag.fields) {
-        const target = product?.specifications.find(s => field.id === s.field.id);
-        clear.push({
-          field,
-          value: target?.value ?? '',
-        });
-        updateDraftProductSpecificationStatusDescriptor(field.id, InputField.Status.Default, '');
-      }
-
-      return clear;
-    });
-  }
-
-  const restoreTagSpecification = (specFieldId: string) => {
-    setDraftProductSpecifications(prevState => {
-      const a: Product.Specification[] = [];
-      for (const spec of prevState) {
-        if (spec.field.id !== specFieldId) {
-          a.push(spec);
-          continue;
-        }
-
-        const init = getProductSpecificationInitialState(spec.field.id);
-        if (!init) {
-          const s = {
-            field: spec.field,
-            value: '',
-          }
-
-          a.push(s);
-          continue
-        }
-
-        const s: Product.Specification = {
-          ...init,
-        }
-
-        a.push(s);
-      }
-
-      return a;
-    })
-  }
-
-  const clearTagSpecification = (specFieldId: string) => {
-    setDraftProductSpecifications(prevState => {
-      const a: Product.Specification[] = [];
-      for (const spec of prevState) {
-        if (spec.field.id !== specFieldId) {
-          a.push(spec);
-          continue;
-        }
-
-        const init = getProductSpecificationInitialState(spec.field.id);
-        if (!init) {
-          const s = {
-            field: spec.field,
-            value: '',
-          }
-
-          a.push(s);
-          continue
-        }
-
-        const s: Product.Specification = {
-          ...spec,
-          value: '',
-        }
-
-        a.push(s);
-      }
-
-      return a;
-    })
+    inputFieldCollection.restore();
   }
 
   const validateInputs = (): Omit<Product, 'id' | 'urn'> | null => {
@@ -510,42 +338,21 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     ? discountExpirationDateInput.validate()
     : void 0;
 
-    let specificationInputsAreInvalid = false;
-    const definedSpecifications: Product.Specification[] = [];
-
-    const productTagFields = draftProductTags.map(tag => tag.fields).flat();
-    for (const tagField of productTagFields) {
-      const draftSpecification = draftProductSpecifications.find(specification => specification.field.id === tagField.id);
-
-      if (!draftSpecification) {
-        if (tagField.required) {
-          updateDraftProductSpecificationStatusDescriptor(tagField.id, InputField.Status.Error, 'Field is required');
-          specificationInputsAreInvalid = true;
-          continue;
-        }
-
-        continue;
-      }
-
-      if (draftSpecification.value !== '' as const) {
-        definedSpecifications.push(draftSpecification);
-        continue;
-      }
-
-      if (draftSpecification.field.required) {
-        updateDraftProductSpecificationStatusDescriptor(draftSpecification.field.id, InputField.Status.Error, 'Field is required')
-        specificationInputsAreInvalid = true;
-      }
-    }
+    const specificationResult = inputFieldCollection.validate();
     
     if (
       !validatedResults || 
       !discountPriceResult?.isValid ||
       !discountExpirationDateResult?.isValid ||
-      specificationInputsAreInvalid
+      !specificationResult.collectionIsValid
     ) {
       return null;
     }
+
+    const specifications: Product.Specification[] = specificationResult.successes.map(result => ({
+      field: result.field.payload,
+      value: result.data as string,
+    }))
 
     const product: Omit<Product, 'id' | 'urn'> = {
       name: validatedResults.nameInput.data,
@@ -558,11 +365,29 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       discountExpirationDate: discountExpirationDateResult?.data?.toString() ?? null,
       stock: validatedResults.stockInput.data,
       tags: draftProductTags,
-      specifications: definedSpecifications,
+      specifications,
     }
 
     return product;
   }
+
+  const inputFieldCollection = useInputFieldCollection({
+    descriptorUpdateDependencies: [product, draftProductTags],
+    fieldDescriptors: draftProductTags.map<InputFieldCollection.Field.Descriptor<Product.Tag.Field>[]>((tag) => tag.fields.map((field) => ({
+      fieldType: InputFieldCollection.FieldType.Text,
+      label: field.name,
+      placeholder: `ex. ${field.example}`,
+      value: product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
+      anchor: product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
+      group: [tag.id, field.id],
+      required: field.required,
+      payload: field,
+      validationTimings: [InputField.ValidationTiming.Blur],
+      validate(_, data) {
+        return data;
+      }
+    }))).flat() ?? [],
+  });
 
   const discountPercent = calculateDiscountPercent();
 
@@ -615,22 +440,13 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
             <article className="product-tag-management">
               { tagSearchInput.render() }
               <div className="product-tag-cluster">
-                {draftProductTags?.map(productTag => (
-                  <ProductTagRepresenter
-                    draftProductSpecificationStatusDescriptors={draftProductSpecificationStatusDescriptors}
-                    specifications={draftProductSpecifications}
-                    targetProductTag={productTag}
-                    draftProductTags={draftProductTags ?? []} 
-                    setProductTags={setDraftProductTags} 
-                    updateSpecification={updateSpecification}
-                    blurSpecification={blurSpecification}
-                    clickSpecification={click}
-                    restore={() => restoreTagSpecifications(productTag)}
-                    restoreSpecification={restoreTagSpecification}
-                    clearSpecification={clearTagSpecification}
-                    getProductSpecificationInitialState={getProductSpecificationInitialState}
+                { draftProductTags.map(draftProductTag => (
+                  <SubProductTagInspector
+                    productTag={draftProductTag}
+                    removeProductTag={() => removeDraftProductTag(draftProductTag.id)}
+                    specificationGroup={inputFieldCollection.createFieldGroup(draftProductTag.id)}
                   />
-                ))}
+                )) }
               </div>
             </article>
             <article>

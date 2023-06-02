@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import TextInputField from "../../components/TextInputField";
-import useInputField, { InputField } from "./input-field-hook";
+import useInputField, { InputField, useInputFieldUnbounding } from "./input-field-hook";
 import { ArgumentTypes } from "../utils/types";
 
 export interface GenericInputOptions {
@@ -23,14 +23,13 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     anchor: options.anchor?.toString() ?? '',
   });
 
-  const [ onceFocused , setOnceFocused] = useState(false);
-  const [ focused, setFocus ] = useState<boolean>();
-
   const inputBlurHandler = () => {
     if (options.validationTimings?.includes(InputField.ValidationTiming.Blur)) {
       inputField.validate();
     }
   }
+
+  const inputFieldUnbounding = useInputFieldUnbounding(inputBlurHandler);
 
   const inputClickHandler: React.MouseEventHandler<HTMLInputElement> = (event) => {
     inputField.statusApplier.restoreDefault()
@@ -53,28 +52,13 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     options.onSubmit?.(validatedResult.data);
   }
 
-  useEffect(() => {
-    if (!focused && focused !== undefined && onceFocused) {
-      inputBlurHandler?.();
-    }
-  }, [focused])
-
-  const unboundHandler = (event: MouseEvent) => {
-    if (focused) {
-      setOnceFocused(true);
-      setFocus(false);
-    }
-  }
-
   const changeHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     options.onChange?.(event.target.value);
     inputField.setValue(event.target.value)
   }
 
   const focusHandler: React.FocusEventHandler<HTMLInputElement> = () => {
-    if (!focused) {
-      setFocus(true);
-    }
+    inputFieldUnbounding.onFocus();
   }
 
   const restoreValue = () => {
@@ -100,7 +84,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       onInputClear={shouldAllowInputClear && clearValue}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       
-      onUnbound={unboundHandler}
+      onUnbound={() => inputFieldUnbounding.onUnbound()}
       onChange={changeHandler}
       onClick={inputClickHandler}
       onKeyPress={keyPressHandler}

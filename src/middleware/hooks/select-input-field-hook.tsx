@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AppSelect from "../../components/SelectInputField"
 import useInputField, { InputField } from "./input-field-hook";
 
-interface Option {
+export interface SelectInputFieldOption {
   readonly title: string;
   readonly value: string;
   readonly defaultSelection?: boolean;
@@ -11,15 +11,20 @@ interface Option {
 interface SelectInputFieldOptions {
   readonly label: string;
   readonly value?: any;
-  readonly options: Option[];
+  readonly options: SelectInputFieldOption[];
   readonly required?: boolean;
 }
 
 export interface SelectInputFieldState {
-  readonly defaultOption: Option;
+  readonly defaultOption: SelectInputFieldOption;
 }
 
-type SelectInputFieldHook = InputField.GenericHook<SelectInputFieldOptions, SelectInputFieldState, Option, Option>;
+export const defaultSelectInputFieldOption: SelectInputFieldOption = {
+  title: 'None',
+  value: '',
+}
+
+type SelectInputFieldHook = InputField.GenericHook<SelectInputFieldOptions, SelectInputFieldState, SelectInputFieldOption, SelectInputFieldOption>;
 const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
   const {
     label,
@@ -27,27 +32,22 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
     required = false,
   } = selectorOptions;
 
-  const defaultOption: Option = {
-    title: 'None',
-    value: '',
-  }
-
-  const appInput = useInputField<Option, Option>({
+  const appInput = useInputField<SelectInputFieldOption, SelectInputFieldOption>({
     validate: (option) => option,
     ...selectorOptions,
-    value: selectorOptions.value ?? defaultOption,
-    anchor: selectorOptions.anchor ?? defaultOption,
+    value: selectorOptions.value ?? defaultSelectInputFieldOption,
+    anchor: selectorOptions.anchor ?? defaultSelectInputFieldOption,
   });
 
   const displayOptions = [...options];
-  displayOptions.unshift(defaultOption);
+  displayOptions.unshift(defaultSelectInputFieldOption);
 
   const restoreValue = () => {
     appInput.setValue(appInput.anchor);
   }
 
   const clearValue = () => {
-    appInput.setValue(defaultOption);
+    appInput.setValue(defaultSelectInputFieldOption);
   }
 
   const findOption = (optionValue: string) => {
@@ -55,11 +55,11 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
   }
 
   const onInputChange: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
-    appInput.setValue(findOption(event.target.value) ?? defaultOption)
+    appInput.setValue(findOption(event.target.value) ?? defaultSelectInputFieldOption)
   }
 
-  const setValue = (option: Option | null, useAsAnchor = false) => {
-    appInput.setValue(option ?? defaultOption, useAsAnchor);
+  const setValue = (option: SelectInputFieldOption | null, useAsAnchor = false) => {
+    appInput.setValue(option ?? defaultSelectInputFieldOption, useAsAnchor);
   }
 
   const shouldAllowInputRestore = appInput.value !== appInput.anchor && appInput.anchor.value !== '';
@@ -87,7 +87,7 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
 
   return {
     ...appInput,
-    defaultOption,
+    defaultOption: defaultSelectInputFieldOption,
     restoreValue,
     clearValue,
     setValue,
