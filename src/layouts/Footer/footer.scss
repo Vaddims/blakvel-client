@@ -1,16 +1,23 @@
 .footer {
-  border-top: .1rem solid rgb(134, 134, 134);
+  border-top: .2rem solid var(--background-secondary-color);
   margin-top: auto;
   position: relative;
   width: 100%;
+  height: 3.5rem;
 
   .creator-box {
+    display: flex;
+    box-sizing: border-box;
     position: relative;
     text-align: center;
     padding: .5rem;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
 
     .creator-sentense {
-      color: white;
+      color: grey;
     }
   }
 }

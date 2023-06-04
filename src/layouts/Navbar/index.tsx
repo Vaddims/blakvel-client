@@ -48,7 +48,9 @@ function Navbar(props: NavbarProps) {
   return (
     <nav className={`navbar ${phase}`} ref={reference}>
       <div className='logo-boundary navbar-section' onClick={redirect('/')}>
-        <img className='logo' src={logo} />
+        <div className='logo-wrapper'>
+          <img className='logo' src={logo} />
+        </div>
         <h2>Petshop</h2>
       </div>
       <div className='navbar-section'>

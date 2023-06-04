@@ -1,7 +1,6 @@
 .navbar {
   opacity: 1;
   top: 0;
-  // background-color: var(--background-secondary-color);
   background-color: var(--background-main-color);
   border-bottom: .2rem solid var(--background-secondary-color);
   height: 3.5rem;
@@ -10,11 +9,6 @@
   flex-direction: row;
   justify-content: space-between;
   z-index: 10000;
-
-  .logo {
-    height: 100%;
-  }
-
   
   .navbar-section {
     box-sizing: border-box;
@@ -30,10 +24,12 @@
       flex-direction: row;
       cursor: pointer;
       padding: 1rem;
-  
-      i {
-        color: white;
-        transition: color .3s ease;
+
+      .logo-wrapper {
+        height: 100%;
+        .logo {
+          height: 100%;
+        }
       }
       
       h2 {
