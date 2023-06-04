@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { SelectInputFieldOption, defaultSelectInputFieldOption } from "./select-input-field-hook";
 import { v4 as createUUID } from 'uuid';
 import { InputField, InputFieldError } from "./input-field-hook";
+import TextInputField from "../../components/TextInputField";
+import CheckboxField from "../../components/CheckboxField";
 
 const nondefaultValidator = (field: InputFieldCollection.Field) => {
   switch (field.fieldType) {
@@ -30,11 +32,12 @@ const nondefaultValidator = (field: InputFieldCollection.Field) => {
   return field.value;
 }
 
-const useInputFieldCollection = function<P = unknown>(options: InputFieldCollection.Options<P>) {
+const useInputFieldCollection = function<P = unknown>(options: InputFieldCollection.Options<P>): InputFieldCollection<P> {
   const getStableFieldFromDescriptor = (descriptor: InputFieldCollection.Field.Descriptor<P>): InputFieldCollection.Field<P> => {
     const uid = createUUID();
     const stableField: InputFieldCollection.Field<P> = {
       uid,
+      identifier: descriptor.identifier,
       group: descriptor.group ?? [],
       fieldType: descriptor.fieldType as any,
       validationTimings: descriptor.validationTimings ?? [],
@@ -49,6 +52,11 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
       payload: descriptor.payload as P,
       onceFocused: false,
       focused: false,
+      statusApplier: {
+        restoreDefault: () => statusApplier.restoreDefault(uid),
+        useCustomDefault: (helperText) => statusApplier.useCustomDefault(uid, helperText),
+        useError: (error: InputFieldError) => statusApplier.useError(uid, error),
+      },
       modify<T extends InputFieldCollection.Field>(override: Partial<GetInputFieldBody<T>> | ((field: T) => Partial<GetInputFieldBody<T>>)) {
         modifyField(this.uid, override)
       },
@@ -103,11 +111,6 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
           return failResult;
         }
       },
-      statusApplier: {
-        restoreDefault: () => statusApplier.restoreDefault(uid),
-        useCustomDefault: (helperText) => statusApplier.useCustomDefault(uid, helperText),
-        useError: (error: InputFieldError) => statusApplier.useError(uid, error),
-      },
       handleFocus() {
         if (!this.focused) {
           modifyField(this.uid, {
@@ -128,7 +131,10 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
             focused: false,
           });
         }
-      }
+      },
+      render() {
+        return renderField(this);
+      },
     };
 
     return stableField;
@@ -155,8 +161,18 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
   }, [options.fieldDescriptors]);
 
   useEffect(() => {
-    const rawFields = getStableFieldFromOptionDescriptors();
-    setFields(rawFields);
+    setFields((state) => {
+      const newState = options.fieldDescriptors.map(descriptor => {
+        const existingField = state.find(field => field.identifier === descriptor.identifier);
+        if (existingField) {
+          return existingField;
+        }
+        
+        return getStableFieldFromDescriptor(descriptor);
+      });
+      
+      return newState;
+    });
   }, options.descriptorUpdateDependencies ?? []);
 
   const findFieldIndex = (fieldId: string, customFields?: InputFieldCollection.Field<P>[]) => {
@@ -312,16 +328,77 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
     }
   }
 
+  const renderField = (field: InputFieldCollection.Field) => {
+    switch (field.fieldType) {
+      case InputFieldCollection.FieldType.Text: {
+        return (
+          <TextInputField
+            label={field.label}
+            value={field.value}
+            markAsRequired={field.required}
+            placeholder={field.placeholder}
+            onChange={(e) => field.modify({
+              value: e.target.value,
+            })}
+            onInputRestore={field.value !== field.anchor && field.anchor !== '' && (() => {
+              field.modify({
+                value: field.anchor,
+              })
+            })}
+            onInputClear={field.value !== '' && (() => {
+              field.modify({
+                value: '',
+              })
+            })}
+            onClick={() => {
+              field.statusApplier.restoreDefault();
+            }}
+            onFocus={() => {
+              field.handleFocus();
+            }}
+            onUnbound={() => {
+              field.handleUnbound();
+            }}
+            status={field.status}
+            helperText={field.helperText}
+          />
+        );
+      }
+
+      case InputFieldCollection.FieldType.Checkbox: {
+        return (
+          <CheckboxField 
+            label={field.label}
+            select={field.value}
+            onClick={() => field.modify({
+              value: !field.value,
+            })}
+            helperText={field.helperText}
+          />
+        );
+      }
+
+      case InputFieldCollection.FieldType.Select: {
+        return <div>Not implemented</div>
+      }
+
+      default: {
+        return (
+          <div>Field type unknown</div>
+        )
+      }
+    }
+  }
+
   return {
     fields: rawFields,
-    validate: () => validateFieldGroup(getFields()),
+    statusApplier,
     restore: () => restoreFieldGroup(getFields()),
-
+    validate: () => validateFieldGroup(getFields()),
     addField,
     exchangeFields,
     removeField,
     createFieldGroup: createFieldGroup(getFields()),
-    statusApplier,
   }
 }
 
@@ -342,6 +419,7 @@ export namespace InputFieldCollection {
     export namespace Descriptor {
       export interface Base<T extends FieldType, V, P> {
         readonly fieldType: T;
+        readonly identifier: string | number;
         readonly group?: (string | number)[];
         readonly placeholder?: string;
         readonly insertPosition?: number;
@@ -360,7 +438,7 @@ export namespace InputFieldCollection {
       export type CheckboxInputField<P> = Descriptor.Base<FieldType.Checkbox, boolean, P>;
     }
 
-    export type Descriptor<P> = 
+    export type Descriptor<P = unknown> = 
     | Descriptor.TextInpuField<P>
     | Descriptor.SelectInputField<P>
     | Descriptor.CheckboxInputField<P>;
@@ -383,6 +461,7 @@ export namespace InputFieldCollection {
         readonly uid: string;
         readonly fieldType: T;
         readonly group: (string | number)[];
+        readonly identifier: string | number;
       }
 
       export interface Body<V, P = unknown> {
@@ -413,6 +492,7 @@ export namespace InputFieldCollection {
         readonly remove: () => void;
         readonly handleFocus: () => void;
         readonly handleUnbound: () => void;
+        readonly render: () => JSX.Element;
       }
 
       export namespace Functionalities {
@@ -423,9 +503,9 @@ export namespace InputFieldCollection {
 
       export type Base<T extends FieldType, V, P> = Identifiers<T> & Body<V, P> & Functionalities<GetStableOf<T>, P>;
 
-      export type TextInpuField<P> = Stable.Base<FieldType.Text, string, P>;
-      export type SelectInputField<P> = Stable.Base<FieldType.Select, SelectInputFieldOption, P>;
-      export type CheckboxInputField<P> = Stable.Base<FieldType.Checkbox, boolean, P>;
+      export type TextInpuField<P = unknown> = Stable.Base<FieldType.Text, string, P>;
+      export type SelectInputField<P = unknown> = Stable.Base<FieldType.Select, SelectInputFieldOption, P>;
+      export type CheckboxInputField<P = unknown> = Stable.Base<FieldType.Checkbox, boolean, P>;
     }
 
     export interface StatusApplier {
@@ -461,4 +541,15 @@ export namespace InputFieldCollection {
     readonly descriptorUpdateDependencies?: any[];
     readonly fieldDescriptors: Field.Descriptor<P>[];
   }
+}
+
+export interface InputFieldCollection<P = unknown> {
+  readonly fields: InputFieldCollection.Field<P>[];
+  readonly statusApplier: InputFieldCollection.Field.StatusApplier;
+  readonly restore: () => void;
+  readonly validate: () => InputFieldCollection.ValidationResult<P>;
+  readonly addField: (...descritptors: InputFieldCollection.Field.Descriptor<P>[]) => void;
+  readonly exchangeFields: (fieldId1: string, fieldId2: string) => void;
+  readonly removeField: (fieldId: string) => void;
+  readonly createFieldGroup: (group: string | number) => InputFieldCollection.FieldGroup<P>;
 }

@@ -34,20 +34,20 @@ export const CreateProductTag = () => {
   } = locationState;
 
   const requestProductTagCreation = async () => {
-    try {
-      const inputProductTag = productTagInspector.validateInputs();
-      await createProductTag({
-        ...inputProductTag,
-      });
+    // try {
+    //   const inputProductTag = productTagInspector.validateInputs();
+    //   await createProductTag({
+    //     ...inputProductTag,
+    //   });
 
-      const path = awaitingPreviousPaths?.[awaitingPreviousPaths.length - 1] ?? StaticRoutes.ProductTagManagement;
-      const newLocationState: LocationState = {
-        ...locationState,
-        awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
-      }
+    //   const path = awaitingPreviousPaths?.[awaitingPreviousPaths.length - 1] ?? StaticRoutes.ProductTagManagement;
+    //   const newLocationState: LocationState = {
+    //     ...locationState,
+    //     awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
+    //   }
 
-      navigate(path, { replace: true, state: newLocationState });
-    } catch {}
+    //   navigate(path, { replace: true, state: newLocationState });
+    // } catch {}
   }
 
   const headerTools = (

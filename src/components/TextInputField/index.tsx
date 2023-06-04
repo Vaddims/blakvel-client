@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import InputField, { extractInputFieldProps, InputFieldCommonProps } from '../InputField';
+import { v4 as createUUID } from 'uuid';
 import './text-input-field.scss';
 
 export interface InputFieldDatalistElement {
@@ -11,14 +13,14 @@ interface TextInputField extends InputFieldCommonProps, React.DetailedHTMLProps<
 }
 
 const TextInputField: React.FC<TextInputField> = (props) => {
-  const formatedLabelId = props.label?.toLowerCase().replace(' ', '-');
-  const inputElementId = `input-${formatedLabelId}`;
-  const tagDatalistElementId = `datalist-${formatedLabelId}`;
+  const [ inputId ] = useState(createUUID());
+  const inputElementId = `input-${inputId}`;
+  const tagDatalistElementId = `datalist-${inputElementId}`;
 
   return (
     <InputField
       {...extractInputFieldProps(props)}
-      htmlFor={inputElementId}
+      inputId={inputElementId}
       className='text-input-field'
     >
       <input

@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import TextInputField from "../../components/TextInputField";
-import useInputField, { InputField, useInputFieldUnbounding } from "./input-field-hook";
+import useInputField, { InputField, InputFieldError, useInputFieldUnbounding } from "./input-field-hook";
 import { ArgumentTypes } from "../utils/types";
 
 export interface GenericInputOptions {
@@ -11,14 +11,22 @@ export interface GenericInputOptions {
 type TextInputFieldHook<T> = InputField.GenericHook<GenericInputOptions, {}, string, T>;
 const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputFieldHook<T>>[0]): ReturnType<TextInputFieldHook<T>> {
   const inputField = useInputField({
-    validate: (data) => {
-      console.warn(`No validation function provided for the (${options.label}) TextInputField hook. By default no formation will be applied for the validated returned value`)
-      return data as any;
-    },
     onValueChange(data) {
       options.onChange?.(data);
     },
     ...options,
+    validate: (data) => {
+      if (options.required && data.trim() === '') {
+        throw new InputFieldError('No input provided');
+      }
+      
+      if (options.validate) {
+        return options.validate(data);
+      }
+      
+      console.warn(`No validation function provided for the (${options.label}) TextInputField hook. By default no formation will be applied for the validated returned value`)
+      return data as any;
+    },
     value: options.value?.toString() ?? '',
     anchor: options.anchor?.toString() ?? '',
   });

@@ -20,57 +20,6 @@ const SubProductTagInspector: React.FC<SubProductTagInspectorProps<Product.Tag.F
   const locationState: LocationState = location.state ?? {};
   const { awaitingPreviousPaths = [] } = locationState;
 
-  const renderField = (tagField: Product.Tag.Field) => {
-    // console.log('income', tagField, 'from', props.specificationGroup.fields)
-    const field = props.specificationGroup.fields.find(field => field.payload.id === tagField.id);
-
-    if (!field) {
-      return (
-        <div>Field not found</div>
-      )
-    }
-
-    switch (field.fieldType) {
-      case InputFieldCollection.FieldType.Text:
-        return (
-          <TextInputField
-            label={field.label}
-            value={field.value}
-            markAsRequired={field.required}
-            placeholder={field.placeholder}
-            onChange={(e) => field.modify({
-              value: e.target.value,
-            })}
-            onInputRestore={field.value !== field.anchor && field.anchor !== '' && (() => {
-              field.modify({
-                value: field.anchor,
-              })
-            })}
-            onInputClear={field.value !== '' && (() => {
-              field.modify({
-                value: '',
-              })
-            })}
-            onClick={() => {
-              field.statusApplier.restoreDefault();
-            }}
-            onFocus={() => {
-              field.handleFocus();
-            }}
-            onUnbound={() => {
-              field.handleUnbound();
-            }}
-            status={field.status}
-            helperText={field.helperText}
-          />
-        );
-    }
-
-    return (
-      <div>End</div>
-    )
-  }
-
   const editTag = () => {
     const newAwaitingPreviousPaths = [...awaitingPreviousPaths, location.pathname];
     navigate(`/product-tags/${props.productTag.id}/inspect`, {
@@ -109,7 +58,7 @@ const SubProductTagInspector: React.FC<SubProductTagInspectorProps<Product.Tag.F
       </header>
       { props.productTag.fields.length > 0 && (
         <div className="product-tag-fields">
-          {props.productTag.fields.map(renderField)}
+          {props.specificationGroup.fields.map((field) => field.render())}
         </div>
       )}
     </div>

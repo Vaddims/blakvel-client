@@ -1,202 +1,207 @@
 import * as uuid from 'uuid';
 import { useParams } from 'react-router-dom';
 import { Fragment, useEffect, useState } from 'react';
-import InputField from '../../../components/TextInputField';
-import { ProductTagFieldBundle, ProductTagFieldInspection } from '../../../pages/InspectProductTag/ProductTagFieldInspection';
 import { Product } from '../../../models/product.model';
 import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import { ProductTagFieldInspector } from './ProductTagFieldInspector';
-import './product-tag-inspector.scss';
-import { useGetProductTagQuery, useGetProductTagsQuery } from '../../../services/api/productsApi';
-import { useInputFieldCollectionManagement } from '../../hooks/useInputFieldCollectionManagement';
-import { FieldDescriptor } from '../../hooks/useInputFieldCollectionManagement';
+import { useGetProductTagQuery } from '../../../services/api/productsApi';
 import useTextInputField from '../../hooks/text-input-field-hook';
-import { InputField as InputFieldNamespace } from '../../hooks/input-field-hook';
+import { InputField } from '../../hooks/input-field-hook';
+import useInputFieldCollection, { InputFieldCollection } from '../../hooks/use-input-field-collection-hook';
+import { v4 as createUUID } from 'uuid';
+import './product-tag-inspector.scss';
 
 export interface ProductTagInspectorOptions {
-  tagId?: string;
+  readonly tagId?: string;
 }
 
-export interface ProductTagFieldState {
-  localId: string;
-  current: Product.Mixed.Tag.Field;
-  initial?: Product.Tag.Field;
-}
-
-const createFieldUid = (field: ProductTagFieldState, inputFieldName: string) => {
-  return `${field.localId}/${inputFieldName}`;
+export interface ProductTagFieldDescriptor extends Product.Mixed.Tag.Field {
+  readonly localUid: string;
 }
 
 export const useProductTagInspector = (options: ProductTagInspectorOptions = {}) => {
-  const { 
-    id = '',
-  } = useParams();
-
-  const uuidIsValid = uuid.validate(id);
-
-  const { data: productTag } = useGetProductTagQuery(id, { skip: !uuid.validate(id) })
-  const { data: globalProductTags } = useGetProductTagsQuery();
-
-  const [ fields, setFields ] = useState<ProductTagFieldState[]>([]);
-
-  const inputFieldCollectionManagement = useInputFieldCollectionManagement<string>({
-    initialDescriptors: [],
-    format(payload, input) {
-      const descriptor = inputFieldCollectionManagement.findDescriptor(payload);
-      if (!descriptor) {
-        throw new Error('Internal error');
-      }
-
-      const [ fieldId, fieldInputName ] = payload.split('/') as [string, string];
-      if (fieldInputName === 'name') {
-        if (input === '') {
-          throw new Error('Field is required');
-        }
-
-        if (fields.some(field => field.current.name === input && fieldId !== field.localId)) {
-          throw new Error('Field must have a uniqe name');
-        }
-
-        return input;
-      }
-    },
-  });
+  const { id = '' } = useParams();
+  const { data: productTag } = useGetProductTagQuery(id, { skip: !id })
+  const [ draftFieldDescriptors, setDraftFieldDescriptors ] = useState<ProductTagFieldDescriptor[]>([]);
 
   const productTagNameInputField = useTextInputField({
     label: 'Tag name',
     required: true,
     inputIcon: faHashtag,
+    value: productTag?.name,
+    anchor: productTag?.name,
+    trackAnchor: true,
+    trackValue: true,
+    validationTimings: [InputField.ValidationTiming.Blur]
   });
- 
-  useEffect(() => {
-    if (!productTag) {
-      return;
+
+  const createProductTagFieldDescriptor = (providedProductTag: Product.Mixed.Tag.Field, override?: Partial<Product.Mixed.Tag.Field>) => {
+    const descriptor: ProductTagFieldDescriptor = {
+      localUid: createUUID(),
+      ...providedProductTag,
+      ...override,
     }
 
-    productTagNameInputField.setValue(productTag.name, true);
-    setFields(productTag.fields.map<ProductTagFieldState>(field => ({
-      localId: uuid.v4(),
-      initial: { ...field },
-      current: { ...field },
-    })));
-  }, [productTag]);
-
-  useEffect(() => {
-    const { fieldDescriptors: existingFieldDescriptors } = inputFieldCollectionManagement;
-    const findInputFieldDescriptor = (id: string) => {
-      return existingFieldDescriptors.find(descriptor => descriptor.payload === id);
-    }
-
-    const descriptors: FieldDescriptor<string>[] = [];
-    for (const field of fields) {
-      const namePreviousDescriptor = findInputFieldDescriptor(createFieldUid(field, 'name'));
-      descriptors.push(namePreviousDescriptor ?? {
-        payload: createFieldUid(field, 'name'),
-        status: InputFieldNamespace.Status.Default,
-      });
-
-      const examplePreviousDescriptor = findInputFieldDescriptor(createFieldUid(field, 'example'));
-      descriptors.push(examplePreviousDescriptor ?? {
-        payload: createFieldUid(field, 'example'),
-        status: InputFieldNamespace.Status.Default,
-      });
-    }
-
-    inputFieldCollectionManagement.setDescriptors(descriptors);
-  }, [fields]);
+    return descriptor;
+  }
 
   const createField = () => {
-    setFields([{
-      localId: uuid.v4(),
-      current: {
+    setDraftFieldDescriptors((state) => {
+      const newField = createProductTagFieldDescriptor({
         name: '',
         example: '',
         required: false,
-      },
-    }, ...fields ]);
-  }
+      });
 
-  const updateField = (index: number) => (field: ProductTagFieldState, fieldChangeId: string) => {
-    const modifiedFields = [...fields];
-    modifiedFields[index] = field;
-    setFields(modifiedFields);
-  }
+      const newState = [newField, ...state];
+      return newState;
+    })
+  };
 
-  const exchangeFieldPosition = (index1: number, index2: number) => {
-    const modifiedFields = [...fields];
-    [modifiedFields[index1], modifiedFields[index2]] = [modifiedFields[index2], modifiedFields[index1]];
-    setFields(modifiedFields);
-  }
-
-  const removeField = (index: number) => () => {
-    const modifiedFields = [...fields];
-    modifiedFields.splice(index, 1);
-    setFields(modifiedFields);
-  }
-  
-  const validateInputs = (): Product.Mixed.Tag => {
-    const productTagNameResult = productTagNameInputField.validate();
-
-    let fieldInputsAreInvalid = true;
-    for (const field of fields) {
-      try {
-        inputFieldCollectionManagement.validateValue(createFieldUid(field, 'name'), field.current.name);
-      } catch {
-        fieldInputsAreInvalid = false;
+  const updateField = (localId: string, inputs?: Partial<Product.Tag.Field>, tagField?: Product.Tag.Field) => {
+    setDraftFieldDescriptors((state) => {
+      const fieldIndex = state.findIndex(descriptor => descriptor.localUid === localId);
+      if (fieldIndex === -1) {
+        console.warn(`Could not update ProductTagField(${localId})`);
+        return state;
       }
-    }
 
-    if (!productTagNameResult.isValid || !fieldInputsAreInvalid) {
-      throw new Error();
-    }
+      const newState = [...state];
+      newState[fieldIndex] = {
+        ...state[fieldIndex],
+        ...tagField,
+      }
 
-    const productTag: Product.Mixed.Tag = {
-      name: productTagNameResult.data,
-      fields: fields.map(field => ({
-        ...field.current,
-      }))
-    }
+      const { fields } = inputFieldCollection.createFieldGroup(localId);
+      (fields[0] as InputFieldCollection.Field.Stable.TextInpuField).modify((field) => ({
+        value: inputs?.name ?? field.value,
+        anchor: newState[fieldIndex].name
+      }));
 
-    return productTag;
+      (fields[1] as InputFieldCollection.Field.Stable.TextInpuField).modify((field) => ({
+        value: inputs?.example ?? field.value,
+        anchor: newState[fieldIndex].example,
+      }));
+
+      (fields[2] as InputFieldCollection.Field.Stable.CheckboxInputField).modify((field) => ({
+        value: inputs?.required ?? field.value,
+      }));
+
+      return newState;
+    })
   }
 
-  const productTagInitialFields = productTag?.fields.map<ProductTagFieldState>(field => fields.find(f => f.current.id === field.id) ?? ({
-    localId: uuid.v4(),
-    initial: { ...field },
-    current: { ...field },
-  }));
+  const removeField = (localId: string) => {
+    setDraftFieldDescriptors((state) => {
+      const fieldIndex = state.findIndex(descriptor => descriptor.localUid === localId);
+      if (fieldIndex === -1) {
+        console.warn(`Could not update ProductTagField(${localId})`);
+        return state;
+      }
 
-  const canRelink = (index: number) => {
-    const field = fields[index];
+      const newState = state.filter(field => field.localUid !== localId);
+      return newState;
+    })
+  }
 
-    if (field.current.id) {
+  const exchangeFieldPositions = (fieldId1: string, fieldId2: string) => {
+    setDraftFieldDescriptors((draftFieldDescriptors) => {
+      const findFieldIndex = (fieldLocalId: string) => draftFieldDescriptors.findIndex(descriptor => descriptor.localUid === fieldLocalId);
+
+      const fieldIndex1 = findFieldIndex(fieldId1);
+      const fieldIndex2 = findFieldIndex(fieldId2);
+
+      if (fieldIndex1 === -1 || fieldIndex2 === -1) {
+        console.warn(`Could not perform field swap for ProductTagField(${fieldId1}) and ProductTagField(${fieldId2})`);
+        return draftFieldDescriptors;
+      }
+
+      const newDraftFieldDescriptors = [...draftFieldDescriptors];
+      [draftFieldDescriptors[fieldIndex1], draftFieldDescriptors[fieldIndex2]] = [draftFieldDescriptors[fieldIndex2], draftFieldDescriptors[fieldIndex1]];
+      return newDraftFieldDescriptors;
+    })
+  }
+
+  const getExistingTwinField = (providedField: ProductTagFieldDescriptor, inputFieldName: string ) => {
+    if (providedField.id) { // the field is already linked
       return;
     }
 
-    const fieldWithSameName = productTagInitialFields?.find(initialField => initialField.current.name === field.current.name);
-    if (!fieldWithSameName) {
+    const sameNameExistingField = productTag?.fields?.find(existingField => existingField.name === inputFieldName);
+    if (!sameNameExistingField) {
       return;
     }
 
-    if (fields.every(f => f.current.id !== fieldWithSameName.current.id)) {
-      return fieldWithSameName;
+    if (draftFieldDescriptors.some(descriptor => descriptor.id === sameNameExistingField.id)) {
+      return;
     }
+
+    return sameNameExistingField;
   }
+
+  const createInputFieldDescriptorsFromTagFieldDescriptor = (fieldDescriptor: ProductTagFieldDescriptor) => {
+    const inputFieldDescriptors: InputFieldCollection.Field.Descriptor[] = [
+      {
+        fieldType: InputFieldCollection.FieldType.Text,
+        identifier: `NameField${fieldDescriptor.localUid}`,
+        required: true,
+        label: 'Display Name',
+        value: fieldDescriptor.name,
+        anchor: fieldDescriptor.name,
+        group: [fieldDescriptor.localUid],
+        validationTimings: [InputField.ValidationTiming.Blur],
+        validate: (_, data) => data,
+      },
+      {
+        fieldType: InputFieldCollection.FieldType.Text,
+        identifier: `FormatExample${fieldDescriptor.localUid}`,
+        label: 'Format Example',
+        helperText: `The format example will be shown only in product inspection mode.`,
+        value: fieldDescriptor.example,
+        anchor: fieldDescriptor.example,
+        group: [fieldDescriptor.localUid],
+        validationTimings: [InputField.ValidationTiming.Blur],
+        validate: (_, data) => data,
+      },
+      {
+        fieldType: InputFieldCollection.FieldType.Checkbox,
+        identifier: `Required${fieldDescriptor.localUid}`,
+        label: 'Require field to be filled in',
+        value: fieldDescriptor.required,
+        anchor: fieldDescriptor.required,
+        group: [fieldDescriptor.localUid],
+        validationTimings: [InputField.ValidationTiming.Blur],
+        validate: (_, data) => data,
+      }
+    ];
+
+    return inputFieldDescriptors;
+  }
+
+  useEffect(() => {
+    if (productTag) {
+      setDraftFieldDescriptors(productTag.fields.map((field) => createProductTagFieldDescriptor(field)))
+    }
+  }, [productTag]);
+
+  const inputFieldCollection = useInputFieldCollection({
+    fieldDescriptors: draftFieldDescriptors.map(createInputFieldDescriptorsFromTagFieldDescriptor).flat(),
+    descriptorUpdateDependencies: [draftFieldDescriptors],
+  });
 
   const render = () => (
     <Fragment>
       { productTagNameInputField.render() }
       <div className="product-tag-dynamic-fields">
-        {fields.map((field, index) => (
+        {draftFieldDescriptors.map(descriptor => (
           <ProductTagFieldInspector
-            key={field.current.id ?? field.initial?.id ?? index}
-            index={index}
-            fieldState={field}
-            canRelinkWith={canRelink(index)}
-            exchangeFieldPosition={exchangeFieldPosition}
-            updateField={updateField(index)}
-            removeField={removeField(index)}
-            inputFieldCollectionManagement={inputFieldCollectionManagement}
+            key={descriptor.localUid}
+            inputFieldCollection={inputFieldCollection}
+            fieldDescriptor={descriptor}
+            exchangeFieldPositions={exchangeFieldPositions}
+            update={(inputs?: Partial<Product.Mixed.Tag.Field>, tagField?: Product.Tag.Field) => updateField(descriptor.localUid, inputs, tagField)}
+            remove={() => removeField(descriptor.localUid)}
+            linkField={getExistingTwinField(descriptor, inputFieldCollection.createFieldGroup(descriptor.localUid).fields[0]?.value as string ?? '')}
           />
         ))}
       </div>
@@ -205,10 +210,10 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
 
   return {
     render,
-    validateInputs,
+    validateInputs: () => inputFieldCollection.validate(),
     createField,
     updateField,
     removeField,
-    exchangeFieldPosition,
+    exchangeFieldPositions,
   }
 }

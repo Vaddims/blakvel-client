@@ -1,7 +1,8 @@
 import { faRotateBack, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InputField as InputFieldNamespace } from '../../middleware/hooks/input-field-hook';
+import { v4 as createUUID } from 'uuid';
 import './input-field.scss';
 
 export type FalsyType = false | null | undefined;
@@ -20,6 +21,7 @@ export interface InputFieldCommonProps {
 }
 
 export interface InputFieldProps extends InputFieldCommonProps {
+  readonly inputId?: string;
   readonly className?: string;
 }
 
@@ -33,8 +35,7 @@ function hasChildElement(element: Element, targetElement: Element): boolean {
 
 export const InputField: React.FC<InputFieldProps> = (props) => {
   const labelRef = useRef(null);
-  const formatedLabelId = props.label?.toLowerCase().replace(' ', '-');
-  const inputElementId = `input-${formatedLabelId}`;
+  const [ inputId ] = useState(props.inputId ?? createUUID());
   const composedLabelClassName = ['input-field', props.className].join(' ');
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
 
   return (
     <label
-      htmlFor={inputElementId}
+      htmlFor={inputId}
       className={composedLabelClassName}
       data-status={props.status}
       ref={labelRef}

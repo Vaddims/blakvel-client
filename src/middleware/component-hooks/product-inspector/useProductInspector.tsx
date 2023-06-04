@@ -375,6 +375,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     descriptorUpdateDependencies: [product, draftProductTags],
     fieldDescriptors: draftProductTags.map<InputFieldCollection.Field.Descriptor<Product.Tag.Field>[]>((tag) => tag.fields.map((field) => ({
       fieldType: InputFieldCollection.FieldType.Text,
+      identifier: field.id,
       label: field.name,
       placeholder: `ex. ${field.example}`,
       value: product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
