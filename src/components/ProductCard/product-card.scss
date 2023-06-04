@@ -6,10 +6,11 @@
   min-width: 10rem;
   height: auto;
   cursor: pointer;
-
-
+  
   .product-image-boundary {
-    @include product-image-wrapper(100%);
+    @include product-image-wrapper(minmax(11rem, 1fr));
+    transition: transform .25s ease;
+    z-index: 1000;
 
     img {
       @include wrapped-product-image()

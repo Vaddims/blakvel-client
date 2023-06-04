@@ -9,10 +9,13 @@ import Page from "../../layouts/Page";
 import useElementSelectorComponent from "../../middleware/component-hooks/element-selector-component/useElementSelectorComponent";
 import ElementSelectorButtonOptions from "../../components/ElementSelectorOption/element-selector-options.interface";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter, faMagnifyingGlass, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faFilter, faMagnifyingGlass, faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 import './catalog.scss';
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { UserRole } from "../../models/user.model";
+import useTextInputField from "../../middleware/hooks/text-input-field-hook";
+import useSearchParamState from "../../middleware/hooks/useSearchParamState";
+import { InputField } from "../../middleware/hooks/input-field-hook";
 
 export interface ElementSelectorPayload {
   order: string;
@@ -21,70 +24,55 @@ export interface ElementSelectorPayload {
 
 export default function Catalog() {
   const navigate = useNavigate();
-  const [ searchParams ] = useSearchParams();
   const auth = useAuthentication();
 
-  const [ searchValue, setSearchValue ] = useState(searchParams.get('search') || '');
+  const {
+    paramCluster,
+    urlSearchParams,
+    applySearchCluster,
+  } = useSearchParamState();
+
   const { collapsed: extensionsCollapsed, toggleCollapse } = usePanelExtensionCollpase();
 
-  const a = new URLSearchParams(searchParams);
+  const requestSearchParams = new URLSearchParams(urlSearchParams);
   if (auth.user) {
-    a.set('format', UserRole.User);
+    requestSearchParams.set('format', UserRole.User);
   }
-  const { data: products } = useGetProductsQuery(a.toString());
+  const { data: products } = useGetProductsQuery(requestSearchParams.toString());
+
+  const getInitialSortOption = () => {
+    const type = paramCluster.sort.value;
+    const order = paramCluster.order.value;
   
-  const type = searchParams.get('sort');
-  const order = searchParams.get('order');
-
-  const sortTarget = (type && order && sortOptions.find(
-    ({ payload }) => payload.type === type && payload.order === order
-  )) || sortOptions.find((options) => options.defaultSelection);
-
-  const handleSearchChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    const { value } = event.target;
-    setSearchValue(value);
+    return type && order && (
+      sortOptions.find(({ payload }) => payload.type === type && payload.order === order)
+    ) || (
+      sortOptions.find((options) => options.defaultSelection)
+    );
   }
 
-  const searchParamsFieldHandler = (searchParams: URLSearchParams) => (key: string, value?: string) => {
-    if (value) {
-      searchParams.set(key, value)
-    } else {
-      searchParams.delete(key);
+  const searchInput = useTextInputField({
+    placeholder: 'Search',
+    inputIcon: faSearch,
+    value: paramCluster.search.value ?? '',
+    trackValue: true,
+    validationTimings: [InputField.ValidationTiming.Submit],
+    validate(data) {
+      return data;
+    },
+    onSubmit(data) {
+      paramCluster.search.set(data).apply();
+    },
+    onClear() {
+      paramCluster.search.remove().apply();
     }
-  }
-  
-  const applySearchParams = (searchParams: URLSearchParams) => {
-    const urlEncodedSearchParams = searchParams.toString();
-    const pathSearchParams = urlEncodedSearchParams === '' ? '' : `?${urlEncodedSearchParams}`;
-    navigate(`/products${pathSearchParams}`);
-  }
-
-  const handleSearchConfirm: KeyboardEventHandler<HTMLInputElement> = (event) => {
-    if (event.key !== 'Enter') {
-      return;
-    }
-
-    event.preventDefault();
-
-    const localSearchParams = new URLSearchParams(searchParams);
-    const fieldHandler = searchParamsFieldHandler(localSearchParams);
-    fieldHandler('search', searchValue);
-    applySearchParams(localSearchParams);
-  }
-
-  const clearNameSearch: MouseEventHandler<SVGSVGElement> = (event) => {
-    event.preventDefault();
-    const localSearchParams = new URLSearchParams(searchParams);
-    localSearchParams.delete('search');
-    setSearchValue('');
-    applySearchParams(localSearchParams);
-  }
+  })
 
   const elementSelector = useElementSelectorComponent<ElementSelectorPayload>({
     title: "Sort",
     buttonOptions: sortOptions,
-    initialTarget: sortTarget,
-    dependencies: [searchParams.toString()]
+    initialTarget: getInitialSortOption(),
+    dependencies: [urlSearchParams.toString()]
   });
 
   useEffect(() => {
@@ -93,40 +81,33 @@ export default function Catalog() {
       return;
     }
 
-    const selectionSearchParams = new URLSearchParams(searchParams);
-    const fieldHanler = searchParamsFieldHandler(selectionSearchParams);
-    fieldHanler('sort', selection.payload.type);
-    fieldHanler('order', selection.payload.order);
-    applySearchParams(selectionSearchParams);
+    paramCluster.sort.set(selection.payload.type);
+    paramCluster.order.set(selection.payload.order);
+    applySearchCluster();
   }, [elementSelector.selections.map(selection => selection.title).join(':')])
 
   const extensions = [
     elementSelector.render(),
   ]
 
+  const middleTools = [
+    searchInput.render()
+  ]
+
   const headerTools = [
-    (
-      <div className='search-boundary'>
-        <FontAwesomeIcon icon={faMagnifyingGlass} className="search-icon" />
-        <input 
-          type="text" 
-          placeholder='Search' 
-          value={searchValue} 
-          onKeyUp={handleSearchConfirm} 
-          onChange={handleSearchChange}
-        />
-        { searchValue && (
-          <FontAwesomeIcon icon={faTimes} onClick={clearNameSearch} />
-        ) }
-      </div>
-    ),
     (
       <div className='catalog-filter-toggler-boundary' onClick={toggleCollapse}>
         <FontAwesomeIcon icon={faFilter} />
         <h4 className='catalog-filter-toggler-title'>Sort and Filter</h4>
       </div>
     ),
-  ]
+  ];
+
+  const subheader = [
+    (
+      <span>Showing <span className="highlight">{products?.length ?? '?'}</span> products</span>
+    )
+  ];
 
   return (
     <Page id='catalog'>
@@ -135,6 +116,8 @@ export default function Catalog() {
         extensions={extensions}
         headerTools={headerTools}
         collapseExtensions={extensionsCollapsed}
+        headerCenterTools={middleTools}
+        subheader={subheader}
       >
         {products && products.map(product => (
           <ProductCard

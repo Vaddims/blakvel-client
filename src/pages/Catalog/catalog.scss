@@ -1,6 +1,13 @@
 #catalog.page {
+  .panel-header {
+    .center-panel-tools {
+      width: 30vw;
+    }
+  }
+  
   main {
     display: grid;
+    gap: 1rem;
     grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     min-height: 5rem;
   }

@@ -88,7 +88,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       type={options.type}
       value={inputField.value}
       placeholder={options.placeholder}
-      {...inputField.appInputComponentProps}
+      {...inputField.inputFieldComponentProps}
       onInputClear={shouldAllowInputClear && clearValue}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       

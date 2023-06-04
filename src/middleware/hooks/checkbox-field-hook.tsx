@@ -40,7 +40,7 @@ const useCheckboxField: CheckboxFieldHook = (options) => {
   const render = () => (
     <CheckboxField
       label=''
-      {...inputField.appInputComponentProps}
+      {...inputField.inputFieldComponentProps}
       select={inputField.value}
       onClick={checkboxClickHandler}
     />

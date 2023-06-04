@@ -71,6 +71,10 @@ const useSearchParamState = () => {
         continue;
       }
 
+      if (value.trim() === '') {
+        continue;
+      }
+      
       newSearchParams.set(key, value);
     }
 

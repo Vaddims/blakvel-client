@@ -18,6 +18,7 @@ export interface InputFieldCommonProps {
   readonly onInputRestore?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
   readonly onInputClear?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
   readonly onUnbound?: (event: MouseEvent) => void;
+  readonly fieldClassName?: string;
 }
 
 export interface InputFieldProps extends InputFieldCommonProps {
@@ -36,7 +37,7 @@ function hasChildElement(element: Element, targetElement: Element): boolean {
 export const InputField: React.FC<InputFieldProps> = (props) => {
   const labelRef = useRef(null);
   const [ inputId ] = useState(props.inputId ?? createUUID());
-  const composedLabelClassName = ['input-field', props.className].join(' ');
+  const composedLabelClassName = ['input-field', props.fieldClassName, props.className].join(' ');
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -113,5 +114,6 @@ export function extractInputFieldProps(props: InputFieldCommonProps & React.Deta
     markAsRequired: props.markAsRequired,
     status: props.status,
     htmlFor: props.htmlFor,
+    fieldClassName: props.fieldClassName,
   }
 }

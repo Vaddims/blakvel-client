@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { InputFieldCommonProps } from "../../components/InputField";
 
@@ -92,12 +92,13 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
     return validateCustomValue(value, options.validate, ignoreErrorDisplay);
   }
 
-  const appInputComponentProps: InputFieldCommonProps = {
+  const inputFieldComponentProps: InputFieldCommonProps = {
     label: options.label ?? '',
     inputIcon: options.inputIcon,
     labelIcon: options.labelIcon,
     markAsRequired: options.required,
     helperText: helperText || undefined,
+    fieldClassName: options.className,
     status,
   }
 
@@ -107,7 +108,7 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
     anchor,
     statusApplier,
     validationTimings: options.validationTimings ?? [],
-    appInputComponentProps,
+    inputFieldComponentProps,
     setValue,
     setAnchor,
     setHelperText,
@@ -196,7 +197,7 @@ export namespace InputField {
     readonly required?: boolean;
   }
 
-  export interface AppInputComponentProps {
+  export interface InputFieldComponentProps {
     readonly label?: string;
     readonly labelIcon?: IconDefinition;
     readonly inputIcon?: IconDefinition;
@@ -204,6 +205,7 @@ export namespace InputField {
     readonly required?: boolean;
     readonly helperText?: string;
     readonly status?: InputField.Status;
+    readonly fieldClassName?: string;
   }
 
   export interface Options<T, K> extends AppInputComponentOptions {
@@ -216,6 +218,7 @@ export namespace InputField {
     readonly validationTimings?: ValidationTiming[];
     readonly validate: Options.ValidateInputFunction<T, K>;
     readonly onValueChange?: Options.ChangeInputFunction<T>; 
+    readonly className?: string;
   }
 
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
@@ -310,7 +313,7 @@ export namespace InputField {
     readonly validate: State.ValidateInputFunction<K>;
     readonly validateCustomValue: State.ValidateCustomValue<T, K>;
 
-    readonly appInputComponentProps: AppInputComponentProps;
+    readonly inputFieldComponentProps: InputFieldComponentProps;
   }
 
   export interface ComponentState<T, K> extends State<T, K> {
