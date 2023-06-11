@@ -1,0 +1,29 @@
+{
+  "steps": [
+    {
+      "icon": "faSearch",
+      "label": "Browse the Curated Collection",
+      "content": "Immerse yourself in our curated collection of pre-loved clothing. Explore a wide range of styles, sizes, and brands, all carefully selected for their quality and appeal."
+    },
+    {
+      "icon": "faEye",
+      "label": "Discover Detailed Listings",
+      "content": "Dive into the detailed listings of each item, featuring high-resolution images, accurate descriptions, and information about its condition. We strive to provide transparency, allowing you to make informed purchasing decisions."
+    },
+    {
+      "icon": "faCartShopping",
+      "label": "Add to Cart and Checkout",
+      "content": "Found a gem that speaks to your style? Simply add it to your cart and proceed to checkout. Our secure payment gateway ensures a seamless and worry-free transaction."
+    },
+    {
+      "icon": "faInbox",
+      "label": "Experience the Blakvel Unboxing",
+      "content": "Await the arrival of your package, knowing that it has gone through the Blakvel treatment. Open the beautifully packaged box to reveal your 'new' second-hand treasure."
+    },
+    {
+      "icon": "faRightToBracket",
+      "label": "Join the Sustainable Fashion Movement",
+      "content": "By purchasing from Blakvel, you contribute to the sustainable fashion movement. Embrace conscious shopping and become a part of a community that values quality, style, and positive change."
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { ArgumentTypes } from "../utils/types";
 export interface GenericInputOptions {
   readonly placeholder?: string;
   readonly type?: 'text' | 'datetime-local' | 'email' | 'password';
+  readonly disabled?: boolean;
 }
 
 type TextInputFieldHook<T> = InputField.GenericHook<GenericInputOptions, {}, string, T>;
@@ -79,8 +80,8 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     options?.onClear?.();
   }
 
-  const shouldAllowInputClear = !!inputField.value;
-  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor !== '';
+  const shouldAllowInputClear = !!inputField.value && !options.disabled;
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor !== '' && !options.disabled;
 
   const render = () => (
     <TextInputField
@@ -91,6 +92,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       {...inputField.inputFieldComponentProps}
       onInputClear={shouldAllowInputClear && clearValue}
       onInputRestore={shouldAllowInputRestore && restoreValue}
+      disabled={options.disabled}
       
       onUnbound={() => inputFieldUnbounding.onUnbound()}
       onChange={changeHandler}

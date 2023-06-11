@@ -1,14 +1,18 @@
 .navbar {
+  box-sizing: border-box;
   opacity: 1;
   top: 0;
-  background-color: var(--background-main-color);
-  border-bottom: .2rem solid var(--background-secondary-color);
-  height: 3.5rem;
+  position: absolute;
+  background-color: transparent;
+  height: 5rem;
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   z-index: 10000;
+  padding-inline: 5rem;
+  transition: background-color .3s ease, height .3s ease, border-bottom .3s ease, padding .3s ease;
+  border-bottom: .2rem solid transparent;
   
   .navbar-section {
     box-sizing: border-box;
@@ -23,28 +27,25 @@
       display: flex;
       flex-direction: row;
       cursor: pointer;
-      padding: 1rem;
+      transform: padding .3s ease;
 
-      .logo-wrapper {
-        height: 100%;
-        .logo {
-          height: 100%;
-        }
+      .logo {
+        height: 66%;
       }
       
-      h2 {
+      .name {
         margin: 0;
-        font-weight: 300;
-        margin-left: .5rem;
+        font-weight: 600;
+        margin-left: 1rem;
         color: white;
         transition: color .3s ease;
+        transition: margin .2s ease;
       }
     }
 
     .navigation-boundary {
       display: table;
       flex-direction: row;
-      padding: 0 1rem;
       margin: 0;
       height: 100%;
       
@@ -65,36 +66,31 @@
         padding: 0 1rem;
       }
     }
-
   }
 
-  &.native {
-    position: absolute;
-  }
-  
-  &.sticky {
-    position: sticky;
-
-    i, h2 {
-      color: white !important;
-    }
-  }
-  
-  &.hybrid {
-    height: 5rem;
+  &[data-phase=fixed] {
     position: fixed;
+    height: 3.5rem;
     border: none;
-    background-color: rgba(50, 50, 50, 0);
-    transition: background-color .3s ease, height .3s ease;
-  
-    &.fixed {
-      height: 3.5rem;
-      border: none;
-      background-color: rgb(50, 50, 50);
-  
-      i, h2 {
-        color: white !important;
-      }
+    background-color: var(--background-main-color);
+    border-bottom: .2rem solid var(--background-secondary-color);
+
+    .logo-boundary .name {
+      margin-left: .5rem;
     }
+  }
+
+  &[data-mode=sticky] {
+    top: 0;
+    position: sticky;
+    height: 3.5rem;
+    background-color: var(--background-main-color);
+    border-bottom: .2rem solid var(--background-secondary-color);
+
+    padding-inline: 2rem;
+  }
+
+  &[data-mode=dynamicBlend] {
+    position: fixed;
   }
 }

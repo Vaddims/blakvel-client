@@ -1,0 +1,24 @@
+{
+  "steps": [
+    {
+      "icon": "faShirt",
+      "label": "Unleash Your Closet's Potential",
+      "content": "Begin your selling journey by exploring your closet for high-quality, gently worn clothing that you're ready to part with."
+    },
+    {
+      "icon": "faCodePullRequest",
+      "label": "Request a Review",
+      "content": "Before selling your item, simply submit a review request through our user-friendly interface. Our team of experts will evaluate the garment's condition, authenticity, and marketability."
+    },
+    {
+      "icon": "faSprayCanSparkles",
+      "label": "Embrace the Blakvel Treatment",
+      "content": "Once your item receives a positive review, our dedicated team will carefully clean, steam, and box your garment, transforming it into a stunning treasure ready for its new owner."
+    },
+    {
+      "icon": "faDollar",
+      "label": "Sit Back and Earn",
+      "content": "With your item prepared, sit back and let Blakvel do the work. We'll list your item on our website, and as soon as it sells, you'll receive your earnings directly into your account."
+    }
+  ]
+}

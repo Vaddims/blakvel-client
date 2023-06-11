@@ -1,0 +1,28 @@
+.contact-form {
+  box-sizing: border-box;
+  display: grid;
+  flex-direction: column;
+  gap: 1.5rem;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+
+  .contact-email {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .contact-fullname {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .contact-type {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+  }
+
+  .contact-message {
+    grid-row: 3;
+    grid-column: 1 / span 2;
+  }
+}

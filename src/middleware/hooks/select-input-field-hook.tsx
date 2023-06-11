@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AppSelect from "../../components/SelectInputField"
+import SelectInputField from "../../components/SelectInputField"
 import useInputField, { InputField } from "./input-field-hook";
 
 export interface SelectInputFieldOption {
@@ -32,7 +32,7 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
     required = false,
   } = selectorOptions;
 
-  const appInput = useInputField<SelectInputFieldOption, SelectInputFieldOption>({
+  const inputField = useInputField<SelectInputFieldOption, SelectInputFieldOption>({
     validate: (option) => option,
     ...selectorOptions,
     value: selectorOptions.value ?? defaultSelectInputFieldOption,
@@ -43,11 +43,11 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
   displayOptions.unshift(defaultSelectInputFieldOption);
 
   const restoreValue = () => {
-    appInput.setValue(appInput.anchor);
+    inputField.setValue(inputField.anchor);
   }
 
   const clearValue = () => {
-    appInput.setValue(defaultSelectInputFieldOption);
+    inputField.setValue(defaultSelectInputFieldOption);
   }
 
   const findOption = (optionValue: string) => {
@@ -55,38 +55,39 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
   }
 
   const onInputChange: React.ChangeEventHandler<HTMLSelectElement> = (event) => {
-    appInput.setValue(findOption(event.target.value) ?? defaultSelectInputFieldOption)
+    inputField.setValue(findOption(event.target.value) ?? defaultSelectInputFieldOption)
   }
 
   const setValue = (option: SelectInputFieldOption | null, useAsAnchor = false) => {
-    appInput.setValue(option ?? defaultSelectInputFieldOption, useAsAnchor);
+    inputField.setValue(option ?? defaultSelectInputFieldOption, useAsAnchor);
   }
 
-  const shouldAllowInputRestore = appInput.value !== appInput.anchor && appInput.anchor.value !== '';
-  const shouldAllowInputClear = appInput.value.value !== '';
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor.value !== '';
+  const shouldAllowInputClear = inputField.value.value !== '' && !selectorOptions.required;
 
   const render = () => (
-    <AppSelect
+    <SelectInputField
       label={label} 
       markAsRequired={required}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       onInputClear={shouldAllowInputClear && clearValue}
       onChange={onInputChange}
+      {...inputField.inputFieldComponentProps}
     >
       {displayOptions.map(option => (
         <option 
-          selected={option.value === appInput.value.value} 
+          selected={option.value === inputField.value.value} 
           disabled={option.value === '' && required}
           value={option.value}
         >
           {(option.value === '' && required) ? `Choose option` : option.title}
         </option>
       ))}
-    </AppSelect>
+    </SelectInputField>
   );
 
   return {
-    ...appInput,
+    ...inputField,
     defaultOption: defaultSelectInputFieldOption,
     restoreValue,
     clearValue,

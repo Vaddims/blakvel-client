@@ -7,7 +7,7 @@ interface TextareaInputFieldOptions {
 
 export type AppTextareaInputHook = InputField.GenericHook<TextareaInputFieldOptions, {}, string, string>;
 const useTextareaInputField: AppTextareaInputHook = (options) => {
-  const appInput = useInputField({
+  const inputField = useInputField({
     validate: (data) => data,
     ...options,
     value: options.value ?? '',
@@ -19,32 +19,33 @@ const useTextareaInputField: AppTextareaInputHook = (options) => {
   } = options;
 
   const inputChangeHandler: React.ChangeEventHandler<HTMLTextAreaElement> = (event) => {
-    appInput.setValue(event.target.value)
+    inputField.setValue(event.target.value)
   }
 
   const restoreValue = () => {
-    appInput.setValue(appInput.anchor);
+    inputField.setValue(inputField.anchor);
   }
 
   const clearValue = () => {
-    appInput.setValue('');
+    inputField.setValue('');
   }
 
-  const shouldAllowInputRestore = appInput.value !== appInput.anchor;
-  const shouldAllowInputClear = appInput.value.trim() !== '';
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor;
+  const shouldAllowInputClear = inputField.value.trim() !== '';
 
   const render = () => (
     <AppTextarea
       label={label ?? ''}
-      value={appInput.value}
+      value={inputField.value}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       onInputClear={shouldAllowInputClear && clearValue}
       onChange={inputChangeHandler}
+      {...inputField.inputFieldComponentProps}
     />
   )
 
   return {
-    ...appInput,
+    ...inputField,
     restoreValue,
     clearValue,
     render,

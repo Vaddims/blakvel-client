@@ -1,0 +1,211 @@
+.the-trade-process-section {
+  width: 100vw;
+  min-height: 20rem;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  align-items: center;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(180deg, var(--background-main-color), rgba(0, 0, 0, 0) 15%), linear-gradient(0deg, var(--background-main-color), rgba(0, 0, 0, 0) 15%), radial-gradient(circle at 50% 25%, rgba(246, 222, 255, 0.075) 20%, rgba(52, 52, 52, 0) 80%);
+
+  .section-header {
+    position: relative;
+    width: 45rem;
+    height: 20rem;
+
+    .back-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    .middle-face {
+      position: absolute;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      img {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, 0);
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .front-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
+    }
+
+    .composition-title {
+      position: absolute;
+      color: grey !important;
+      margin: 0;
+
+      $c: rgb(255, 255, 255);
+      $c2: rgb(115, 115, 115);
+
+      font-style: italic;
+
+      &.the-text {
+        top: 5rem;
+        left: 6rem;
+        font-size: 5rem;
+        background: linear-gradient(70deg, $c2 50%, $c 100%);
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      &.process-text {
+        top: 9rem;
+        left: 8rem;
+        font-size: 7rem;
+        background: radial-gradient(circle at top, $c 10%, $c2 60%);
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+  }
+
+  & > .content {
+    margin-top: 0rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    // padding-inline: 4rem;
+    width: 100%;
+
+    .guidance {
+      width: 100%;
+
+      .carousel-title {
+        color: rgb(219, 219, 219) !important;
+        position: relative;
+        padding-inline: 4rem;
+        font-size: 2rem;
+        margin: 0;
+        margin-left: 1rem;
+        font-style: italic;
+        z-index: 50;
+      }
+
+      .carousel {
+        position: relative;
+        z-index: 5;
+        margin-top: -1rem;
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        width: 100%;
+        overflow-x: scroll;
+        padding-inline: 4rem;
+        box-sizing: border-box;
+        scroll-snap-type: x mandatory;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        .carousel-item {
+          box-sizing: border-box;
+          z-index: 10;
+          overflow: hidden;
+          position: relative;
+          display: flex;
+          flex-direction: row;
+          padding: 1rem 2rem;
+          background: radial-gradient(circle at top left, rgba(213, 255, 85, 0.1) 0%, rgba(255, 137, 137, 0) 40%), radial-gradient(circle at right bottom, rgba(255, 0, 0, 0.1) 0%, rgba(255, 137, 137, 0) 40%);
+          backdrop-filter: blur(20px);
+          background-color: rgba(5, 5, 5, 0.091);
+          flex: 0 0 35%;
+          border-radius: 1rem;
+          align-items: center;
+          gap: 2rem;
+          scroll-snap-align: center;
+
+          .info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            .title-box {
+              display: flex;
+              flex-direction: row;
+              gap: 1rem;
+              font-size: 3vmin;
+              margin: 0;
+              gap: 1rem;
+              align-items: center;
+
+              .title {
+                margin: 0;
+              }
+
+              .icon {
+                path {
+                  mix-blend-mode: color-burn;
+                  stroke-width: 10;
+                  fill: rgb(167, 167, 167);
+                }
+              }
+            }
+  
+            .carousel-content {
+              margin: 0;
+              color: rgb(158, 158, 158) !important;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media only screen and (width < 30rem) {
+    padding: 0;
+
+    .section-header {
+      transform: scale(0.6) translateX(2rem);
+    }
+
+    & > .content {
+      margin-top: -2rem;
+
+      .guidance {
+        .carousel-title {
+          margin: 0 !important;
+          padding-inline: 2rem;
+        }
+
+        .carousel {
+          padding-inline: 1rem !important;
+  
+          .carousel-item {
+            padding: 1.5rem 1.5rem;
+            padding-bottom: 1rem;
+            flex: 0 0 80% !important;
+
+            .info-container {
+              .title-box {
+                font-size: 5vmin;
+              }
+
+              .carousel-content {
+                font-size: .8rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

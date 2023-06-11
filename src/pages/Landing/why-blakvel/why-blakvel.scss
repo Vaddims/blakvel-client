@@ -1,0 +1,236 @@
+.why-blakvel-section {
+  position: relative;
+  min-height: 41.5rem;
+  height: calc(100vh - 3.5rem);
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  .composition-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% - 4rem);
+    height: 90%;
+    min-height: 41.5rem;
+
+    .middle-face {
+      position: absolute;
+      z-index: 30;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 1rem;
+  
+      img {
+        position: relative;
+        object-fit: cover;
+        top: -10%;
+        height: 135%;
+        transform: scaleX(-1);
+        bottom: 0;
+      }
+    }
+
+    $c: var(--background-highlight-color);
+    $b: .1rem;
+
+    .back-face {
+      box-shadow: 0 0 25px -10px $c;
+      border-radius: 1rem;
+      box-sizing: border-box;
+      z-index: 20;
+      position: absolute;
+      width: 100%;
+      height: 90%;
+      bottom: 0;
+      border: $b solid $c;
+      background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 50%);
+    }
+
+    .front-face {
+      border-radius: 1rem;
+      box-sizing: border-box;
+      z-index: 50;
+      position: absolute;
+      width: 100%;
+      height: 90%;
+      bottom: 0;
+      border: $b solid $c;
+      border-top: none;
+
+      .accordions-section {
+        box-sizing: border-box;
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: calc(100% - 42rem);
+        padding-inline: 5%;
+        left: 42rem;
+
+        .accordion {
+          margin: 1rem 0;
+          
+          header {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            align-items: center;
+            height: min-content !important;
+            width: 100% !important;
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+
+            .icon-wrapper {
+              flex: 0 0 2rem; 
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background-color: transparent;
+              border-radius: 100%;
+              aspect-ratio: 1;
+              width: 2rem;
+              border: .1rem solid white;
+              transition: border .2s ease, background-color .2s ease;
+
+              svg path {
+                fill: white;
+                transition: fill .2s ease;
+              }
+            }
+
+            .label {
+              flex: 0 0 1fr;
+              color: white;
+              margin: 0;
+              transition: color .2s ease;
+            }
+
+            &:hover {
+              .icon-wrapper {
+                border: .1rem solid var(--background-highlight-color);
+
+                svg path {
+                  fill: var(--background-highlight-color);
+                }
+              }
+
+              .label {
+                color: var(--background-highlight-color) !important;
+              }
+            }
+          }
+
+          &[aria-selected=true] {
+            header {
+              .icon-wrapper {
+                background-color: var(--background-highlight-color);
+                border: .1rem solid var(--background-highlight-color);
+              }
+  
+              .label {
+                color: var(--background-highlight-color) !important;
+              }
+
+              &:hover {
+                .icon-wrapper {
+                  svg path {
+                    fill: white;
+                  }
+                }
+              }
+            }
+          }
+
+          .content {
+            margin-top: -0.5rem;
+            padding-left: 3.35rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+          }
+        }
+      }
+    }
+
+    .composition-title {
+      position: absolute;
+      font-size: 10rem;
+      color: rgb(115, 115, 115) !important;
+      font-weight: 900;
+      margin: 0;
+
+      &.why-text {
+        left: 18.5rem;
+        top: 10rem;
+        font-size: 8rem;
+        background: linear-gradient(70deg, rgb(54, 54, 54), rgb(144, 144, 144));
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-style: italic;
+      }
+
+      &.blakvel-text {
+        left: 5.2rem;
+        font-style: italic;
+        top: 16rem;
+        background: linear-gradient(70deg, rgb(74, 74, 74), rgb(164, 164, 164));
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+  }
+
+  @media only screen and (width < 50rem) {
+    border: none;
+
+    .composition-wrapper {
+      // background-color: red;
+      // border: none;
+      .back-face {
+        background: none;
+        border: none;
+        box-shadow: 0 0 25px -10px transparent;
+      }
+
+      .middle-face {
+        img {
+          display: none;
+        } 
+      }
+
+      .front-face {
+        border: none;
+
+        .accordions-section {
+          width: 100%;
+          left: 0;
+          // background-color: red;
+
+          .accordion {
+            header {
+
+            }
+          }
+        }
+      }
+    }
+
+    .composition-title {
+      display: none;
+    }
+
+    .accordion {
+      .label {
+        font-size: 1rem !important;
+      }
+    }
+  }
+}
