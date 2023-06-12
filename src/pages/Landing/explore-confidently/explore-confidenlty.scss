@@ -8,6 +8,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-x: hidden;
   background: linear-gradient(180deg, var(--background-main-color) 0%, rgba(0, 0, 0, 0) 2.5rem), radial-gradient(circle at 120% 30%, rgba(255, 255, 255, 0.16) 0%, rgba(0, 0, 0, 0) 40%), radial-gradient(circle at -20% 70%, rgba(255, 255, 255, 0.16) 0%, rgba(0, 0, 0, 0) 40%);
   
   .section-header {

@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
 import logo from './logo.png';
 import { useRedirection } from '../../utils/hooks/useRedirection';
-import UnauthorizedNavbarNavigation from './unauthorized-navigation';
-import AdminNavbarNavigation from './admin-navigation';
+import UnauthorizedNavbarNavigation from './RoleDependentNavigation/unauthorized-navigation';
+import AdminNavbarNavigation from './RoleDependentNavigation/admin-navigation';
 import './navbar.scss';
 import { useAuthentication } from '../../middleware/hooks/useAuthentication';
 import { UserRole } from '../../models/user.model';
-import AuthorizedNavbarNavigation from './authorized-navigation';
+import AuthorizedNavbarNavigation from './RoleDependentNavigation/customer-navigation';
 import { ReactComponent as Logo} from './blakvel_emblem.svg';
+import RoleDependentNavigation from './RoleDependentNavigation';
 
 export enum NavbarMode {
   blend = 'blend',
@@ -22,8 +23,8 @@ interface NavbarProps {
 function Navbar(props: NavbarProps) {
   const navbarMode = props.mode || NavbarMode.sticky;
   const reference = useRef<HTMLElement>(null);
-  const redirect = useRedirection();
   const { user } = useAuthentication();
+  const redirect = useRedirection();
 
   useEffect(() => {
     const { current } = reference;
@@ -52,17 +53,9 @@ function Navbar(props: NavbarProps) {
       </div>
       <div className='navbar-section'>
         <ul className='navigation-boundary'>
-          <li onClick={redirect('/products')}>Products</li>
-          <li onClick={redirect('/contact')}>Contact</li>
-            {user ? (
-              user.role === UserRole.Admin ? (
-                <AdminNavbarNavigation />
-              ) : (
-                <AuthorizedNavbarNavigation />
-              )
-            ) : (
-              <UnauthorizedNavbarNavigation />
-            )}
+          <li className='text-navigation' onClick={redirect('/products')}>Products</li>
+          <li className='text-navigation' onClick={redirect('/contact')}>Contact</li>
+          <RoleDependentNavigation />
         </ul>
       </div>
     </nav>

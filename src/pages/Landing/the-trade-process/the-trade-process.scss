@@ -6,6 +6,7 @@
   padding: 2rem 0;
   align-items: center;
   backdrop-filter: blur(20px);
+  overflow-x: hidden;
   background: linear-gradient(180deg, var(--background-main-color), rgba(0, 0, 0, 0) 15%), linear-gradient(0deg, var(--background-main-color), rgba(0, 0, 0, 0) 15%), radial-gradient(circle at 50% 25%, rgba(246, 222, 255, 0.075) 20%, rgba(52, 52, 52, 0) 80%);
 
   .section-header {
