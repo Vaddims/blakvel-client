@@ -5,6 +5,12 @@
   flex-direction: column;
   padding: 0;
 
+  &[data-mixed-values=true] {
+    input::placeholder {
+      color: var(--background-highlight-color);
+    }
+  }
+
   header {
     padding: 0 .5rem;
     margin-bottom: .4rem;

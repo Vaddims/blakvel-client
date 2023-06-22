@@ -1,4 +1,4 @@
-import AppTextarea from "../../components/TextareaInputField";
+import TextareaInputField from "../../components/TextareaInputField";
 import useInputField, { InputField } from "./input-field-hook";
 
 interface TextareaInputFieldOptions {
@@ -30,17 +30,45 @@ const useTextareaInputField: AppTextareaInputHook = (options) => {
     inputField.setValue('');
   }
 
+  const mixedValueStateClickHandler = () => {
+    inputField.setMixedValuesState((state) => {
+      const nextState = !state;
+
+      if (nextState) {
+        clearValue();
+        inputField.statusApplier.restoreDefault();
+      }
+
+      return nextState;
+    });
+
+    return true;
+  }
+
+  const inputClickHandler = () => {
+    inputField.setMixedValuesState(false);
+    inputField.statusApplier.restoreDefault()
+  }
+
   const shouldAllowInputRestore = inputField.value !== inputField.anchor;
   const shouldAllowInputClear = inputField.value.trim() !== '';
 
+  const placeholder = inputField.mixedValuesState ? 'Using existing values (Click to modify)' : options.placeholder; 
+
   const render = () => (
-    <AppTextarea
+    <TextareaInputField
       label={label ?? ''}
       value={inputField.value}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       onInputClear={shouldAllowInputClear && clearValue}
       onChange={inputChangeHandler}
+      placeholder={placeholder}
+      onClick={inputClickHandler}
+
       {...inputField.inputFieldComponentProps}
+
+      mixedValuesState={inputField.mixedValuesState}
+      onMixedValueStateClick={mixedValueStateClickHandler}
     />
   )
 

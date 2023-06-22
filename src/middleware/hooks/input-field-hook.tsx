@@ -7,6 +7,7 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
   const [ anchor, setRawAnchor ] = useState(options.anchor);
   const [ status, setRawStatus ] = useState(InputField.Status.Default);
   const [ helperText, setRawHelperText ] = useState<string | null>(options.helperText ?? null);
+  const [ mixedValuesState, setMixedValuesState ] = useState(options.mixedValuesState);
 
   useEffect(() => {
     if (options.validationTimings?.includes(InputField.ValidationTiming.Change)) {
@@ -25,6 +26,16 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
       setAnchor(options.anchor);
     }
   }, [options.anchor]);
+
+  useEffect(() => {
+    if (options.trackMixedValuesState) {
+      setMixedValuesState(options.mixedValuesState);
+    }
+  }, [options.mixedValuesState]);
+
+  useEffect(() => {
+    
+  }, [options.mixedValuesState]);
 
   const setValue: InputField.State.SetValueFunction<T> = (data, useAsAnchor = false) => {
     setRawValue(data);
@@ -63,28 +74,43 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
     ignoreErrorDisplay = false
   ) => {
     try {
-      const data = providedValidationFunction?.(providedValue) ?? options.validate(providedValue);
+      const data = providedValidationFunction ? providedValidationFunction(providedValue) : options.validate(providedValue);
       if (!ignoreErrorDisplay) {
         statusApplier.restoreDefault();
       }
 
-      return {
-        isValid: true,
-        data,
+      if (options.label === 'Name') {
+        console.log('validation successful')
+      }
+
+      if (!mixedValuesState) {
+        return {
+          isValid: true,
+          isForMixedValues: false,
+          data,
+        }
       }
     } catch (error) {
       if (!(error instanceof InputFieldError)) {
         throw error;
       }
 
-      if (!ignoreErrorDisplay) {
+      if (!mixedValuesState && !ignoreErrorDisplay) {
         statusApplier.useError(error);
       }
 
-      return {
-        isValid: false,
-        error,
+      if (!mixedValuesState) {
+        return {
+          isValid: false,
+          error,
+        }
       }
+    }
+
+    return {
+      isValid: true,
+      isForMixedValues: true,
+      data: undefined,
     }
   }
 
@@ -94,8 +120,8 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
 
   const inputFieldComponentProps: InputFieldCommonProps = {
     label: options.label ?? '',
-    inputIcon: options.inputIcon,
     labelIcon: options.labelIcon,
+    inputIcon: options.inputIcon,
     markAsRequired: options.required,
     helperText: helperText || undefined,
     fieldClassName: options.className,
@@ -114,6 +140,9 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
     setHelperText,
     validate,
     validateCustomValue,
+
+    mixedValuesState,
+    setMixedValuesState,
   }
 }
 
@@ -149,16 +178,28 @@ export type InputCollectionResults<T> = {
 
 export function validateComponentStateInputs<T>(inputCollection: T extends { [k: string]: InputField.ComponentState<any, any> } ? T : never) {
   const validationResults = {} as any;
+  let overallValid = true;
+
   for (const key in inputCollection) {
     const result = inputCollection[key].validate();
     if (!result.isValid) {
-      return null;
+      overallValid = false;
     }
-
+      
     validationResults[key] = result;
   }
 
-  return validationResults as InputCollectionResults<T>;
+  if (!overallValid) {
+    return {
+      isValid: false,
+      validationResults,
+    } as const;
+  }
+
+  return {
+    isValid: true,
+    validationResults: validationResults as InputCollectionResults<T>,
+  } as const;
 }
 
 export class InputFieldError extends Error {
@@ -195,6 +236,8 @@ export namespace InputField {
     readonly inputIcon?: IconDefinition;
     readonly placeholder?: string;
     readonly required?: boolean;
+    readonly mixedValuesState?: boolean | undefined;
+    readonly trackMixedValuesState?: boolean;
   }
 
   export interface InputFieldComponentProps {
@@ -277,7 +320,14 @@ export namespace InputField {
 
       export interface Success<T> extends Base {
         readonly isValid: true;
+        readonly isForMixedValues: false;
         readonly data: T;
+      }
+
+      export interface MixedSuccess<T> extends Base {
+        readonly isValid: true;
+        readonly isForMixedValues: true;
+        readonly data: T | undefined;
       }
 
       export interface Fail extends Base {
@@ -286,7 +336,10 @@ export namespace InputField {
       }
     }
 
-    export type ValidationResult<T> = State.ValidationResult.Success<T> | State.ValidationResult.Fail;
+    export type ValidationResult<T> = 
+      | State.ValidationResult.Success<T>
+      | State.ValidationResult.MixedSuccess<T>
+      | State.ValidationResult.Fail;
 
     export interface SetHelperTextFunction {
       (helperText: string | null): void;
@@ -303,6 +356,7 @@ export namespace InputField {
     readonly value: T;
     readonly anchor: T;
     readonly helperText: string | null;
+    readonly placeholder?: string;
 
     readonly statusApplier: State.StatusApplier;
     readonly validationTimings: ValidationTiming[];
@@ -314,6 +368,9 @@ export namespace InputField {
     readonly validateCustomValue: State.ValidateCustomValue<T, K>;
 
     readonly inputFieldComponentProps: InputFieldComponentProps;
+
+    readonly mixedValuesState: boolean | undefined;
+    readonly setMixedValuesState: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   }
 
   export interface ComponentState<T, K> extends State<T, K> {

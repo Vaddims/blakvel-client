@@ -37,6 +37,7 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
     const uid = createUUID();
     const stableField: InputFieldCollection.Field<P> = {
       uid,
+      mixedValuesState: descriptor.mixedValuesState,
       identifier: descriptor.identifier,
       group: descriptor.group ?? [],
       fieldType: descriptor.fieldType as any,
@@ -85,30 +86,42 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
             nondefaultValidator(field)
           }
           
-          const result = (descriptor.validate as any)(field, field.value);
-          const successResult: InputFieldCollection.Field.Stable.ValidationResult.Success<P> = {
-            isValid: true,
-            field: field,
-            data: result,
+          if (!field.mixedValuesState) {
+            const result = (descriptor.validate as any)(field, field.value);
+            const successResult: InputFieldCollection.Field.Stable.ValidationResult.Success<P> = {
+              isValid: true,
+              isForMixedValues: false,
+              field: field,
+              data: result,
+            }
+      
+            return successResult;
           }
-    
-          return successResult;
         } catch (error) {
           if (!(error instanceof InputFieldError)) {
             throw error;
           }
 
-          if (true) {
+          if (!field.mixedValuesState && true /* field.ignoreAlerts */) {
             this.statusApplier.useError(error);
           }
-    
-          const failResult: InputFieldCollection.Field.Stable.ValidationResult.Fail = {
-            isValid: false,
-            field: field,
-            error,
-          }
 
-          return failResult;
+          if (!field.mixedValuesState) {
+            const failResult: InputFieldCollection.Field.Stable.ValidationResult.Fail = {
+              isValid: false,
+              field: field,
+              error,
+            }
+  
+            return failResult;
+          }
+        }
+
+        return {
+          isValid: true,
+          isForMixedValues: true,
+          data: undefined,
+          field,
         }
       },
       handleFocus() {
@@ -301,7 +314,7 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
   const validateFieldGroup = (fields: InputFieldCollection.Field<P>[]): InputFieldCollection.ValidationResult<P> => {
     const results: InputFieldCollection.Field.Stable.ValidationResult<P>[] = [];
     const fails: InputFieldCollection.Field.Stable.ValidationResult.Fail[] = [];
-    const successes: InputFieldCollection.Field.Stable.ValidationResult.Success<P>[] = [];
+    const successes: (InputFieldCollection.Field.Stable.ValidationResult.Success<P> | InputFieldCollection.Field.Stable.ValidationResult.MixedSuccess)[] = [];
 
     for (const field of fields) {
       const result = field.validate();
@@ -329,6 +342,7 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
   }
 
   const renderField = (field: InputFieldCollection.Field) => {
+    const placeholder = field.mixedValuesState ? `Using existing values (Click to modify)` : field.placeholder;
     switch (field.fieldType) {
       case InputFieldCollection.FieldType.Text: {
         return (
@@ -336,7 +350,14 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
             label={field.label}
             value={field.value}
             markAsRequired={field.required}
-            placeholder={field.placeholder}
+            placeholder={placeholder}
+            mixedValuesState={field.mixedValuesState}
+            onMixedValueStateClick={() => {
+              field.statusApplier.restoreDefault();
+              field.modify((currentField) => ({
+                mixedValuesState: typeof currentField === 'undefined' ? undefined : !currentField.mixedValuesState,
+              }))
+            }}
             onChange={(e) => field.modify({
               value: e.target.value,
             })}
@@ -352,6 +373,9 @@ const useInputFieldCollection = function<P = unknown>(options: InputFieldCollect
             })}
             onClick={() => {
               field.statusApplier.restoreDefault();
+              field.modify((currentField) => ({
+                mixedValuesState: currentField.mixedValuesState && false,
+              }));
             }}
             onFocus={() => {
               field.handleFocus();
@@ -429,7 +453,11 @@ export namespace InputFieldCollection {
         readonly anchor?: V;
         readonly helperText?: string;
         readonly required?: boolean;
-        readonly payload?: P;
+        readonly payload?: P;  
+
+        readonly mixedValuesState?: boolean | undefined; // boolean - show / undefined - hide
+        readonly onMixedValueStateClick?: () => boolean;
+
         readonly validate: Validation<GetStableOf<T, P>>;
       }
 
@@ -451,11 +479,13 @@ export namespace InputFieldCollection {
 
         export interface Success<P> extends Base<P>, InputField.State.ValidationResult.Success<unknown> {}
         export interface Fail extends Base, InputField.State.ValidationResult.Fail {}
+        export interface MixedSuccess extends Base, InputField.State.ValidationResult.MixedSuccess<unknown> {}
       }
 
       export type ValidationResult<P = unknown> =
       | ValidationResult.Success<P>
-      | ValidationResult.Fail;
+      | ValidationResult.Fail
+      | ValidationResult.MixedSuccess;
 
       export interface Identifiers<T extends FieldType> {
         readonly uid: string;
@@ -468,6 +498,7 @@ export namespace InputFieldCollection {
         readonly label?: string;
         readonly placeholder: string;
         readonly validationTimings: InputField.ValidationTiming[];
+        readonly mixedValuesState: boolean | undefined;
         readonly value: V;
         readonly anchor: V;
         readonly helperTextAnchor: string;
@@ -525,7 +556,7 @@ export namespace InputFieldCollection {
   export interface ValidationResult<P> {
     readonly results: InputFieldCollection.Field.Stable.ValidationResult<P>[];
     readonly fails: InputFieldCollection.Field.Stable.ValidationResult.Fail[];
-    readonly successes: InputFieldCollection.Field.Stable.ValidationResult.Success<P>[];
+    readonly successes: (InputFieldCollection.Field.Stable.ValidationResult.Success<P> | InputFieldCollection.Field.Stable.ValidationResult.MixedSuccess)[];
     readonly collectionIsValid: boolean;
   }
 

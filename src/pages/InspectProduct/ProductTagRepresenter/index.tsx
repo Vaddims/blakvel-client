@@ -6,7 +6,7 @@ import { InputFieldStatusDescriptor } from "..";
 import InputField from "../../../components/TextInputField";
 import { Product } from "../../../models/product.model";
 import { ProductTagField } from "../../CreateProductTag/ProductTagFieldInspection";
-import './product-tag-representer.scss';
+// import './product-tag-representer.scss';
 import { LocationState } from "../../../models/location-state.model";
 
 interface ProductTagRepresenterProps {

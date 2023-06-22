@@ -1,4 +1,4 @@
-import { faRotateBack, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faLayerGroup, faRotateBack, faXmark, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import { InputField as InputFieldNamespace } from '../../middleware/hooks/input-field-hook';
@@ -14,6 +14,8 @@ export interface InputFieldCommonProps {
   readonly markAsRequired?: boolean;
   readonly helperText?: string;
   readonly htmlFor?: string;
+  readonly mixedValuesState?: boolean | undefined; // boolean - show / undefined - hide
+  readonly onMixedValueStateClick?: () => void;
   readonly status?: InputFieldNamespace.Status;
   readonly onInputRestore?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
   readonly onInputClear?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
@@ -58,6 +60,7 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
       className={composedLabelClassName}
       data-status={props.status}
       ref={labelRef}
+      data-mixed-values={props.mixedValuesState}
     >
       {props.label && (
         <header>
@@ -91,6 +94,16 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
               <FontAwesomeIcon icon={faXmark} size='xl' />
             </button>
           )}
+          {(typeof props.mixedValuesState !== 'undefined' && props.onMixedValueStateClick) && (
+            <button 
+              onClick={props.onMixedValueStateClick} 
+              className='action-icon mixed-value-state' 
+              title='Use Existing value' 
+              aria-checked={props.mixedValuesState}
+            >
+              <FontAwesomeIcon icon={faLayerGroup} size='xl' />
+            </button>
+          )}
         </div>
       </section>
       { props.helperText && (
@@ -110,8 +123,10 @@ export function extractInputFieldProps(props: InputFieldCommonProps & React.Deta
     labelIcon: props.labelIcon,
     onInputClear: props.onInputClear,
     onInputRestore: props.onInputRestore,
+    onMixedValueStateClick: props.onMixedValueStateClick,
     onUnbound: props.onUnbound,
     markAsRequired: props.markAsRequired,
+    mixedValuesState: props.mixedValuesState,
     status: props.status,
     htmlFor: props.htmlFor,
     fieldClassName: props.fieldClassName,

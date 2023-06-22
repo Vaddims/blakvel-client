@@ -26,6 +26,7 @@ import Orders from "../../pages/Orders"
 import AdminOrderManagement from "../../pages/AdminOrderManagement"
 import AdminUserManagement from "../../pages/AdminUserManagement"
 import AdminOrderInspection from "../../pages/AdminOrderInspection"
+import ProductsSwitcher from "../ProductsSwitcher"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
@@ -40,15 +41,13 @@ const AppRoutes: React.FC = () => {
   const authProtectedRoute = createRoleProtectedRoute();
   const adminProtectedRoute = createRoleProtectedRoute(UserRole.Admin);
 
-  // console
-
   return (
     <BrowserRouter>
       <Routes>
         <Route index element={<Landing />} />
 
         <Route path="products">
-          <Route index element={<Catalog />} />
+          <Route index element={<ProductsSwitcher />} />
           <Route path=":id">
             <Route index element={<Product />} />
             <Route path="inspect" element={adminProtectedRoute}>

@@ -11,7 +11,8 @@ interface CheckboxFieldResult {
 
 type CheckboxFieldHook = InputField.GenericHook<CheckboxFieldOptions, CheckboxFieldResult, boolean, boolean>;
 const useCheckboxField: CheckboxFieldHook = (options) => {
-  const defaultValue = false;
+  const defaultValue = options.value ?? false;
+
   const inputField = useInputField({
     value: defaultValue,
     anchor: defaultValue,
@@ -21,8 +22,29 @@ const useCheckboxField: CheckboxFieldHook = (options) => {
   })
 
   const toggleValue = () => {
-    const newSelectState = !inputField.value; 
-    inputField.setValue(newSelectState);
+    // stages
+
+    // mixed value -> no select
+    if (inputField.mixedValuesState) {
+      inputField.setMixedValuesState(false);
+      inputField.setValue(false);
+      return;
+    }
+
+    // no select -> select
+    if (!inputField.value) {
+      inputField.setValue(true);
+      return;
+    }
+
+    // select -> [, mixed values]
+    if (options.mixedValuesState) {
+      inputField.setMixedValuesState(true);
+      return;
+    }
+
+    // select -> no select
+    inputField.setValue(false);
   }
 
   const checkboxClickHandler: React.MouseEventHandler<HTMLButtonElement> = () => {
@@ -42,6 +64,7 @@ const useCheckboxField: CheckboxFieldHook = (options) => {
       label=''
       {...inputField.inputFieldComponentProps}
       select={inputField.value}
+      mixedValuesState={inputField.mixedValuesState}
       onClick={checkboxClickHandler}
     />
   );

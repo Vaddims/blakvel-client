@@ -23,7 +23,7 @@ const useSearchParamState = () => {
   const [ urlSearchParams ] = useSearchParams();
   const [ shouldApplyParams, setShouldApplyParams ] = useState(false);
 
-  const initState = () => {
+  const instantiateCachedParams = () => {
     const cachedParams: CachedParamState = {};
 
     for (const [ key, value ] of urlSearchParams.entries()) {
@@ -42,7 +42,7 @@ const useSearchParamState = () => {
     return cachedParams;
   }
 
-  const [ cachedParams, setCachedParams ] = useState<CachedParamState>(initState());
+  const [ cachedParams, setCachedParams ] = useState<CachedParamState>(instantiateCachedParams());
   
   let awaitingStateResolution = false;
 
@@ -93,6 +93,10 @@ const useSearchParamState = () => {
       navigate(`${pathname}?${searchParams}`);
     }
   }, [shouldApplyParams, cachedParams]);
+
+  useEffect(() => {
+    setCachedParams(instantiateCachedParams());
+  }, [urlSearchParams.toString()]);
 
   const applySearchParams = () => {
     setShouldApplyParams(true);

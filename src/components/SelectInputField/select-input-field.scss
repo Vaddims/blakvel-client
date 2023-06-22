@@ -4,6 +4,12 @@
   appearance: none;
   border: .1rem solid rgb(150, 150, 150);
 
+  &[data-mixed-values=true] {
+    select {
+      color: var(--background-highlight-color) !important;
+    }
+  }
+
   select { 
     background-color: transparent;
     appearance: none;

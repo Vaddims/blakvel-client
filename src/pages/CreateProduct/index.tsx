@@ -1,11 +1,8 @@
-import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProductImageShowcaseInspector, ProductImageShowcaseInspectorRefMethods } from "../../components/ProductImageEditor";
-import { useProductImageShowcaseEditor } from "../../components/ProductImageEditor/useProductImageShowcaseEditor";
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel";
-import { useProductInspector } from "../../middleware/component-hooks/product-inspector/useProductInspector";
 import { useCreateProductMutation } from "../../services/api/productsApi";
+import useProductInspector from "../../middleware/component-hooks/product-inspector/useProductInspector";
 import './createProduct.scss';
 
 const CreateProduct: React.FC = () => {
@@ -15,14 +12,15 @@ const CreateProduct: React.FC = () => {
   
   const requestProductCreation = async () => {
     const inputProduct = productInspector.validateInputs();
-    if (!inputProduct) {
+    const prod = inputProduct[0];
+    if (!prod) {
       return;
     }
 
     const product = await createProduct({
-      ...inputProduct,
-      tags: inputProduct.tags.map(tag => tag.id),
-      specifications: inputProduct.specifications.map(spec => ({
+      ...prod,
+      tags: prod.tags.map(tag => tag.id),
+      specifications: prod.specifications.map(spec => ({
         value: spec.value,
         fieldId: spec.field.id,
       }))

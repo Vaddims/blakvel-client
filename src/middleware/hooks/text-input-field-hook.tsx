@@ -7,7 +7,13 @@ export interface GenericInputOptions {
   readonly placeholder?: string;
   readonly type?: 'text' | 'datetime-local' | 'email' | 'password';
   readonly disabled?: boolean;
+  readonly allowEmptyValue?: boolean;
 }
+
+const placeholderInputTypeSwap = [
+  'datetime-local',
+  'password',
+]
 
 type TextInputFieldHook<T> = InputField.GenericHook<GenericInputOptions, {}, string, T>;
 const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputFieldHook<T>>[0]): ReturnType<TextInputFieldHook<T>> {
@@ -31,6 +37,19 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     value: options.value?.toString() ?? '',
     anchor: options.anchor?.toString() ?? '',
   });
+  const placeholder = inputField.mixedValuesState ? 'Using existing values (Click to modify)' : options.placeholder; 
+
+  const [ inputType, setInputType ] = useState<GenericInputOptions['type']>((placeholder && placeholderInputTypeSwap.includes(options.type as any)) ? 'text' : (options.type ?? 'text'));
+
+  useEffect(() => {
+    const e = (placeholder && placeholderInputTypeSwap.includes(options.type as any));
+    const a = e ? 'text' : (options.type ?? 'text');
+    if (e) {
+      setInputType(a);
+    } else {
+      setInputType(options.type);
+    }
+  }, [placeholder, options.type])
 
   const inputBlurHandler = () => {
     if (options.validationTimings?.includes(InputField.ValidationTiming.Blur)) {
@@ -63,11 +82,19 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
 
   const changeHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     options.onChange?.(event.target.value);
-    inputField.setValue(event.target.value)
+    inputField.setValue(event.target.value);
   }
 
   const focusHandler: React.FocusEventHandler<HTMLInputElement> = () => {
     inputFieldUnbounding.onFocus();
+
+    if (inputType !== options.type) {
+      setInputType(options.type);
+    }
+
+    if (inputField.mixedValuesState) {
+      inputField.setMixedValuesState(false)
+    }
   }
 
   const restoreValue = () => {
@@ -80,20 +107,37 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     options?.onClear?.();
   }
 
+  const mixedValueStateClickHandler = () => {
+    inputField.setMixedValuesState((state) => {
+      const nextState = !state;
+
+      if (nextState) {
+        clearValue();
+        inputField.statusApplier.restoreDefault();
+      }
+
+      return nextState;
+    });
+
+    return true;
+  }
+
   const shouldAllowInputClear = !!inputField.value && !options.disabled;
   const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor !== '' && !options.disabled;
 
   const render = () => (
     <TextInputField
       label=''
-      type={options.type}
+      type={inputType}
       value={inputField.value}
-      placeholder={options.placeholder}
+      placeholder={placeholder}
       {...inputField.inputFieldComponentProps}
       onInputClear={shouldAllowInputClear && clearValue}
       onInputRestore={shouldAllowInputRestore && restoreValue}
       disabled={options.disabled}
       
+      mixedValuesState={inputField.mixedValuesState}
+      onMixedValueStateClick={mixedValueStateClickHandler}
       onUnbound={() => inputFieldUnbounding.onUnbound()}
       onChange={changeHandler}
       onClick={inputClickHandler}

@@ -19,6 +19,7 @@ import './product-management.scss';
 import { useAuthentication } from '../../middleware/hooks/useAuthentication';
 import useTextInputField from '../../middleware/hooks/text-input-field-hook';
 import { InputField } from '../../middleware/hooks/input-field-hook';
+import { Product } from '../../models/product.model';
 
 export type SortOptionType = keyof typeof sortOptions['clusters'];
 export interface SortOption {
@@ -57,6 +58,7 @@ const AdminProductManagement: React.FC = () => {
     selections,
     allElementsAreSelected,
     deselectAllSelections,
+    toggleAdditionalElement,
     handleSelectionEvent,
     elementIsSelected,
     handleElementBulkSelection,
@@ -160,15 +162,16 @@ const AdminProductManagement: React.FC = () => {
 
   const redirectToProductInspector = () => {
     if (selections.length === 1) {
-      navigate(`/products/${selections[0].id}/inspect`);
+      navigate(`/products?inspect=${selections[0].id}`);
       return;
     }
 
-    const url = new URL(`/products/inspect`, window.location.origin);
+    const urlSearchParams = new URLSearchParams();
     for (const selection of selections) {
-      url.searchParams.append('target', selection.id);
+      urlSearchParams.append('inspect', selection.id);
     }
-    navigate(url);
+
+    navigate(`/products?${urlSearchParams.toString()}`);
   }
 
   const deleteAllSelections = async () => {
@@ -254,6 +257,11 @@ const AdminProductManagement: React.FC = () => {
     applySearchCluster();
   }
 
+  const toggleProductCard = (product: Product): React.MouseEventHandler<HTMLButtonElement> => (event) => {
+    event.stopPropagation()
+    toggleAdditionalElement(product);
+  }
+
   return (
     <Page id='admin-product-management' onClick={deselectAllSelections}>
       <AdminPanel 
@@ -308,7 +316,8 @@ const AdminProductManagement: React.FC = () => {
                   key={product.id}
                   product={product} 
                   onClick={handleSelectionEvent(product)}
-                  onDoubleClick={() => navigate(`/products/${product.id}/inspect`)}
+                  onDoubleClick={() => navigate(`/products?inspect=${product.id}`)}
+                  onCheckboxClick={toggleProductCard(product)}
                   aria-multiselectable
                   aria-selected={elementIsSelected(product)}
                 />

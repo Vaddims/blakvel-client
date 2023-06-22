@@ -1,17 +1,17 @@
-import AppInput, { InputFieldCommonProps, extractInputFieldProps } from "../InputField";
+import InputField, { InputFieldCommonProps, extractInputFieldProps } from "../InputField";
 import './textarea-input-field.scss';
 
 interface AppTextareaInputFieldProps extends InputFieldCommonProps, React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {}
 
-const AppTextarea: React.FC<AppTextareaInputFieldProps> = (props) => {
+const TextareaField: React.FC<AppTextareaInputFieldProps> = (props) => {
   return (
-    <AppInput
+    <InputField
       {...extractInputFieldProps(props)}
       className="textarea-input-field"
     >
       <textarea {...props} />
-    </AppInput>
+    </InputField>
   )
 }
 
-export default AppTextarea;
+export default TextareaField;

@@ -98,8 +98,16 @@ label.input-field {
       border: .1rem solid var(--background-highlight-color);
     }
 
-    .action-icon path {
-      fill: rgb(198, 198, 198);
+    .action-icon {
+      &.mixed-value-state {
+        &[aria-checked=true] path {
+          fill: var(--background-highlight-color);
+        }
+      }
+
+      path {
+        fill: rgb(198, 198, 198);
+      }
     }
   }
 

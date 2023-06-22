@@ -58,15 +58,6 @@ export default function Product() {
     return <h1>NO PRODUCT WITH SUCH ID</h1>
   }
 
-  const adminHeaderTools = (
-    <button 
-      className="panel-tool outline-highlight" 
-      onClick={redirect(`/products/${id}/inspect`)}
-    >
-      Edit
-    </button>
-  );
-
   const addProductToCart = async () => {
     if (!authentication.user || !product) {
       return;
@@ -120,18 +111,32 @@ export default function Product() {
     }
   }
 
-  const commonHeaderTools = allLoaded && (
-    <>
-      {!productInCart ? (
+  const adminHeaderTools = (
+    <button 
+      className="panel-tool outline-highlight" 
+      onClick={redirect(`/products?inspect=${id}`)}
+    >
+      Edit
+    </button>
+  );
+
+  const commonHeaderTools = [
+    (
+      !productInCart ? (
         <button className="panel-tool outline-highlight" onClick={addProductToCart}>To cart</button>
       ) : (
         <button className="panel-tool outline-highlight" onClick={removeProductFromCart}>Delete from cart</button>
-      )}
+      )
+    ),
+    (
       <button className="panel-tool highlight">Buy</button>
-    </>
-  );
+    )
+  ];
 
-  const headerTools = user?.role === UserRole.Admin ? adminHeaderTools : commonHeaderTools;
+  const headerTools = commonHeaderTools;
+  if (user?.role) {
+    headerTools.unshift(adminHeaderTools);
+  }
 
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const discountPercent = hasDiscount ? (100 - Math.round(product.discountPrice! / product.price * 100)) : 0;

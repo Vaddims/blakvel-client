@@ -1,13 +1,12 @@
-import { ChangeEventHandler, KeyboardEventHandler, useEffect, useState } from "react";
-import { useGetProductQuery, useUpdateProductMutation } from "../../services/api/productsApi";
-import { useProductImageShowcaseEditor } from '../../components/ProductImageEditor/useProductImageShowcaseEditor';
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useGetProductsQuery, useUpdateProductMutation } from "../../services/api/productsApi";
+import { useNavigate, useParams } from "react-router-dom";
 import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
-import * as uuid from 'uuid';
 import './inspect-product.scss';
-import { useProductInspector } from "../../middleware/component-hooks/product-inspector/useProductInspector";
 import { InputField } from "../../middleware/hooks/input-field-hook";
+import useSearchParamState from "../../middleware/hooks/useSearchParamState";
+import useProductInspector from "../../middleware/component-hooks/product-inspector/useProductInspector";
+import { UpdateProductRequest } from "../../models/update-product-request.model";
 
 export interface InputFieldStatusDescriptor {
   readonly fieldId: string;
@@ -18,40 +17,63 @@ export interface InputFieldStatusDescriptor {
 const InspectProduct = () => {
   const navigate = useNavigate();
   const { id = '' } = useParams();
-  const uuidIsValid = uuid.validate(id);
+
+  const {
+    paramCluster,
+    urlSearchParams,
+  } = useSearchParamState();
   
   const [ updateProduct ] = useUpdateProductMutation();
-  const { data: product } = useGetProductQuery(id, { skip: !uuidIsValid });
+
+  // paramCluster.target.set(paramCluster.inspect.all);
+  const querySearchParams = new URLSearchParams(urlSearchParams);
+  querySearchParams.set('format', 'admin');
+  const { data: products } = useGetProductsQuery(querySearchParams.toString());
+
   const productInspector = useProductInspector({
-    productId: id,
+    // productId: id || undefined,
   });
   
   const requestProductUpdate = async () => {
-    if (!product) {
+    if (!products) {
       return;
     }
 
-    const inputProduct = productInspector.validateInputs();
-    if (!inputProduct) {
+    const inputProducts = productInspector.validateInputs();
+
+    if (inputProducts.length === 0) {
+      alert('something went wrong');
       return;
     }
 
-    await updateProduct({
-      ...inputProduct,
-      discountExpirationDate: inputProduct.discountExpirationDate || void 0,
-      id: product.id,
-      tags: inputProduct.tags.map(tag => tag.id),
-      specifications: inputProduct.specifications.map(specification => ({
-        value: specification.value,
-        fieldId: specification.field.id,
-      }))
-    });
+    for (const inputProduct of inputProducts) {
+      const updateRequestBody: UpdateProductRequest = {
+        ...inputProduct,
+        discountExpirationDate: inputProduct.discountExpirationDate || null,
+        id: inputProduct.id,
 
-    await productInspector.imageEditor.uploadImages(product.id);
-    navigate(`/products/${product.id}`, { replace: true });
+        tags: inputProduct.tags.map(tag => tag.id),
+        specifications: inputProduct.specifications.map(specification => ({
+          value: specification.value,
+          fieldId: specification.field.id,
+        }))
+      }
+
+      await updateProduct(updateRequestBody);
+    }
+
+    if (inputProducts.length === 1) {
+      await productInspector.imageEditor.uploadImages(inputProducts[0].id);
+    }
+
+    if (inputProducts.length === 1) {
+      navigate(`/products/${inputProducts[0].id}`, { replace: true });
+    } else {
+      navigate(`/admin-panel/product-management`, { replace: true });
+    }
   }
 
-  const restoreProductHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+  const restoreInputsHandler: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
     event.stopPropagation();
     productInspector.restoreProductValues();
@@ -59,28 +81,30 @@ const InspectProduct = () => {
 
   const headerTools = (
     <>
-      <button className="panel-tool outline-highlight" onMouseUp={restoreProductHandler}>Restore</button>
+      <button className="panel-tool outline-highlight" onMouseUp={restoreInputsHandler}>Restore</button>
       <button className="panel-tool highlight" onClick={requestProductUpdate}>Update</button>
     </>
   )
 
-  if (!product) {
-    return <div>Loading...</div>
+  const panelSubheader = [];
+
+  if (products?.length === 1) {
+    const prod = products[0];
+    panelSubheader.push(
+      (
+        <span>ID: <span className="highlight">{ prod.id }</span></span>
+      ),
+      (
+        <span>Creation Date: <span className="highlight">{ new Date(prod.creationDate).toLocaleString() }</span></span>
+      )
+    );
   }
 
-  const panelSubheader = [
-    (
-      <span>ID: <span className="highlight">{ product.id }</span></span>
-    ),
-    (
-      <span>Creation Date: <span className="highlight">{ new Date(product.creationDate).toLocaleString() }</span></span>
-    )
-  ]
-
+  const inspectingProductIds = paramCluster.inspect.all;
   return (
     <Page id="inspect-product">
       <Panel
-        title={`Inspecting one product`}
+        title={`Inspecting ${inspectingProductIds.length === 1 ? 'product' : `${inspectingProductIds.length} products`}`}
         headerTools={headerTools}
         subheader={panelSubheader}
         displayBackNavigation

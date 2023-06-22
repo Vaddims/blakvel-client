@@ -9,7 +9,7 @@ export interface SelectInputFieldOption {
 }
 
 interface SelectInputFieldOptions {
-  readonly label: string;
+  // readonly label: string;
   readonly value?: any;
   readonly options: SelectInputFieldOption[];
   readonly required?: boolean;
@@ -23,6 +23,13 @@ export const defaultSelectInputFieldOption: SelectInputFieldOption = {
   title: 'None',
   value: '',
 }
+
+export const mixedValuesSelectInputFieldOption: SelectInputFieldOption = {
+  title: 'Using existing values (Click to modify)',
+  value: 'mixed_values',
+}
+
+const disabledInputFieldOptions = [defaultSelectInputFieldOption.value, mixedValuesSelectInputFieldOption.value];
 
 type SelectInputFieldHook = InputField.GenericHook<SelectInputFieldOptions, SelectInputFieldState, SelectInputFieldOption, SelectInputFieldOption>;
 const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
@@ -40,6 +47,9 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
   });
 
   const displayOptions = [...options];
+  if (selectorOptions.mixedValuesState) {
+    displayOptions.unshift(mixedValuesSelectInputFieldOption)
+  }
   displayOptions.unshift(defaultSelectInputFieldOption);
 
   const restoreValue = () => {
@@ -60,9 +70,27 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
 
   const setValue = (option: SelectInputFieldOption | null, useAsAnchor = false) => {
     inputField.setValue(option ?? defaultSelectInputFieldOption, useAsAnchor);
+    if (typeof inputField.mixedValuesState !== 'undefined') {
+      inputField.setMixedValuesState(false);
+    }
   }
 
-  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor.value !== '';
+  const mixedValueStateClickHandler = () => {
+    inputField.setMixedValuesState((state) => {
+      const nextState = !state;
+
+      if (nextState) {
+        setValue(mixedValuesSelectInputFieldOption);
+        inputField.statusApplier.restoreDefault();
+      }
+
+      return nextState;
+    });
+
+    return true;
+  }
+
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor && !disabledInputFieldOptions.includes(inputField.anchor.value);
   const shouldAllowInputClear = inputField.value.value !== '' && !selectorOptions.required;
 
   const render = () => (
@@ -73,11 +101,14 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
       onInputClear={shouldAllowInputClear && clearValue}
       onChange={onInputChange}
       {...inputField.inputFieldComponentProps}
+
+      mixedValuesState={inputField.mixedValuesState}
+      onMixedValueStateClick={mixedValueStateClickHandler}
     >
       {displayOptions.map(option => (
         <option 
           selected={option.value === inputField.value.value} 
-          disabled={option.value === '' && required}
+          disabled={disabledInputFieldOptions.includes(option.value) && required}
           value={option.value}
         >
           {(option.value === '' && required) ? `Choose option` : option.title}

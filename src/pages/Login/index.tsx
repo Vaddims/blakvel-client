@@ -50,7 +50,7 @@ export default function Login() {
     const passwordResult = passwordInput.validate();
 
     dispatch(usersApi.util.resetApiState());
-    if (!emailResult.isValid || !passwordResult.isValid) {
+    if (!emailResult.isValid || emailResult.isForMixedValues || !passwordResult.isValid || passwordResult.isForMixedValues) {
       return;
     }
 

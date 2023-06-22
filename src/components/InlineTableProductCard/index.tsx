@@ -4,11 +4,13 @@ import './inline-table-product-card.scss';
 
 export interface InlineTableProductCardProps extends React.HTMLAttributes<HTMLTableRowElement> {
   readonly product: Product;
+  readonly onCheckboxClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 const InlineTableProductCard: React.FC<InlineTableProductCardProps> = (props) => {
   const {
     product,
+    onCheckboxClick,
     className,
     ...trProps
   } = props;
@@ -18,7 +20,8 @@ const InlineTableProductCard: React.FC<InlineTableProductCardProps> = (props) =>
 
   return (
     <AppTableRow 
-      {...trProps} 
+      {...trProps}
+      onCheckboxClick={onCheckboxClick}
       className={['inline-table-product-card', className].join(' ')}
     >
       <td className='common-info'>

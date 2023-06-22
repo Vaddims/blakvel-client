@@ -1,32 +1,25 @@
 import { faBoxes, faCalendarMinus, faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
-import { InputFieldDatalistElement } from "../../../components/TextInputField";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
 import { Product } from "../../../models/product.model";
-import { InputFieldStatusDescriptor } from "../../../pages/InspectProduct";
-import { ProductTagRepresenter } from "../../../pages/InspectProduct/ProductTagRepresenter";
-import { productsApi, useGetProductQuery, useGetProductTagsQuery } from "../../../services/api/productsApi";
+import { useGetProductTagsQuery, useGetProductsQuery } from "../../../services/api/productsApi";
 import useCheckboxField from "../../hooks/checkbox-field-hook";
-import useSelectInputField from "../../hooks/select-input-field-hook";
+import useSelectInputField, { mixedValuesSelectInputFieldOption } from "../../hooks/select-input-field-hook";
 import statusSelections from './status.selection.json';
 import useTextareaInput from "../../hooks/textarea-input-field-hook";
-import * as uuid from 'uuid';
-import './product-inspector.scss';
 import { InputField, InputFieldError, validateComponentStateInputs } from "../../hooks/input-field-hook";
 import useTextInputField from "../../hooks/text-input-field-hook";
 import useInputFieldCollection, { InputFieldCollection } from "../../hooks/use-input-field-collection-hook";
 import SubProductTagInspector from "./SubProductTagInspector";
+import useSearchParamState from "../../hooks/useSearchParamState";
+import './product-inspector.scss';
 
 interface ProductInspectorOptions {
-  readonly productId?: string;
+  readonly productIds?: string[];
   readonly disableSkeletonLayout?: boolean;
 }
 
-const discountPriceValidator = (discountInput: string, priceResult: InputField.State.ValidationResult<any>) => {
-  if (discountInput.trim() === '') {
-    throw new InputFieldError('Input is empty')
-  }
-
+const discountPriceTypeValidator = (discountInput: string) => {
   const discount = Number(discountInput);
   if (Number.isNaN(discount)) {
     throw new InputFieldError('Input is not a number');
@@ -36,6 +29,10 @@ const discountPriceValidator = (discountInput: string, priceResult: InputField.S
     throw new InputFieldError(`Price can't be negative`);
   }
 
+  return discount;
+}
+
+const discountPriceRelativityValidator = (discount: number, priceResult: InputField.State.ValidationResult<any>) => {
   if (!priceResult.isValid) {
     return discount;
   }
@@ -47,17 +44,48 @@ const discountPriceValidator = (discountInput: string, priceResult: InputField.S
   if (discount === priceResult.data) {
     throw new InputFieldError(`Discount can't be equal to the price`);
   }
+}
 
+const discountPriceValidator = (discountInput: string, priceResult: InputField.State.ValidationResult<any>) => {
+  const discount = discountPriceTypeValidator(discountInput);
+  discountPriceRelativityValidator(discount, priceResult);
   return discount;
 }
 
 export const useProductInspector = (options?: ProductInspectorOptions) => {
-  const productId = options?.productId ?? '';
-  const productIdProvided = typeof options?.productId === 'string';
+  const {
+    paramCluster,
+    urlSearchParams,
+  } = useSearchParamState();
 
-  const { data: product } = useGetProductQuery(productId, { skip: !productIdProvided });
-  const { data: globalProductTags } = useGetProductTagsQuery();
-  const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(product?.tags ?? []);
+  const productIds = paramCluster.inspect.all;
+
+  const s = new URLSearchParams([['format', 'admin']]);
+  for (const a of productIds) {
+    s.append('target', a);
+  }
+
+  const { data: products = [] } = useGetProductsQuery(s.toString(), { skip: productIds.length === 0 });
+
+  const { data: globalProductTags = [] } = useGetProductTagsQuery();
+
+  const draftProductsInit = () => {
+    if (products.length !== 0) {
+      const tags = products.map(p => p.tags).flat();
+      const uniqueTagIds = new Set(tags.map(tag => tag.id));
+      const uniqueTags = globalProductTags.filter(tag => uniqueTagIds.has(tag.id));
+      return uniqueTags;
+    }
+
+    return [];
+  }
+
+  const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(draftProductsInit());
+  const a = () => draftProductTags.map(pt => pt.id).join('&');
+
+  useEffect(() => {
+    setDraftProductTags(draftProductsInit());
+  }, [products.map(p => p.id).join('&')]);
 
   const removeDraftProductTag = (id: string) => {
     setDraftProductTags((productTags) => {
@@ -66,43 +94,103 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     });
   }
 
-  useEffect(() => {
-    if (product) {
-      applyProductValues(product);
-    }
-  }, [product]);
+  interface MultiValueUnificationStatus<T> {
+    readonly unified: boolean;
+    readonly value: T | undefined;
+  }
 
+  const getMultiValueUnificationStatusFactory = function<T>(elements?: T[]) {
+    return function<K>(pipe: (value: T) => K, identifier?: (v: K) => string | number | boolean): MultiValueUnificationStatus<K> {
+      const pipedElements = elements?.map(pipe);
+      
+      const getPrimitiveValueFrom = (value: K) => {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === undefined) {
+          return value;
+        }
+  
+        if (!identifier) {
+          throw new Error('Identificator is required');
+        }
+  
+        return identifier(value);
+      }
+  
+      if (!pipedElements) {
+        return {
+          unified: true,
+          value: undefined,
+        }
+      }
+  
+      for (const element of pipedElements) {
+        if (getPrimitiveValueFrom(element) !== getPrimitiveValueFrom(pipedElements[0])) {
+          return {
+            unified: false,
+            value: undefined,
+          };
+        }
+      }
+  
+      return {
+        unified: true,
+        value: pipedElements[0],
+      };
+    }
+  }
+
+  const calculateDiscountPercent = () => {
+    return 0;
+    // const priceResult = priceInput.validate(true);
+    // const discountPriceResult = discountPriceInput.validate(true);
+  
+    // if (!priceResult.isValid || priceInput.value.trim() === '' || !discountPriceResult.isValid || discountPriceInput.value.trim() === '') {
+    //   return null;
+    // }
+  
+    // const price = priceResult.data;
+    // const discountPrice = discountPriceResult.data;
+  
+    // if (price < discountPrice) {
+    //   return null;
+    // }
+  
+    // const discountPercent = 100 - Math.round(discountPrice / price * 100);
+    // return discountPercent;
+  }
+
+  const shouldActLikeMixedValues = (unificationStatus: MultiValueUnificationStatus<any>) => (
+    (productIds.length > 1 && !unificationStatus.unified) ? true : undefined
+  );
+
+  const getMultiValueUnificationStatus = getMultiValueUnificationStatusFactory(products);
+
+  const nameUnificationStatus = getMultiValueUnificationStatus((product) => product.name);
   const nameInput = useTextInputField({
     label: 'Name',
     required: true,
-    value: product?.name,
-    anchor: product?.name,
+    mixedValuesState: shouldActLikeMixedValues(nameUnificationStatus),
+    trackMixedValuesState: true,
+    value: nameUnificationStatus.value,
+    anchor: nameUnificationStatus.value,
     trackValue: true,
     trackAnchor: true,
     validationTimings: [InputField.ValidationTiming.Blur],
-    validate: (input) => {
-      if (input.trim() === '') {
-        throw new InputFieldError('Name not provided');
-      }
-
-      return input;
-    }
+    validate: (input) => input,
   });
 
+  const priceUnificationStatus = getMultiValueUnificationStatus((product) => product.price);
   const priceInput = useTextInputField<number>({
     label: 'Price',
     required: true,
-    value: product?.price.toString(),
-    anchor: product?.price.toString(),
+    mixedValuesState: shouldActLikeMixedValues(priceUnificationStatus),
+    trackMixedValuesState: true,
+    value: priceUnificationStatus.value?.toString() ?? '',
+    anchor: priceUnificationStatus.value?.toString() ?? '',
     trackValue: true,
     trackAnchor: true,
     inputIcon: faDollar,
     validationTimings: [InputField.ValidationTiming.Blur],
     validate: (input) => {
-      if (input.trim() === '') {
-        throw new InputFieldError('Price not provided');
-      }
-
       const number = Number(input);
       if (Number.isNaN(number)) {
         throw new InputFieldError('Input is not a number');
@@ -119,37 +207,103 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         return;
       }
 
-      const priceResult = priceInput.validateCustomValue(data, this.validate, true);
+      const priceResult = priceInput.validateCustomValue(data, undefined, true);
+
+      if (products.length <= 1) {
+        if (priceResult.isValid) {
+          const customDiscountPriceValidator = () => discountPriceValidator(discountPriceInput.value, priceResult);
+          discountPriceInput.validateCustomValue(discountPriceInput.value, customDiscountPriceValidator);
+        } 
+        
+        if (data === '') {
+          discountPriceInput.statusApplier.restoreDefault();
+        }
+      }
+
+      if (discountPriceInput.value.trim() === '') {
+        return;
+      }
+
       if (priceResult.isValid) {
         const customDiscountPriceValidator = () => discountPriceValidator(discountPriceInput.value, priceResult);
         discountPriceInput.validateCustomValue(discountPriceInput.value, customDiscountPriceValidator);
+      } 
+      
+      if (data === '') {
+        discountPriceInput.statusApplier.restoreDefault();
       }
     },
   });
 
+  const discountResult = getMultiValueUnificationStatus<boolean>(product => !!product.discountPrice);
   const discountCheckboxInput = useCheckboxField({
     label: 'Use Discount',
-    value: typeof product?.discountPrice === 'number',
-    anchor: typeof product?.discountPrice === 'number',
+    value: discountResult.value,
+    anchor: discountResult.value,
     trackValue: true,
     trackAnchor: true,
+    mixedValuesState: shouldActLikeMixedValues(discountResult),
+    trackMixedValuesState: true,
   });
 
+  const discountPriceUnificationStatus = getMultiValueUnificationStatus(product => product.discountPrice);
   const discountPriceInput = useTextInputField({
     label: 'Discount Price',
-    value: product?.discountPrice?.toString(),
-    anchor: product?.discountPrice?.toString(),
+    required: true,
+    mixedValuesState: shouldActLikeMixedValues(discountPriceUnificationStatus),
+    trackMixedValuesState: true,
+    value: discountPriceUnificationStatus.value?.toString() || undefined,
+    anchor: discountPriceUnificationStatus.value?.toString() || undefined,
     trackValue: true,
     trackAnchor: true,
     inputIcon: faDollar,
-    required: true,
     validationTimings: [InputField.ValidationTiming.Blur],
     validate(input) {
-      return discountPriceValidator(input, priceInput.validate(true));
+      const priceResult = priceInput.validate(true);
+
+      if (products.length <= 1) {
+        return discountPriceValidator(input, priceResult);
+      }
+
+      if (priceResult.isValid && priceInput.value.trim() !== '') {
+        return discountPriceValidator(input, priceResult);
+      } else {
+        return discountPriceTypeValidator(input);
+      }
+
     }, 
   });
 
+  const discountExpirationDateResult = getMultiValueUnificationStatus(
+    product => product.discountExpirationDate, (value) => value?.toString() ?? ''
+  );
+
+  const formattedDiscountExpirationDate = (() => {
+    const expirationDate = discountExpirationDateResult.value
+      ? new Date(discountExpirationDateResult.value)
+      : null;
+
+    if (expirationDate) {
+      const expirationDatePassed = expirationDate.getTime() - Date.now() <= 0;
+      if (expirationDatePassed) {
+        return;
+      } else {
+        const offsetInMs = new Date().getTimezoneOffset() * 60 * 1000;
+        const valueFormattedDateWithOffset = new Date(expirationDate.getTime() - offsetInMs).toISOString().replace('Z', '');
+        return valueFormattedDateWithOffset;
+      }
+    }
+
+    return;
+  })()
+
   const discountExpirationDateInput = useTextInputField<Date | undefined>({
+    mixedValuesState: shouldActLikeMixedValues(discountExpirationDateResult),
+    trackMixedValuesState: true,
+    value: formattedDiscountExpirationDate,
+    anchor: formattedDiscountExpirationDate,
+    trackValue: true,
+    trackAnchor: true,
     label: 'Expiration Date',
     helperText: 'If an expiration date is not provided, the discount will remain active until it is manually changed.',
     inputIcon: faCalendarMinus,
@@ -174,37 +328,55 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     }
   });
 
+  const descriptionUnificationStatus = getMultiValueUnificationStatus(product => product.description);
   const descriptionInput = useTextareaInput({
     label: 'Description',
-    value: product?.description,
-    anchor: product?.description,
+    mixedValuesState: shouldActLikeMixedValues(descriptionUnificationStatus),
+    trackMixedValuesState: true,
+    value: descriptionUnificationStatus.value,
+    anchor: descriptionUnificationStatus.value,
     trackValue: true,
     trackAnchor: true,
   });
 
+  
+  const stateUnificationStatus = getMultiValueUnificationStatus(product => product.state);
+
+  const prebuildOption = statusSelections.find(option => option.value === 'prepublic');
+  const targetOption = statusSelections.find(option => option.value === stateUnificationStatus.value);
+  const currentStateOption = targetOption ?? (products?.length === 1 ? prebuildOption : mixedValuesSelectInputFieldOption);
+
   const stateSelectionInput = useSelectInputField({
     label: 'State',
+    mixedValuesState: shouldActLikeMixedValues(stateUnificationStatus),
+    trackMixedValuesState: true,
     options: statusSelections,
-    value: statusSelections.find(option => option.value === (product?.state ?? 'prepublic')),
-    anchor: statusSelections.find(option => option.value === (product?.state ?? 'prepublic')),
+    value: currentStateOption,
+    anchor: currentStateOption,
     trackValue: true,
     trackAnchor: true,
     required: true,
   });
 
+  const physicalIdUnificationStatus = getMultiValueUnificationStatus(product => product.physicalId);
   const physicalIdInput = useTextInputField({
     label: 'Physical ID',
-    value: product?.physicalId,
-    anchor: product?.physicalId,
+    mixedValuesState: shouldActLikeMixedValues(physicalIdUnificationStatus),
+    trackMixedValuesState: true,
+    value: physicalIdUnificationStatus.value,
+    anchor: physicalIdUnificationStatus.value,
     trackValue: true,
     trackAnchor: true,
   })
 
+  const stockUnificationStatus = getMultiValueUnificationStatus(product => product.stock);
   const stockInput = useTextInputField({
     label: 'In Stock',
     required: true,
-    value: product?.stock.toString(),
-    anchor: product?.stock.toString(),
+    mixedValuesState: shouldActLikeMixedValues(stockUnificationStatus),
+    trackMixedValuesState: true,
+    value: stockUnificationStatus.value?.toString(),
+    anchor: stockUnificationStatus.value?.toString(),
     trackValue: true,
     trackAnchor: true,
     labelIcon: faBoxes,
@@ -266,129 +438,230 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     stateSelectionInput,
   };
 
-  // TODO REWORK
-  const imageEditor = useProductImageShowcaseEditor(product);
+  // // TODO REWORK
+  const imageEditor = useProductImageShowcaseEditor(products.length === 1 ? products[0] : undefined);
 
-  // TODO Trasnfer somewhere else
-  const calculateDiscountPercent = () => {
-    const priceResult = priceInput.validate(true);
-    const discountPriceResult = discountPriceInput.validate(true);
+  // // TODO Trasnfer somewhere else
+  // const calculateDiscountPercent = () => {
+  //   const priceResult = priceInput.validate(true);
+  //   const discountPriceResult = discountPriceInput.validate(true);
 
-    if (!priceResult.isValid || !discountPriceResult.isValid) {
-      return null;
-    }
+  //   if (!priceResult.isValid || !discountPriceResult.isValid) {
+  //     return null;
+  //   }
 
-    const price = priceResult.data;
-    const discountPrice = discountPriceResult.data;
+  //   const price = priceResult.data;
+  //   const discountPrice = discountPriceResult.data;
 
-    if (price < discountPrice) {
-      return null;
-    }
+  //   if (price < discountPrice) {
+  //     return null;
+  //   }
 
-    const discountPercent = 100 - Math.round(discountPrice / price * 100);
-    return discountPercent;
-  }
-
-  const applyProductValues = (targetProduct: Product) => {
-    let shouldShowDiscount = true;
-    const { discountPrice } = targetProduct;
-    const expirationDate = targetProduct.discountExpirationDate 
-      ? new Date(targetProduct.discountExpirationDate)
-      : null;
-
-    if (discountPrice) {
-      if (expirationDate) {
-        const expirationDatePassed = expirationDate.getTime() - Date.now() <= 0;
-        if (expirationDatePassed) {
-          shouldShowDiscount = false;
-        } else {
-          const offsetInMs = new Date().getTimezoneOffset() * 60 * 1000;
-          const valueFormattedDateWithOffset = new Date(expirationDate.getTime() - offsetInMs).toISOString().replace('Z', '');
-          discountExpirationDateInput.setValue(valueFormattedDateWithOffset, true);
-        }
-      }
-
-      if (shouldShowDiscount) {
-        discountCheckboxInput.setValue(true, true);
-        discountPriceInput.setValue(discountPrice?.toString(), true);
-      }
-    }
-
-    setDraftProductTags(targetProduct.tags);
-    // setDraftProductSpecifications(targetProduct.specifications)
-  }
+  //   const discountPercent = 100 - Math.round(discountPrice / price * 100);
+  //   return discountPercent;
+  // }
 
   const restoreProductValues = () => {
     const staticInputsArray = Array.from(Object.values(staticInputs));
     staticInputsArray.forEach((input) => input.restoreValue());
     staticInputsArray.forEach(input => input.statusApplier.restoreDefault());
     
-    setDraftProductTags(product?.tags ?? []);
+    setDraftProductTags(draftProductsInit());
     inputFieldCollection.restore();
   }
 
-  const validateInputs = (): Omit<Product, 'id' | 'urn'> | null => {
-    const validatedResults = validateComponentStateInputs(staticInputs);
-    
-    const discountPriceResult = validatedResults?.discountCheckboxInput.data 
-    ? discountPriceInput.validate() 
-    : void 0;
+  type Writeable<T extends { [x: string]: any }> = {
+    -readonly [P in keyof T]: T[P];
+  }
 
-    const discountExpirationDateResult = validatedResults?.discountCheckboxInput.data 
-    ? discountExpirationDateInput.validate()
-    : void 0;
+  const validateInputs = (): Product[] => {
+    const validatedCluster = validateComponentStateInputs(staticInputs);
+    const discountCheckboxValidationResult = validatedCluster.validationResults.discountCheckboxInput;
+    const shouldValidateDiscountInputs = discountCheckboxValidationResult.data || discountCheckboxValidationResult.isForMixedValues;
+
+    const discountPriceResult = shouldValidateDiscountInputs
+      ? discountPriceInput.validate() 
+      : void 0;
+
+    const discountExpirationDateResult = shouldValidateDiscountInputs
+      ? discountExpirationDateInput.validate()
+      : void 0;
 
     const specificationResult = inputFieldCollection.validate();
     
     if (
-      !validatedResults || 
-      !discountPriceResult?.isValid ||
-      !discountExpirationDateResult?.isValid ||
-      !specificationResult.collectionIsValid
+      !validatedCluster.isValid || 
+      (discountPriceResult && !discountPriceResult.isValid) ||
+      (discountExpirationDateResult && !discountExpirationDateResult.isValid) ||
+      (productIds.length <= 1 && !specificationResult.collectionIsValid)
     ) {
-      return null;
+      console.log('err')
+      return [];
     }
 
-    const specifications: Product.Specification[] = specificationResult.successes.map(result => ({
-      field: result.field.payload,
-      value: result.data as string,
-    }))
+    const p = (prod: Writeable<Product>) => {
+      if (!validatedCluster.validationResults.nameInput.isForMixedValues) {
+        prod.name = validatedCluster.validationResults.nameInput.data;
+      }
 
-    const product: Omit<Product, 'id' | 'urn'> = {
-      name: validatedResults.nameInput.data,
-      price: validatedResults.priceInput.data,
-      creationDate: new Date().toString(),
-      description: validatedResults.descriptionInput.data,
-      physicalId: validatedResults.physicalIdInput.data,
-      state: validatedResults.stateSelectionInput.data.value as Product['state'],
-      discountPrice: discountPriceResult?.data ?? null,
-      discountExpirationDate: discountExpirationDateResult?.data?.toString() ?? null,
-      stock: validatedResults.stockInput.data,
-      tags: draftProductTags,
-      specifications,
+      if (!validatedCluster.validationResults.priceInput.isForMixedValues) {
+        prod.price = validatedCluster.validationResults.priceInput.data;
+      }
+
+      if (validatedCluster.validationResults.discountCheckboxInput.isForMixedValues) {
+        // apply selectivly
+        if (discountPriceResult && !discountPriceResult.isForMixedValues) {
+          prod.discountPrice = discountPriceResult.data;
+        }
+
+        if (discountExpirationDateResult && !discountExpirationDateResult.isForMixedValues) {
+          prod.discountExpirationDate = discountExpirationDateResult.data?.toString() ?? null;
+        }
+      } else if (validatedCluster.validationResults.discountCheckboxInput.data) {
+        // apply for all
+        if (discountPriceResult && !discountPriceResult.isForMixedValues) {
+          prod.discountPrice = discountPriceResult.data;
+        }
+
+        if (discountExpirationDateResult && !discountExpirationDateResult.isForMixedValues) {
+          prod.discountExpirationDate = discountExpirationDateResult.data?.toString() ?? null;
+        }
+      } else {
+        // delete all
+        prod.discountPrice = null;
+        prod.discountExpirationDate = null;
+      }
+
+      if (!validatedCluster.validationResults.descriptionInput.isForMixedValues) {
+        prod.description = validatedCluster.validationResults.descriptionInput.data;
+      }
+
+      if (!validatedCluster.validationResults.physicalIdInput.isForMixedValues) {
+        prod.physicalId = validatedCluster.validationResults.physicalIdInput.data;
+      }
+
+      if (!validatedCluster.validationResults.stateSelectionInput.isForMixedValues) {
+        prod.state = validatedCluster.validationResults.stateSelectionInput.data.value as any;
+      }
+
+      if (!validatedCluster.validationResults.stockInput.isForMixedValues) {
+        prod.stock = validatedCluster.validationResults.stockInput.data;
+      }
+
+      return prod;
     }
 
-    return product;
+    switch (products.length) {
+      case 0: {
+        const s: Writeable<Product> = {
+          name: validatedCluster.validationResults.nameInput.data,
+          description: validatedCluster.validationResults.descriptionInput.data,
+          price: validatedCluster.validationResults.priceInput.data,
+          discountPrice: discountPriceResult?.data ?? null,
+          discountExpirationDate: discountExpirationDateResult?.data?.toString() ?? null,
+          physicalId: validatedCluster.validationResults.descriptionInput.data,
+          state: validatedCluster.validationResults.stateSelectionInput.data.value as any,
+          stock: validatedCluster.validationResults.stockInput.data,
+          creationDate: new Date().toString(),
+          tags: [],
+          specifications: [],
+          id: '',
+          urn: {
+            thumbnail: null,
+            thumbs: [],
+          }
+        }
+
+        const typedSpecs = specificationResult.successes as InputFieldCollection.Field.Stable.ValidationResult.Success<Product.Tag.Field>[];
+        
+        const specs: Product.Specification[] = typedSpecs.map(result => ({
+          field: result.field.payload,
+          value: result.data as string,
+        }))
+
+        s.tags = draftProductTags;
+        s.specifications = specs;
+        return [s];
+      }
+
+      case 1:
+        const updatedProduct: Writeable<Product> = {
+          ...p({...products[0]})
+        };
+
+        const typedSpecs = specificationResult.successes as InputFieldCollection.Field.Stable.ValidationResult.Success<Product.Tag.Field>[];
+        
+        const specs: Product.Specification[] = typedSpecs.map(result => ({
+          field: result.field.payload,
+          value: result.data as string,
+        }))
+
+        updatedProduct.tags = draftProductTags;
+        updatedProduct.specifications = specs;
+        return [updatedProduct];
+
+      default:
+        const updatedProducts: Product[] = [];
+        for (const product of products) {
+          const updatedProduct: Writeable<Product> = {
+            ...product,
+          }
+
+          const a = {...p(updatedProduct)};
+          updatedProducts.push(a);
+          
+          console.log('>>', a);
+        }
+        return updatedProducts;
+    }
+  }
+
+  const getFieldDescritproSpec = (field: Product.Tag.Field): MultiValueUnificationStatus<string> => {
+    if (products.length === 1) {
+      return {
+        unified: true,
+        value: products[0].specifications.find(spec => spec.field.id === field.id)?.value ?? '',
+      }
+    }
+
+    const specs = products.map(p => p.specifications).flat();
+    const fieldSpecs = specs.filter(spec => spec.field.id === field.id);
+    const a = getMultiValueUnificationStatusFactory(fieldSpecs);
+    const unificationResult = a(e => e.value);
+    return unificationResult;
+  }
+
+  const temp = () => {
+    const handle = (tag: Product.Tag, field: Product.Tag.Field) => {
+      const unificationStatusResult = getFieldDescritproSpec(field);
+      const a: InputFieldCollection.Field.Descriptor<Product.Tag.Field> = {
+        fieldType: InputFieldCollection.FieldType.Text,
+        mixedValuesState: shouldActLikeMixedValues(unificationStatusResult),
+        identifier: field.id,
+        label: field.name,
+        placeholder: `ex. ${field.example}`,
+        value: unificationStatusResult.value ?? '', // '', // product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
+        anchor: unificationStatusResult.value ?? '', // '', // product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
+        group: [tag.id, field.id],
+        required: field.required,
+        payload: field,
+        validationTimings: [InputField.ValidationTiming.Blur],
+        validate(_, data) {
+          return data;
+        }
+      }
+
+      return a;
+    }
+
+    return draftProductTags.map<InputFieldCollection.Field.Descriptor<Product.Tag.Field>[]>((tag) => tag.fields.map((field) => handle(tag, field))).flat();
   }
 
   const inputFieldCollection = useInputFieldCollection({
-    descriptorUpdateDependencies: [product, draftProductTags],
-    fieldDescriptors: draftProductTags.map<InputFieldCollection.Field.Descriptor<Product.Tag.Field>[]>((tag) => tag.fields.map((field) => ({
-      fieldType: InputFieldCollection.FieldType.Text,
-      identifier: field.id,
-      label: field.name,
-      placeholder: `ex. ${field.example}`,
-      value: product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
-      anchor: product?.specifications.find(spec => spec.field.id === field.id)?.value ?? '',
-      group: [tag.id, field.id],
-      required: field.required,
-      payload: field,
-      validationTimings: [InputField.ValidationTiming.Blur],
-      validate(_, data) {
-        return data;
-      }
-    }))).flat() ?? [],
+    descriptorUpdateDependencies: [products.map(p => p.id).join('&'), draftProductTags],
+    fieldDescriptors: temp(),
   });
+  // for future
 
   const discountPercent = calculateDiscountPercent();
 
@@ -398,7 +671,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         {imageEditor.render()}
       </article>
       <main className="product-information-panel">
-
         <section className="info-row">
           <header className="row-divider">
             General Information
@@ -416,7 +688,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
                     <span className=''>-{discountPercent}%</span> 
                   )}
                 </header>
-                { discountCheckboxInput.value && (
+                { (discountCheckboxInput.value || discountCheckboxInput.mixedValuesState) && (
                   <div className='discount-input-fields'>
                     {discountPriceInput.render()}
                     {discountExpirationDateInput.render()}
@@ -431,39 +703,42 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
             </article>
           </div>
         </section>
-
-        <section className="info-row">
-          <header className="row-divider">
-            Specifications
-            <hr className="divider" />
-          </header>
-          <div className="cluster">
-            <article className="product-tag-management">
-              { tagSearchInput.render() }
-              <div className="product-tag-cluster">
-                { draftProductTags.map(draftProductTag => (
-                  <SubProductTagInspector
-                    productTag={draftProductTag}
-                    removeProductTag={() => removeDraftProductTag(draftProductTag.id)}
-                    specificationGroup={inputFieldCollection.createFieldGroup(draftProductTag.id)}
-                  />
-                )) }
-              </div>
-            </article>
-            <article>
-              [Unique specifications]
-            </article>
-          </div>
-        </section>
-        <section className="info-row">
-          <header className="row-divider">
-            Timelined Snapshots
-            <hr className="divider" />
-          </header>
-          <div className="cluster">
-            
-          </div>
-        </section>
+        { productIds.length <= 1 && (
+          <section className="info-row">
+            <header className="row-divider">
+              Specifications
+              <hr className="divider" />
+            </header>
+            <div className="cluster">
+              <article className="product-tag-management">
+                { tagSearchInput.render() }
+                <div className="product-tag-cluster">
+                  { draftProductTags.map(draftProductTag => (
+                    <SubProductTagInspector
+                      productTag={draftProductTag}
+                      removeProductTag={() => removeDraftProductTag(draftProductTag.id)}
+                      specificationGroup={inputFieldCollection.createFieldGroup(draftProductTag.id)}
+                    />
+                  )) }
+                </div>
+              </article>
+              <article>
+                [Unique specifications]
+              </article>
+            </div>
+          </section>
+        )}
+        {false && (
+          <section className="info-row">
+            <header className="row-divider">
+              Timelined Snapshots
+              <hr className="divider" />
+            </header>
+            <div className="cluster">
+              
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
@@ -475,3 +750,5 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     imageEditor,
   }
 }
+
+export default useProductInspector;

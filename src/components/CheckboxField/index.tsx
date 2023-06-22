@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './checkbox-field.scss';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 import { InputFieldCommonProps } from '../InputField';
 
 interface CheckboxFieldProps extends InputFieldCommonProps {
@@ -16,6 +16,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     <label
       htmlFor={fieldId} 
       aria-selected={props.select}
+      aria-current={props.mixedValuesState ?? false}
       className='checkbox-field'
     >
       <button 
@@ -24,9 +25,14 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         onClick={props.onClick}
       >
         <FontAwesomeIcon 
+          icon={faLayerGroup}
+          size='lg'
+          className='checkbox-icon mixed-values'
+        />
+        <FontAwesomeIcon 
           icon={faCheck} 
           size='lg' 
-          className='checkbox-icon' 
+          className='checkbox-icon tick' 
         />
       </button>
       { props.label && (
