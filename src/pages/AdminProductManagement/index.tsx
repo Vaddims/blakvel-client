@@ -7,7 +7,7 @@ import InlineTableProductCard from '../../components/InlineTableProductCard';
 import * as sortOptions from './sort.options.json';
 import { ReactNode, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconDefinition, faFilterCircleXmark, faMagnifyingGlassMinus, faSearch, faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
+import { IconDefinition, faEdit, faFilterCircleXmark, faMagnifyingGlassMinus, faSearch, faSort, faSortDown, faSortUp, faTrash } from '@fortawesome/free-solid-svg-icons';
 import discountFilterOptions from './discount-filter.options.json';
 import stateFilterOptions from './state-filter.options.json';
 import useElementSelectorComponent from '../../middleware/component-hooks/element-selector-component/useElementSelectorComponent';
@@ -222,9 +222,14 @@ const AdminProductManagement: React.FC = () => {
 
   const selectionHeaderTools = (
     <>
-      <button className="panel-tool outline-highlight">Mark as Fixed</button>
-      <button className="panel-tool edit highlight" onClick={redirectToProductInspector}>Edit</button>
-      <button className="panel-tool delete" onClick={deleteAllSelections}>Delete</button>
+      <button className="panel-tool edit highlight" onClick={redirectToProductInspector}>
+        <FontAwesomeIcon icon={faEdit} />
+        Edit
+      </button>
+      <button className="panel-tool delete" onClick={deleteAllSelections}>
+        <FontAwesomeIcon icon={faTrash} />
+        Delete
+      </button>
     </>
   );
 

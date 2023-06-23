@@ -6,7 +6,12 @@
   
     .panel-tool {
       &.delete {
-        background-color: rgb(255, 70, 70);
+        color: rgb(255, 70, 70);
+        border: .1rem solid rgb(255, 70, 70);
+
+        path {
+          fill: rgb(255, 70, 70);
+        }
       }
     }
   }

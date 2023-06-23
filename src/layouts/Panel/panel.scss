@@ -70,33 +70,38 @@
       gap: .5rem;
 
       .panel-tool {
-        background-color: var(--background-main-color);
+        display: flex;
+        gap: .5rem;
+        background-color: transparent;
         color: var(--text-main-color);
         font-size: medium;
         stroke-linecap: 2rem;
-        border: .1rem solid transparent;
+        border: .1rem solid var(--background-highlight-color);
         padding: .5rem 1.5rem;
         border-radius: .5rem;
         cursor: pointer;
         text-decoration: none;
+        font-weight: 500;
 
         &.highlight {
-          background-color: var(--background-highlight-color);
+          background-color: var(--sub-highlight-color);
         }
 
-        &:not(.highlight):hover {
-          transition: background-color 200ms ease;
-          background-color: var(--background-secondary-color);
-        }
+        // &:not(.highlight):hover {
+        //   transition: background-color 200ms ease;
+        //   background-color: var(--background-secondary-color);
+        // }
 
         &.outline-highlight {
+          background-color: transparent;
+          color: var(--background-highlight-color) !important;
           border: .1rem solid var(--background-highlight-color);
         }
 
-        &.outline-highlight:hover {
-          transition: background-color 200ms ease;
-          background-color: var(--background-highlight-color);
-        }
+        // &.outline-highlight:hover {
+        //   transition: background-color 200ms ease;
+        //   background-color: var(--background-highlight-color);
+        // }
       }
     }
   }

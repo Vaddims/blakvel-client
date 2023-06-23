@@ -72,9 +72,12 @@
         .shopping-cart::after {
           position: absolute;
           display: block;
-          background-color: var(--background-highlight-color);
+          background-color: var(--sub-highlight-color);
+          border: 0.15rem solid var(--background-main-color);
           content: attr(data-shopping-cart-item-quantity);
+          // box-shadow: 0 0 0 .1rem var(--background-main-color);
           font-size: .8rem;
+          // box-sizing: border-b/x/x;
           width: 1rem;
           height: 1rem;
           right: -.5rem;
