@@ -21,6 +21,7 @@ export interface InputFieldCommonProps {
   readonly onInputClear?: React.MouseEventHandler<HTMLButtonElement> | FalsyType;
   readonly onUnbound?: (event: MouseEvent) => void;
   readonly fieldClassName?: string;
+  readonly inputPrefix?: string;
 }
 
 export interface InputFieldProps extends InputFieldCommonProps {
@@ -81,6 +82,7 @@ export const InputField: React.FC<InputFieldProps> = (props) => {
       <section className="input-section">
         <div className='input-icon-wrapper'>
           { props.inputIcon && <FontAwesomeIcon icon={props.inputIcon} className='input-icon' /> }
+          { props.inputPrefix && <span className='text'>{props.inputPrefix}</span> }
         </div>
         { props.children }
         <div className='input-management-actions'>
@@ -130,5 +132,6 @@ export function extractInputFieldProps(props: InputFieldCommonProps & React.Deta
     status: props.status,
     htmlFor: props.htmlFor,
     fieldClassName: props.fieldClassName,
+    inputPrefix: props.inputPrefix,
   }
 }

@@ -54,6 +54,10 @@ label.input-field {
       display: flex;
       align-items: center;
 
+      .text {
+        margin-left: .5rem;
+      }
+
       .input-icon {
         margin-left: .75rem;
 
@@ -68,7 +72,11 @@ label.input-field {
       position: relative;
       display: flex;
       flex-direction: row;
-      padding: 0 .5rem;
+      padding-right: .5rem;
+
+      &:empty {
+        display: none;
+      }
 
       button {
         padding: 0 .5rem;
@@ -81,7 +89,7 @@ label.input-field {
     &:hover {
       border: .1rem solid rgb(190, 190, 190);
 
-      .input-management-actions {
+      .input-management-actions:not(:empty) {
         display: flex;
       }
 

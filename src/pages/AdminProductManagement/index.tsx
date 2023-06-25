@@ -7,7 +7,7 @@ import InlineTableProductCard from '../../components/InlineTableProductCard';
 import * as sortOptions from './sort.options.json';
 import { ReactNode, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconDefinition, faEdit, faFilterCircleXmark, faMagnifyingGlassMinus, faSearch, faSort, faSortDown, faSortUp, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { IconDefinition, faDollar, faEdit, faFilterCircleXmark, faMagnifyingGlassMinus, faPercent, faPercentage, faSearch, faSort, faSortDown, faSortUp, faTrash } from '@fortawesome/free-solid-svg-icons';
 import discountFilterOptions from './discount-filter.options.json';
 import stateFilterOptions from './state-filter.options.json';
 import useElementSelectorComponent from '../../middleware/component-hooks/element-selector-component/useElementSelectorComponent';
@@ -20,6 +20,26 @@ import { useAuthentication } from '../../middleware/hooks/useAuthentication';
 import useTextInputField from '../../middleware/hooks/text-input-field-hook';
 import { InputField } from '../../middleware/hooks/input-field-hook';
 import { Product } from '../../models/product.model';
+import useSelectInputField, { SelectInputFieldOption } from '../../middleware/hooks/select-input-field-hook';
+
+const expirationOptions = {
+  none: {
+    title: 'None',
+    value: 'none',
+  },
+  before: {
+    title: 'Expires Before',
+    value: 'exp_bfr',
+  },
+  after: {
+    title: 'Expires After',
+    value: 'exp_aftr',
+  },
+  queal: {
+    title: 'Expires At Day',
+    value: 'exp_at_day'
+  },
+}
 
 export type SortOptionType = keyof typeof sortOptions['clusters'];
 export interface SortOption {
@@ -30,6 +50,26 @@ export interface SortOption {
 export interface ElementSelectorButtonDiscountFilterPayload {
   readonly type?: string;
   readonly value?: any;
+}
+
+const discountFilter = {
+  all: {
+    title: 'All',
+    value: 'none',
+    defaultSelection: true,
+  } as SelectInputFieldOption,
+  discounted: {
+    title: 'Discounted',
+    value: 'true',
+  } as SelectInputFieldOption,
+  nonDiscounted: {
+    title: 'Non-discounted',
+    value: 'false'
+  } as SelectInputFieldOption,
+} as const;
+
+const findDsicountFilter = (v: string) => {
+  return Object.values(discountFilter).find(filter => filter.value === v);
 }
 
 const AdminProductManagement: React.FC = () => {  
@@ -72,6 +112,10 @@ const AdminProductManagement: React.FC = () => {
     value: paramCluster.search.value ?? '',
     trackValue: true,
     validationTimings: [InputField.ValidationTiming.Submit],
+    changeDebouncingTimeout: 500,
+    onChange(data) {
+      paramCluster.search.set(data.length === 0 ? null : data).apply();
+    },
     onSubmit(data) {
       paramCluster.search.set(data.length === 0 ? null : data);
       applySearchCluster();
@@ -80,34 +124,134 @@ const AdminProductManagement: React.FC = () => {
       paramCluster.search.set(null);
       applySearchCluster();
     }
-  })
-
-  const discountFilterSelector = useElementSelectorComponent<ElementSelectorButtonDiscountFilterPayload>({
-    title: 'Discount Filter',
-    multiple: false,
-    trackInitialTarget: true,
-    identifyOptions: (option) => option.title,
-    buttonOptions: discountFilterOptions,
-    initialTarget: discountFilterOptions.find(option => (
-      typeof paramCluster.hasDiscount.value === 'string' &&
-      option.payload.value === stringToBoolean(paramCluster.hasDiscount.value)
-    )) ?? discountFilterOptions.find(option => option.defaultSelection)
   });
 
-  const stateFilterSelector = useElementSelectorComponent({
-    title: 'State Filter',
-    multiple: true,
-    trackInitialTarget: true,
-    identifyOptions: (option) => option.title,
-    buttonOptions: stateFilterOptions,
-    initialTarget: stateFilterOptions.filter(option => (
-      paramCluster.hasState.all.includes(option.payload)
-    )) ?? stateFilterOptions.filter(option => option.defaultSelection),
+  const changeDebouncingTimeout = 500;
+
+  const minPrice = useTextInputField({
+    label: 'Price',
+    placeholder: 'Min',
+    value: paramCluster.minPrice.value ?? '',
+    required: true,
+    inputIcon: faDollar,
+    hideClear: true,
+    className: 'r',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.minPrice.set(state).apply();
+    }
+  });
+
+  const maxPrice = useTextInputField({
+    placeholder: 'Max',
+    required: true,
+    value: paramCluster.maxPrice.value ?? '',
+    inputIcon: faDollar,
+    hideClear: true,
+    className: 'l',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.maxPrice.set(state).apply();
+    }
+  });
+
+  const discountFilterSelector = useSelectInputField({
+    label: 'Discount',
+    required: true,
+    value: paramCluster.hasDiscount.value ? findDsicountFilter(paramCluster.hasDiscount.value) : discountFilter.all,
+    options: Object.values(discountFilter),
+    dynamicClassName(state) {
+      return state.value === discountFilter.discounted.value ? 'b' : '';
+    },
+  });
+
+  const minDiscountPercentagePrice = useTextInputField({
+    placeholder: 'Min',
+    required: true,
+    value: paramCluster.minDiscountPercentage.value ?? '',
+    inputIcon: faPercent,
+    hideClear: true,
+    className: 't r b',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.minDiscountPercentage.set(state).apply();
+    }
+  });
+
+  const maxDiscountPercentagePrice = useTextInputField({
+    placeholder: 'Max',
+    required: true,
+    value: paramCluster.maxDiscountPercentage.value ?? '',
+    inputIcon: faPercent,
+    hideClear: true,
+    className: 't l b',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.maxDiscountPercentage.set(state).apply();
+    }
+  });
+
+  const minDiscountPrice = useTextInputField({
+    placeholder: 'Min',
+    required: true,
+    value: paramCluster.minPriorPrice.value ?? '',
+    inputIcon: faDollar,
+    hideClear: true,
+    className: 't r',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.minPriorPrice.set(state).apply();
+    }
+  });
+
+  const maxDiscountPrice = useTextInputField({
+    placeholder: 'Max',
+    required: true,
+    value: paramCluster.maxPriorPrice.value ?? '',
+    inputIcon: faDollar,
+    hideClear: true,
+    className: 't l',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.maxPriorPrice.set(state).apply();
+    }
+  });
+
+  const stateFilterSelector = useSelectInputField({
+    label: 'State',
+    required: true,
+    value: stateFilterOptions.find(filter => filter.value === paramCluster.hasState.value) ?? stateFilterOptions[0],
+    options: stateFilterOptions,
+  });
+  
+  const expDateSelector = useSelectInputField({
+    hideClear: true,
+    label: 'Discount Timeline',
+    required: true,
+    value: expirationOptions.none,
+    options: Object.values(expirationOptions),
+    dynamicClassName(state) {
+      return state.value !== expirationOptions.none.value ? 'b' : '';
+    }
+  })
+
+  const expStartDate = useTextInputField({
+    required: true,
+    label: 'Discount Expiration',
+    type: 'date',
+    inputPrefix: 'From:',
+    className: 'b',
+  })
+
+  const expEndDate = useTextInputField({
+    inputPrefix: 'To:',
+    type: 'date',
+    className: 't'
   })
 
   const filters: {name: string, value: string}[] = [
-    ...discountFilterSelector.selections.filter(option => option.payload.type).map(option => ({ name: option.title, value: option.title as string })),
-    ...stateFilterSelector.selections.map(option => ({ name: option.title, value: option.payload as string })),
+    // ...discountFilterSelector.selections.filter(option => option.payload.type).map(option => ({ name: option.title, value: option.title as string })),
+    // ...stateFilterSelector.selections.map(option => ({ name: option.title, value: option.payload as string })),
   ]
 
   if (paramCluster.search.value) {
@@ -115,15 +259,27 @@ const AdminProductManagement: React.FC = () => {
   }
 
   useEffect(() => {
-    const selectionValue = discountFilterSelector.selections[0]?.payload.value ?? null;
-    paramCluster.hasDiscount.set(selectionValue?.toString() ?? null)
-    applySearchCluster();
-  }, [discountFilterSelector.getSelectionsInSequentialString()]);
+    if (discountFilterSelector.value.value === discountFilter.all.value) {
+      paramCluster.hasDiscount.remove().apply();
+      return;
+    }
+
+    paramCluster.hasDiscount.set(discountFilterSelector.value.value).apply();
+  }, [discountFilterSelector.value]);
 
   useEffect(() => {
-    paramCluster.hasState.set(stateFilterSelector.selections.map(selection => selection.payload));
-    applySearchCluster();
-  }, [stateFilterSelector.getSelectionsInSequentialString()]);
+    if (stateFilterSelector.value.value === stateFilterOptions[0].value) {
+      paramCluster.hasState.remove().apply()
+      return;
+    }
+
+    paramCluster.hasState.set(stateFilterSelector.value.value).apply();
+  }, [stateFilterSelector.value]);
+
+  // useEffect(() => {
+  //   const validationResult = minPrice.validate(true);
+
+  // }, [minPrice.value]);
   
   const applySortOption = (sortOption: SortOption | null) => {
     paramCluster.sort.set(sortOption?.type ?? null);
@@ -240,10 +396,47 @@ const AdminProductManagement: React.FC = () => {
   const headerTools = selections.length > 0 ? selectionHeaderTools : defaultHeaderTools;
 
 
-  const extensions: ReactNode[] = [
-    discountFilterSelector.render(),
-    stateFilterSelector.render(),
-  ];
+  // const extensions: ReactNode[] = [
+  //   discountFilterSelector.render(),
+  //   stateFilterSelector.render(),
+  // ];
+  const a = discountFilterSelector.validate(true);
+
+  const extensions = (
+    <div className='admin-panel-management-extensions'>
+      <header>
+        <span>Filters</span>
+      </header>
+      <div className='filter-content'>
+        <div className='price'>
+          {minPrice.render()}
+          {maxPrice.render()}
+        </div>
+        <div className='discount'>
+          {discountFilterSelector.render()}
+          {a.isValid && a.data?.value === discountFilter.discounted.value && (
+            <>
+              <div className='price-percentage-range-container'>
+                {minDiscountPercentagePrice.render()}
+                {maxDiscountPercentagePrice.render()}
+              </div>
+              <div className='price-range-container'>
+                {minDiscountPrice.render()}
+                {maxDiscountPrice.render()}
+              </div>
+              <div className='exp-date-container'>
+                {expStartDate.render()}
+                {expEndDate.render()}
+                {/* {expDateSelector.render()} */}
+                {/* {expDateSelector.value.value !== expirationOptions.none.value && expStartDate.render()} */}
+              </div>
+            </>
+          )}
+        </div>
+        {stateFilterSelector.render()}
+      </div>
+    </div>
+  )
 
   const subheader: ReactNode[] = [
     <span>Showing <span className='highlight'>{ products.length }</span> products</span>,

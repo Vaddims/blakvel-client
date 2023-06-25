@@ -9,10 +9,10 @@ export interface SelectInputFieldOption {
 }
 
 interface SelectInputFieldOptions {
-  // readonly label: string;
   readonly value?: any;
   readonly options: SelectInputFieldOption[];
   readonly required?: boolean;
+  readonly dynamicClassName?: (state: SelectInputFieldOption) => string | undefined;
 }
 
 export interface SelectInputFieldState {
@@ -90,8 +90,10 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
     return true;
   }
 
-  const shouldAllowInputRestore = inputField.value !== inputField.anchor && !disabledInputFieldOptions.includes(inputField.anchor.value);
-  const shouldAllowInputClear = inputField.value.value !== '' && !selectorOptions.required;
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor && !disabledInputFieldOptions.includes(inputField.anchor.value) && !selectorOptions.hideRestore;
+  const shouldAllowInputClear = inputField.value.value !== '' && !selectorOptions.required && !selectorOptions.hideClear;
+
+  const dynamicClassName = selectorOptions.dynamicClassName ? selectorOptions.dynamicClassName(inputField.value) : undefined;
 
   const render = () => (
     <SelectInputField
@@ -102,6 +104,7 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
       onChange={onInputChange}
       {...inputField.inputFieldComponentProps}
 
+      fieldClassName={[dynamicClassName, selectorOptions.className].join(' ')}
       mixedValuesState={inputField.mixedValuesState}
       onMixedValueStateClick={mixedValueStateClickHandler}
     >
@@ -111,7 +114,7 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
           disabled={disabledInputFieldOptions.includes(option.value) && required}
           value={option.value}
         >
-          {(option.value === '' && required) ? `Choose option` : option.title}
+          {(option.value === '' && required) ? (selectorOptions.placeholder ?? `Choose option`) : option.title}
         </option>
       ))}
     </SelectInputField>

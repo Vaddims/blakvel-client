@@ -1,26 +1,27 @@
 [
   {
+    "title": "All",
+    "value": "all",
+    "defaultSelection": true
+  },
+  {
     "title": "Public",
-    "defaultSelection": true,
-    "disabled": false,
-    "payload": "public"
+    "defaultSelection": false,
+    "value": "public"
   },
   {
     "title": "Prepublic",
-    "disabled": false,
-    "defaultSelection": true,
-    "payload": "prepublic"
+    "defaultSelection": false,
+    "value": "prepublic"
   },
   {
     "title": "Internal",
-    "disabled": false,
-    "defaultSelection": true,
-    "payload": "internal"
+    "defaultSelection": false,
+    "value": "internal"
   },
   {
     "title": "Archive",
-    "disabled": false,
-    "defaultSelection": true,
-    "payload": "archive"
+    "defaultSelection": false,
+    "value": "archive"
   }
 ]

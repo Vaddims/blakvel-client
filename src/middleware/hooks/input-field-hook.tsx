@@ -125,6 +125,7 @@ const useInputField = function<T, K>(options: InputField.Options<T, K>): InputFi
     markAsRequired: options.required,
     helperText: helperText || undefined,
     fieldClassName: options.className,
+    inputPrefix: options.inputPrefix,
     status,
   }
 
@@ -262,6 +263,7 @@ export namespace InputField {
     readonly validate: Options.ValidateInputFunction<T, K>;
     readonly onValueChange?: Options.ChangeInputFunction<T>; 
     readonly className?: string;
+    readonly inputPrefix?: string;
   }
 
   type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
@@ -274,6 +276,9 @@ export namespace InputField {
     readonly onSubmit?: InputField.State.SubmitInputFunction<K>;
     readonly onRestore?: State.RestoreInputFunction;
     readonly onClear?: State.ClearInputFunction;
+    readonly hideClear?: boolean;
+    readonly hideRestore?: boolean;
+    readonly changeDebouncingTimeout?: number; // ms
   }
 
   export namespace State {

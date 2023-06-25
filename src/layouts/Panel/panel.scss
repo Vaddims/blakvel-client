@@ -138,19 +138,24 @@
 
     .panel-extensions-boundary {
       position: relative;
-      width: 15rem;
+      width: 17.5rem;
+      // background-color: red;
 
       .panel-extensions {
         position: sticky;
         display: flex;
         width: 100%;
-        min-height: 60vh;
-        max-height: calc(100vh - 6rem);
+        // min-height: 60vh;
+        max-height: calc(100vh - 8rem);
         overflow-y: auto;
         overflow-x: visible;
         flex-direction: column;
         top: 5.5rem;
         gap: 1rem;
+        box-sizing: border-box;
+        border-radius: .5rem;
+
+        border: .1rem solid var(--background-secondary-color);
 
         &::-webkit-scrollbar {
           display: none;

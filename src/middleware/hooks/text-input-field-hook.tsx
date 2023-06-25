@@ -1,11 +1,12 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import TextInputField from "../../components/TextInputField";
 import useInputField, { InputField, InputFieldError, useInputFieldUnbounding } from "./input-field-hook";
 import { ArgumentTypes } from "../utils/types";
+import useFunctionDebounce from "./function-debounce-hook";
 
 export interface GenericInputOptions {
   readonly placeholder?: string;
-  readonly type?: 'text' | 'datetime-local' | 'email' | 'password';
+  readonly type?: 'text' | 'datetime-local' | 'email' | 'password' | 'date';
   readonly disabled?: boolean;
   readonly allowEmptyValue?: boolean;
 }
@@ -17,9 +18,15 @@ const placeholderInputTypeSwap = [
 
 type TextInputFieldHook<T> = InputField.GenericHook<GenericInputOptions, {}, string, T>;
 const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputFieldHook<T>>[0]): ReturnType<TextInputFieldHook<T>> {
+  const valueChangeHandler = (data: string) => {
+    return options.onChange?.(data)
+  }
+
+  const debounceChange = useFunctionDebounce(valueChangeHandler, options.changeDebouncingTimeout);
+
   const inputField = useInputField({
     onValueChange(data) {
-      options.onChange?.(data);
+      debounceChange(data);
     },
     ...options,
     validate: (data) => {
@@ -81,8 +88,8 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
   }
 
   const changeHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    options.onChange?.(event.target.value);
     inputField.setValue(event.target.value);
+    debounceChange(event.target.value);
   }
 
   const focusHandler: React.FocusEventHandler<HTMLInputElement> = () => {
@@ -122,8 +129,8 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     return true;
   }
 
-  const shouldAllowInputClear = !!inputField.value && !options.disabled;
-  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor !== '' && !options.disabled;
+  const shouldAllowInputClear = !!inputField.value && !options.disabled && !options.hideClear;
+  const shouldAllowInputRestore = inputField.value !== inputField.anchor && inputField.anchor !== '' && !options.disabled && !options.hideRestore;
 
   const render = () => (
     <TextInputField

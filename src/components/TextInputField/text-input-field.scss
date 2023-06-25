@@ -68,20 +68,6 @@
       }
     }
 
-    .input-management-actions {
-      position: relative;
-      display: flex;
-      flex-direction: row;
-      padding: 0 .5rem;
-
-      button {
-        padding: 0 .5rem;
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-      }
-    }
-
     &:hover {
       border: .1rem solid rgb(190, 190, 190);
 

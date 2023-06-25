@@ -16,6 +16,133 @@
     }
   }
 
+  .price-range-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    // gap: .5rem;
+  }
+
+  .exp-date-container {
+    margin-top: 1rem;
+  }
+
+  .price-percentage-range-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    // gap: .5rem;
+  }
+
+  .admin-panel-management-extensions {
+    display: flex;
+    flex-direction: column;
+
+    & > header {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      padding-inline: 1rem;
+      color: grey;
+      cursor: pointer;
+      height: 3rem;
+      border-bottom: 0.1rem solid var(--background-secondary-color);
+
+      span {
+        font-size: 1.25rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: grey;
+      }
+    }
+
+    .filter-content {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+
+      .discount {
+        display: flex;
+        flex-direction: column;
+        // gap: .5rem;
+      }
+
+      .price {
+        display: flex;
+        flex-direction: row;
+        align-items: end;
+        justify-content: center;
+      }
+  
+      .input-field {
+        box-sizing: border-box;
+        width: 100%;
+
+        &.t {
+          .input-section {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-top: .1rem solid #9696963d;
+          }
+
+          &:focus-within {
+            .input-section {
+              border-top: .1rem solid var(--background-highlight-color);
+            }
+          }
+        }
+
+        &.r {
+          .input-section {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: .1rem solid #9696963d;
+          }
+
+          &:focus-within {
+            .input-section {
+              border-right: .1rem solid var(--background-highlight-color);
+            }
+          }
+        }
+
+        &.l {
+          .input-section {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-left: .1rem solid #9696963d;
+          }
+
+          &:focus-within {
+            .input-section {
+              border-left: .1rem solid var(--background-highlight-color);
+            }
+          }
+        }
+
+        &.b {
+          .input-section {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-bottom: .1rem solid #9696963d;
+          }
+
+          &:focus-within {
+            .input-section {
+              border-bottom: .1rem solid var(--background-highlight-color);
+            }
+          }
+        }
+      }
+    }
+  }
+
   .product-absence {
     padding: 20vh 0;
     position: sticky;
