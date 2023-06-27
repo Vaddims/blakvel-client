@@ -7,6 +7,11 @@ import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import InlineTableProductTagCard from "../../components/InlineTableProductTagCard";
 import "./product-tag-management.scss";
+import { ReactNode } from "react";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import useTextInputField from "../../middleware/hooks/text-input-field-hook";
+import useSearchParamState from "../../middleware/hooks/useSearchParamState";
+import { InputField } from "../../middleware/hooks/input-field-hook";
 
 export default function AdminProductTagManagement() {
   const { data: productTags = [] } = useGetProductTagsQuery();
@@ -24,6 +29,59 @@ export default function AdminProductTagManagement() {
   });
 
   const navigate = useNavigate();
+
+  const {
+    paramCluster,
+    clear: clearSearchCluster,
+    urlSearchParams,
+    applySearchCluster,
+  } = useSearchParamState();
+
+  const globalSearchInput = useTextInputField({
+    inputIcon: faSearch,
+    placeholder: 'Search',
+    value: paramCluster.search.value ?? '',
+    trackValue: true,
+    validationTimings: [InputField.ValidationTiming.Submit],
+    changeDebouncingTimeout: 500,
+    onChange(data) {
+      paramCluster.search.set(data.length === 0 ? null : data).apply();
+    },
+    onSubmit(data) {
+      paramCluster.search.set(data.length === 0 ? null : data);
+      applySearchCluster();
+    },
+    onClear() {
+      paramCluster.search.set(null);
+      applySearchCluster();
+    }
+  });
+
+  const changeDebouncingTimeout = 500;
+
+  const minFieldQuantityFilterInput = useTextInputField({
+    label: 'Fields',
+    required: true,
+    placeholder: '-',
+    inputPrefix: 'Min:',
+    className: 'r',
+    hideClear: true,
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.minFields.set(state).apply();
+    }
+  });
+
+  const maxFieldQuantityFilterInput = useTextInputField({
+    inputPrefix: 'Max:',
+    hideClear: true,
+    placeholder: '-',
+    className: 'l',
+    changeDebouncingTimeout,
+    onChange(state) {
+      paramCluster.maxFields.set(state).apply();
+    }
+  });
 
   const redirectToProductTagInspector = () => {
     if (selections.length === 1) {
@@ -65,16 +123,44 @@ export default function AdminProductTagManagement() {
 
   const selectionHeaderTools = (
     <>
-      <button className="panel-tool edit highlight" onClick={redirectToProductTagInspector}>Edit</button>
+      {selections.length === 1 && (
+        <button 
+          className="panel-tool edit highlight" 
+          onClick={redirectToProductTagInspector}
+        >
+          Edit
+        </button>
+      )}
       <button className="panel-tool delete" onClick={deleteSelectedTags}>Delete</button>
     </>
   );
+
+  const subheader: ReactNode[] = [
+    <span>Showing <span className='highlight'>{ productTags.length }</span> tags</span>,
+  ]
+
+  const extensions = (
+    <div className='admin-panel-management-extensions'>
+      <header>
+        <span>Filters</span>
+      </header>
+      <div className='filter-content'>
+        <div className='field-quantity-range'>
+          { minFieldQuantityFilterInput.render() }
+          { maxFieldQuantityFilterInput.render() }
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <Page id='admin-product-tag-management' onClick={deselectAllSelections}>
       <AdminPanel
         title="Tag Management"
+        extensions={extensions}
         headerTools={selections.length === 0 ? defaultHeaderTools : selectionHeaderTools}
+        subheader={subheader}
+        headerCenterTools={globalSearchInput.render()}
       >
         <AppTable useSelectionCheckbox>
           <thead>

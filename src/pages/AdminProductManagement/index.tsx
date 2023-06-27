@@ -223,17 +223,6 @@ const AdminProductManagement: React.FC = () => {
     value: stateFilterOptions.find(filter => filter.value === paramCluster.hasState.value) ?? stateFilterOptions[0],
     options: stateFilterOptions,
   });
-  
-  const expDateSelector = useSelectInputField({
-    hideClear: true,
-    label: 'Discount Timeline',
-    required: true,
-    value: expirationOptions.none,
-    options: Object.values(expirationOptions),
-    dynamicClassName(state) {
-      return state.value !== expirationOptions.none.value ? 'b' : '';
-    }
-  })
 
   const expStartDate = useTextInputField({
     required: true,
@@ -427,8 +416,6 @@ const AdminProductManagement: React.FC = () => {
               <div className='exp-date-container'>
                 {expStartDate.render()}
                 {expEndDate.render()}
-                {/* {expDateSelector.render()} */}
-                {/* {expDateSelector.value.value !== expirationOptions.none.value && expStartDate.render()} */}
               </div>
             </>
           )}

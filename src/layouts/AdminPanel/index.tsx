@@ -26,7 +26,6 @@ const AdminPanel: React.FC<PanelProps> = (props) => {
 
   const a = useElementSelectorComponent({
     ...adminPanelSelectorOptions,
-    collapse: true,
     initialTarget: target,
     onSelectionChange: onTargetChange,
   });

@@ -20,7 +20,7 @@ const InlineTableProductTagCard: React.FC<InlineTableProductTagCardProps> = (pro
         </div>
         <div>
           <span>
-            <span className='info'>{productTag.fields.length} tags</span>
+            <span className='info'>{productTag.fields.length} fields</span>
           </span>
         </div>
       </td>

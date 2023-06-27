@@ -42,21 +42,21 @@ export const InspectProductTag = () => {
       return;
     }
 
-    // try {
-    //   const inputProductTag = productTagInspector.validateInputs();
-    //   await updateProductTag({
-    //     ...inputProductTag,
-    //     id: productTag.id,
-    //   } as any);
+    try {
+      const inputProductTag = productTagInspector.validateInputs();
+      await updateProductTag({
+        ...inputProductTag,
+        id: productTag.id,
+      } as any);
 
-    //   const path = awaitingPreviousPaths?.[awaitingPreviousPaths.length - 1] ?? StaticRoutes.ProductTagManagement;
-    //   const newLocationState: LocationState = {
-    //     ...locationState,
-    //     awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
-    //   }
+      const path = awaitingPreviousPaths?.[awaitingPreviousPaths.length - 1] ?? StaticRoutes.ProductTagManagement;
+      const newLocationState: LocationState = {
+        ...locationState,
+        awaitingPreviousPaths: awaitingPreviousPaths.slice(0, -2),
+      }
 
-    //   navigate(path, { replace: true, state: newLocationState });
-    // } catch {}
+      navigate(path, { replace: true, state: newLocationState });
+    } catch {}
   }
 
   const headerTools = (
@@ -68,7 +68,7 @@ export const InspectProductTag = () => {
   
   return (
     <Page id="inspect-product-tag">
-      <Panel title="Inspecting One Tag" headerTools={headerTools}>
+      <Panel title="Inspecting One Tag" headerTools={headerTools} displayBackNavigation>
         <div className="product-tag-details">
           { productTagInspector.render() }
         </div>

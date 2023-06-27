@@ -44,6 +44,9 @@ const useSelectInputField: SelectInputFieldHook = (selectorOptions) => {
     ...selectorOptions,
     value: selectorOptions.value ?? defaultSelectInputFieldOption,
     anchor: selectorOptions.anchor ?? defaultSelectInputFieldOption,
+    onValueChange(state) {
+      selectorOptions.onChange?.(state);
+    }
   });
 
   const displayOptions = [...options];

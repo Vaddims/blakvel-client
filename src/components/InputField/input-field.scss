@@ -6,6 +6,62 @@ label.input-field {
   padding: 0;
   background-color: transparent;
 
+  &.t {
+    .input-section {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-top: .1rem solid #9696963d;
+    }
+
+    &:focus-within {
+      .input-section {
+        border-top: .1rem solid var(--background-highlight-color);
+      }
+    }
+  }
+
+  &.r {
+    .input-section {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: .1rem solid #9696963d;
+    }
+
+    &:focus-within {
+      .input-section {
+        border-right: .1rem solid var(--background-highlight-color);
+      }
+    }
+  }
+
+  &.l {
+    .input-section {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left: .1rem solid #9696963d;
+    }
+
+    &:focus-within {
+      .input-section {
+        border-left: .1rem solid var(--background-highlight-color);
+      }
+    }
+  }
+
+  &.b {
+    .input-section {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom: .1rem solid #9696963d;
+    }
+
+    &:focus-within {
+      .input-section {
+        border-bottom: .1rem solid var(--background-highlight-color);
+      }
+    }
+  }
+
   header {
     padding: 0 .5rem;
     margin-bottom: .4rem;

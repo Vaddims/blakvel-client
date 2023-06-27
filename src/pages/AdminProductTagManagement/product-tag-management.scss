@@ -1,7 +1,53 @@
 #admin-product-tag-management.page {
-  button.panel-tool {
-    &.delete {
-      background-color: rgb(255, 70, 70);
+  .panel-header {
+    .center-panel-tools {
+      width: 30vw;
+    }
+    
+    button.panel-tool {
+      &.delete {
+        background-color: rgb(255, 70, 70);
+      }
+    }
+  }
+
+  .admin-panel-management-extensions {
+    display: flex;
+    flex-direction: column;
+
+    & > header {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      padding-inline: 1rem;
+      color: grey;
+      cursor: pointer;
+      height: 3rem;
+      border-bottom: 0.1rem solid var(--background-secondary-color);
+  
+      span {
+        font-size: 1.25rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: grey;
+      }
+    }
+
+    .filter-content {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+
+      .field-quantity-range {
+        display: flex;
+        flex-direction: row;
+        justify-content: end;
+        align-items: end;
+      }
     }
   }
 }
