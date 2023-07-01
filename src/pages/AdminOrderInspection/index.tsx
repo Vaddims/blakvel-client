@@ -5,6 +5,26 @@ import { useGetOrderQuery } from "../../services/api/usersApi";
 import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import './admin-order-inspection.scss';
+import useTextInputField from "../../middleware/hooks/text-input-field-hook";
+import useSelectInputField from "../../middleware/hooks/select-input-field-hook";
+import { OrderStatus } from "../../models/order.model";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+
+const statusOptions = {
+  open: {
+    title: 'Open',
+    value: OrderStatus.Open,
+  },
+  canceled: {
+    title: 'Canceled',
+    value: OrderStatus.Canceled,
+  },
+  archive: {
+    title: 'Archive',
+    value: OrderStatus.Archived,
+  }
+}
 
 const AdminOrderInspection: React.FC = () => {
   const { orderId = '' } = useParams();
@@ -12,6 +32,14 @@ const AdminOrderInspection: React.FC = () => {
     isLoading,
     data: order,
   } = useGetOrderQuery(orderId);
+
+  const status = useSelectInputField({
+    label: 'Status',
+    options: Object.values(statusOptions),
+    required: true,
+    value: [...Object.values(statusOptions)].find(opt => opt.value === order?.status),
+    trackValue: true,
+  })
 
   if (isLoading) {
     return (
@@ -25,14 +53,24 @@ const AdminOrderInspection: React.FC = () => {
     )
   }
 
+
+  const selectionHeaderTools = (
+    <>
+      <button className="panel-tool edit highlight">
+        <FontAwesomeIcon icon={faEdit} />
+        Update
+      </button>
+      <button className="panel-tool delete">
+        <FontAwesomeIcon icon={faTrash} />
+        Delete Order
+      </button>
+    </>
+  );
+
   return (
     <Page id='admin-order-inspection'>
-      <Panel title='Inspect Order' displayBackNavigation>
+      <Panel title='Inspect Order' displayBackNavigation headerTools={selectionHeaderTools}>
         <div className="subheader">
-          <div className="order-status">
-            <span className="title">Status:</span>
-            <span className="status">{ order.status }</span>
-          </div>
           <div className="order-date">
             <span className="title">Order date:</span>
             <span className="date">{ new Date(order.creationDate).toLocaleString() }</span>
@@ -41,6 +79,10 @@ const AdminOrderInspection: React.FC = () => {
             <span className="title">Estimated delivery:</span>
             <span>Not implemented</span>
           </div>
+        </div>
+        <hr />
+        <div className="input-fields-section">
+          {status.render()}
         </div>
         <hr />
         <AppTable>
@@ -59,7 +101,7 @@ const AdminOrderInspection: React.FC = () => {
                 </td>
                 <td>
                   <div className="item-info">
-                    <span className="price">${ item.archivedPrice * item.quantity }</span>
+                    <span className="price">${ (item.archivedPrice * item.quantity).toFixed(2) }</span>
                     <span className="qty">Qty: { item.quantity }</span>
                   </div>
                 </td>

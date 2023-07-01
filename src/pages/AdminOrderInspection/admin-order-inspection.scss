@@ -1,6 +1,27 @@
 @import '../../components/ProductImageWrapper/productImageWrapper.scss';
 
 #admin-order-inspection.page {
+  .panel-header {
+    .panel-tool {
+      &.delete {
+        color: rgb(255, 70, 70);
+        border: .1rem solid rgb(255, 70, 70);
+
+        path {
+          fill: rgb(255, 70, 70);
+        }
+      }
+    }
+  }
+
+  .input-fields-section {
+    padding: 1rem 0;
+  }
+
+  .input-field {
+    width: 20rem;
+  }
+
   .subheader {
     display: flex;
     gap: 1rem;
