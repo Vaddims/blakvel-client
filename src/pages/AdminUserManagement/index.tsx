@@ -8,9 +8,11 @@ import { useGetUsersQuery } from "../../services/api/usersApi";
 import './admin-user-management.scss';
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { InputField } from "../../middleware/hooks/input-field-hook";
 import useSelectInputField from "../../middleware/hooks/select-input-field-hook";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRedirection } from "../../utils/hooks/useRedirection";
 
 const userStateFilter = {
   all: {
@@ -33,6 +35,7 @@ const findUserRoleFilter = (v: string) => {
 
 const AdminUserManagement: React.FC = () => {
   const { data: users = [] } = useGetUsersQuery();
+  const redirect = useRedirection();
 
   const {
     paramCluster,
@@ -42,6 +45,7 @@ const AdminUserManagement: React.FC = () => {
   } = useSearchParamState();
 
   const {
+    selections,
     allElementsAreSelected,
     handleElementBulkSelection,
     handleSelectionEvent,
@@ -131,6 +135,22 @@ const AdminUserManagement: React.FC = () => {
     </div>
   )
 
+  const selectionHeaderTools = [
+    <button className="panel-tool delete">
+      <FontAwesomeIcon icon={faTrash} />
+      Delete
+    </button>
+  ];
+
+  if (selections.length === 1) {
+    selectionHeaderTools.unshift(
+      <button className="panel-tool edit highlight" onClick={redirect(`/users/${selections[0].id}/inspect`)}>
+        <FontAwesomeIcon icon={faEdit} />
+        Edit
+      </button>
+    )
+  }
+
   const bulkSelectionHandler: React.MouseEventHandler = (event) => {
     event.stopPropagation();
     handleElementBulkSelection();
@@ -144,9 +164,11 @@ const AdminUserManagement: React.FC = () => {
     globalSearchInput.render(),
   ]
 
+  const panelTools = selections.length > 0 ? selectionHeaderTools : null;
+
   return (
     <Page id='admin-user-management' onClick={deselectAllSelections}>
-      <AdminPanel title='User Management' subheader={subheader} headerCenterTools={selectionHeaderCentralTools} extensions={extensions}>
+      <AdminPanel title='User Management' subheader={subheader} headerCenterTools={selectionHeaderCentralTools} extensions={extensions} headerTools={panelTools}>
         <AppTable useSelectionCheckbox>
           <thead>
             <AppTableRow 
@@ -163,6 +185,7 @@ const AdminUserManagement: React.FC = () => {
               <AppTableRow
                 onClick={handleSelectionEvent(user)}
                 aria-selected={elementIsSelected(user)}
+                onDoubleClick={redirect(`/users/${user.id}/inspect`)}
               >
                 <td>{ user.email }</td>
                 <td className="role">{ user.role }</td>

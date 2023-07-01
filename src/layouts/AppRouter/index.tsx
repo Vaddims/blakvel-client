@@ -27,6 +27,7 @@ import AdminOrderManagement from "../../pages/AdminOrderManagement"
 import AdminUserManagement from "../../pages/AdminUserManagement"
 import AdminOrderInspection from "../../pages/AdminOrderInspection"
 import ProductsSwitcher from "../ProductsSwitcher"
+import InspectUserProfile from "../../pages/InspectUserProfile"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
@@ -110,6 +111,14 @@ const AppRoutes: React.FC = () => {
             <Route index element={<Orders />} />
             <Route path=':orderId'>
               <Route index element={<Order />} />
+            </Route>
+          </Route>
+        </Route>
+
+        <Route path="users">
+          <Route path=":id">
+            <Route path="inspect">
+              <Route index element={<InspectUserProfile />} />
             </Route>
           </Route>
         </Route>

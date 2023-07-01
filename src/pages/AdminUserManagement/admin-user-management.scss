@@ -1,5 +1,16 @@
 #admin-user-management.page {
   .panel-header {
+    .panel-tool {
+      &.delete {
+        color: rgb(255, 70, 70);
+        border: .1rem solid rgb(255, 70, 70);
+
+        path {
+          fill: rgb(255, 70, 70);
+        }
+      }
+    }
+    
     .center-panel-tools {
       width: 30vw;
     }
