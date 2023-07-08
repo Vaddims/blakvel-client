@@ -6,10 +6,11 @@ function UnauthorizedNavbarNavigation() {
 
   return (
     <>
-      <li onClick={redirect('/auth/login')}>Sign Up</li>
+      <li className="login-action" onClick={redirect('/auth/login')}>Sign Up</li>
       <UserHamburgerNavbarComposition>
-        <li onClick={redirect('/products')} className="alt-navbar-option-view">Products</li>
-        <li onClick={(redirect('/contact'))} className="alt-navbar-option-view">Contact</li>
+        <li onClick={redirect('/products')} className="alt-navbar-option-view">Catalog</li>
+        <li onClick={redirect('/products')} className="alt-navbar-option-view">Sell Item</li>
+        <li onClick={(redirect('/contact'))} className="alt-navbar-option-view">Contact Us</li>
       </UserHamburgerNavbarComposition>
     </>
   )

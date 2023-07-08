@@ -19,7 +19,8 @@ function AuthorizedNavbarNavigation() {
     <>
       <UserShoppingCartComposition />
       <UserHamburgerNavbarComposition>
-        <li onClick={redirect('/products')} className="alt-navbar-option-view">Products</li>
+        <li onClick={redirect('/products')} className="alt-navbar-option-view">Catalog</li>
+        <li onClick={redirect('/products')} className="alt-navbar-option-view">Sell Item</li>
         <li onClick={redirect('/user/orders')}>Orders</li>
         <li onClick={(redirect('/contact'))} className="alt-navbar-option-view">Contact</li>
       </UserHamburgerNavbarComposition>

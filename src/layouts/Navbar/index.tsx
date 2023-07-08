@@ -53,8 +53,9 @@ function Navbar(props: NavbarProps) {
       </div>
       <div className='navbar-section'>
         <ul className='navigation-boundary'>
-          <li className='text-navigation' onClick={redirect('/products')}>Products</li>
-          <li className='text-navigation' onClick={redirect('/contact')}>Contact</li>
+          <li className='text-navigation' onClick={redirect('/products')}>Catalog</li>
+          <li className='text-navigation' onClick={redirect('/products')}>Sell Item</li>
+          <li className='text-navigation' onClick={redirect('/contact')}>Contact Us</li>
           <RoleDependentNavigation />
         </ul>
       </div>

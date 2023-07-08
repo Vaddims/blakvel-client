@@ -77,32 +77,34 @@
       .sub-header-text {
         font-size: 1.25rem;
         margin: 0;
-        margin-top: 1rem;
+        margin-top: .5rem;
       }
 
       .actions {
         display: flex;
         flex-direction: row;
         gap: 1rem;
-        margin-top: 1rem;
+        margin-top: 3rem;
 
         .store {
           font-size: 1rem;
-          background-color: var(--background-highlight-color);
-          border: none;
+          font-weight: 700;
+          border: .1rem solid var(--background-highlight-color);
+          background-color: var(--sub-highlight-color);
           border-radius: .5rem;
-          padding: .5rem 1rem;
+          padding: .75rem 1.5rem;
           color: white;
           cursor: pointer;
         }
 
         .request-review {
           font-size: 1rem;
+          font-weight: 700;
           border: .1rem solid var(--background-highlight-color);
           background-color: transparent;
           border-radius: .5rem;
-          padding: .5rem 1rem;
-          color: white;
+          padding: .75rem 1.5rem;
+          color: var(--background-highlight-color);
           cursor: pointer;
         }
       }

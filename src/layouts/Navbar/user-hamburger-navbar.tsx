@@ -52,7 +52,7 @@ const UserHamburgerNavbar: React.FC<UserHamburgerNavbarProps> = (props) => {
             { authentication.user ? (
               <li onClick={logoutUser} className="logout-button">Logout</li>
             ) : (
-              <li onClick={redirect('/auth/login')}>Sign Up</li>
+              <li className="login-action" onClick={redirect('/auth/login')}>Sign Up</li>
             ) }
           </ul>
         </div>
