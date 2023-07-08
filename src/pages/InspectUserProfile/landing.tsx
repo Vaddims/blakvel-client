@@ -98,7 +98,7 @@ const InspectUserLandingProfile: React.FC = () => {
         <section className="info-row">
           <header className="row-divider">
             <div className="h-d">
-              <span>Newsest Orders</span>
+              <span>Recent Orders</span>
               <button className="inspect-all-orders-action">Show All</button>
             </div>
             <hr className="divider" />
@@ -130,7 +130,7 @@ const InspectUserLandingProfile: React.FC = () => {
         <section className="info-row">
           <header className="row-divider">
             <div className="h-d">
-              <span>Newest Sales</span>
+              <span>Recent Sales</span>
               <button className="inspect-all-orders-action">Show All</button>
             </div>
             <hr className="divider" />
@@ -148,7 +148,7 @@ const InspectUserLandingProfile: React.FC = () => {
         <section className="info-row">
           <header className="row-divider">
             <div className="h-d">
-              <span>Newest Support Messages</span>
+              <span>Recent Support Messages</span>
               <button className="inspect-all-orders-action">Show All</button>
             </div>
             <hr className="divider" />
