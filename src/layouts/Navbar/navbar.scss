@@ -218,6 +218,18 @@
             h3 {
               text-transform: capitalize;
             }
+
+            .user-qr-code-action {
+              display: block;
+              justify-self: start;
+              align-self: flex-start;
+              font-size: .85rem;
+              margin: 0;
+              margin-top: .25rem;
+              box-sizing: border-box;
+              color: var(--background-highlight-color) !important;
+              cursor: pointer;
+            }
           }
         }
 

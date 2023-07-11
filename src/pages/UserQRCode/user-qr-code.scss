@@ -1,0 +1,66 @@
+.qr-code-container {
+  display: flex;
+  flex-direction: row;
+  // height: fit-content;
+  // width: 100%;
+  gap: 2rem;
+
+  $imagePadding: 1rem;
+
+  .image-container {
+    position: relative;
+    margin-top: 1rem;
+    // max-height: 60vh;
+    flex: 1;
+    // max-width: 20rem;
+    // max-height: 60vh;
+    border: .1rem solid rgb(150, 150, 150);
+    box-sizing: border-box;
+    border-radius: .5rem;
+    padding: $imagePadding;
+    width: 100%;
+    height: 50vh;
+    aspect-ratio: 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1;
+      object-fit: contain;
+      border-radius: .5rem;
+    }
+
+    .logo-container {
+      position: absolute;
+      background-color: var(--background-main-color);
+      height: calc(((100% - ($imagePadding / 2)) / (36 / 5)));
+      left: 50%;
+      top: 50%;
+      border: .05rem solid rgb(255, 255, 255);
+      border-radius: 100%;
+      overflow: hidden;
+      padding: 2%;
+      transform: translate(-50%, -50%);
+
+      .logo {
+        height: 100%;
+        aspect-ratio: 1;
+        background-color: var(--background-main-color);
+      }
+    }
+  }
+
+  .info {
+    height: fit-content;
+
+    p {
+      line-height: 25px;
+    }
+
+    hr {
+      border:1px solid var(--background-secondary-color);
+    }
+  }
+
+
+}

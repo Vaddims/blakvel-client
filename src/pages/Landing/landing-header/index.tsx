@@ -27,6 +27,7 @@ function Header() {
             </button>
             <button
               className='request-review'
+              onClick={() => navigate('/item-sale-process')}
             >
               Sell your Item
             </button>

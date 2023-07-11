@@ -28,6 +28,8 @@ import AdminUserManagement from "../../pages/AdminUserManagement"
 import AdminOrderInspection from "../../pages/AdminOrderInspection"
 import ProductsSwitcher from "../ProductsSwitcher"
 import InspectUserProfile from "../../pages/InspectUserProfile"
+import ItemSaleProcess from "../../pages/ItemSaleProcess"
+import UserQRCode from "../../pages/UserQRCode"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
@@ -58,6 +60,10 @@ const AppRoutes: React.FC = () => {
           <Route path="create" element={adminProtectedRoute}>
             <Route index element={<CreateProduct />} />
           </Route>
+        </Route>
+
+        <Route path="item-sale-process">
+          <Route index element={<ItemSaleProcess />} />
         </Route>
 
         <Route path='product-tags'>
@@ -106,6 +112,7 @@ const AppRoutes: React.FC = () => {
         </Route>
 
         <Route path='user' element={authProtectedRoute} >
+          <Route path='qr-code' element={<UserQRCode />} />
           <Route path='cart' element={<ShoppingCart />} />
           <Route path='orders'>
             <Route index element={<Orders />} />
