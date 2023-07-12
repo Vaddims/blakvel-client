@@ -31,22 +31,28 @@ const UserHamburgerNavbar: React.FC<UserHamburgerNavbarProps> = (props) => {
       <dialog className="user-dialog" ref={props.dialogRef}>
         <div className="dialog-content">
           { authentication.user && (
-            <div className="user-info-container">
-              <div className='user-appearance' data-offline-icon={!gravatarAvatarSource}>
-                { gravatarAvatarSource ? (
-                  <img src={`http://www.gravatar.com/avatar/${md5(authentication.user.email)}.jpg?s=${80}`} alt="" />
-                ) : (
-                  <div>
-                    <FontAwesomeIcon icon={faUser} size='xl' />
-                  </div>
-                ) }
+            <>
+              <div className="user-info-container" onClick={redirect('/user')}>
+                <div className='user-appearance' data-offline-icon={!gravatarAvatarSource}>
+                  { gravatarAvatarSource ? (
+                    <img src={`http://www.gravatar.com/avatar/${md5(authentication.user.email)}.jpg?s=${80}`} alt="" />
+                  ) : (
+                    <div>
+                      <FontAwesomeIcon icon={faUser} size='xl' />
+                    </div>
+                  ) }
+                </div>
+                <div className='user-info'>
+                  <h3>{authentication.user.role}</h3>
+                  <p>{authentication.user.email}</p>
+                  <span className="user-qr-code-action" onClick={(e) => {
+                    e.stopPropagation();
+                    redirect(`/user/qr-code`)(e);
+                  }}>Show user QR Code</span>
+                </div>
               </div>
-              <div className='user-info'>
-                <h3>{authentication.user.role}</h3>
-                <p>{authentication.user.email}</p>
-                <span className="user-qr-code-action" onClick={redirect(`/user/qr-code`)}>Show user QR Code</span>
-              </div>
-            </div>
+              <hr />
+            </>
           )}
           <ul className='user-navigations' onClick={userNavigationOptionClickHandler}>
             {props.children}

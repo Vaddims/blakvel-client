@@ -112,6 +112,7 @@ const AppRoutes: React.FC = () => {
         </Route>
 
         <Route path='user' element={authProtectedRoute} >
+          <Route index element={<InspectUserProfile />} />
           <Route path='qr-code' element={<UserQRCode />} />
           <Route path='cart' element={<ShoppingCart />} />
           <Route path='orders'>

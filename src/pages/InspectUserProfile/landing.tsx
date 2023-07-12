@@ -6,6 +6,7 @@ import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 import useSelectInputField, { defaultSelectInputFieldOption } from "../../middleware/hooks/select-input-field-hook";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBox, faHeadset, faMoneyCheck, faUser } from "@fortawesome/free-solid-svg-icons";
+import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 
 const ops = [
   {
@@ -20,9 +21,10 @@ const ops = [
 
 const InspectUserLandingProfile: React.FC = () => {
   const { id } = useParams();
+  const { user: authenticatedUser } = useAuthentication();
   // const auth = useAuthentication();
   const { data: users = [] } = useGetUsersQuery();
-  const cu = users.find(user => user.id === id);
+  const cu = users.find(user => user.id === id) ?? authenticatedUser;
 
   const firstNameInputField = useTextInputField({
     label: 'Full Name',
@@ -55,7 +57,7 @@ const InspectUserLandingProfile: React.FC = () => {
   })
 
   const { data: avatar } = useGravatarAvatar({
-    skip: !id,
+    skip: !cu,
     email: cu?.email,
   })
 
