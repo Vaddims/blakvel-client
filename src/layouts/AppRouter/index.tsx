@@ -30,6 +30,7 @@ import ProductsSwitcher from "../ProductsSwitcher"
 import InspectUserProfile from "../../pages/InspectUserProfile"
 import ItemSaleProcess from "../../pages/ItemSaleProcess"
 import UserQRCode from "../../pages/UserQRCode"
+import AdminSupportManagement from "../../pages/AdminSupportManagement"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
@@ -108,6 +109,9 @@ const AppRoutes: React.FC = () => {
           </Route>
           <Route path="user-management">
             <Route index element={<AdminUserManagement />} />
+          </Route>
+          <Route path="support-management">
+            <Route index element={<AdminSupportManagement />} />
           </Route>
         </Route>
 

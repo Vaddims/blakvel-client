@@ -5,7 +5,7 @@
     {
       "title": "Overview",
       "disabled": false,
-      "defaultSelection": true,
+      "defaultSelection": false,
       "payload": {
         "endpoint": ""
       }
@@ -13,7 +13,7 @@
     {
       "title": "Products",
       "disabled": false,
-      "defaultSelection": false,
+      "defaultSelection": true,
       "payload": {
         "endpoint": "/product-management"
       }
@@ -40,6 +40,14 @@
       "defaultSelection": false,
       "payload": {
         "endpoint": "/user-management"
+      }
+    },
+    {
+      "title": "Support",
+      "disabled": false,
+      "defaultSelection": false,
+      "payload": {
+        "endpoint": "/support-management"
       }
     },
     {
