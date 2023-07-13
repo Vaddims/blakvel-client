@@ -17,7 +17,7 @@ const placeholderInputTypeSwap = [
   'password',
 ]
 
-type TextInputFieldHook<T> = InputField.GenericHook<GenericTextInputOptions, {}, string, T>;
+export type TextInputFieldHook<T> = InputField.GenericHook<GenericTextInputOptions, {}, string, T>;
 const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputFieldHook<T>>[0]): ReturnType<TextInputFieldHook<T>> {
   const valueChangeHandler = (data: string) => {
     return options.onChange?.(data)

@@ -1,0 +1,6 @@
+.sequential-section-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 2rem; // Is needed for the sticky header mask effect
+}

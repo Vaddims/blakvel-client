@@ -25,13 +25,12 @@ const InspectProduct = () => {
   
   const [ updateProduct ] = useUpdateProductMutation();
 
-  // paramCluster.target.set(paramCluster.inspect.all);
   const querySearchParams = new URLSearchParams(urlSearchParams);
   querySearchParams.set('format', 'admin');
   const { data: products } = useGetProductsQuery(querySearchParams.toString());
 
   const productInspector = useProductInspector({
-    // productId: id || undefined,
+    productIds: paramCluster.inspect.all,
   });
   
   const requestProductUpdate = async () => {

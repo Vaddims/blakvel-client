@@ -8,78 +8,82 @@
   gap: 1rem;
   flex-grow: 1;
 
-  .product-information-panel {
-    display: flex;
-    flex-direction: column !important;
-    width: 100%;
-    gap: 2rem !important;
-    
-    .info-row {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
+  .general-information-section {
+    & > main {
+      display: grid;
+      grid-template-areas: 
+        'name-input-field state-input-field' 
+        'description-input-field physical-id-input-field'
+        'description-input-field stock-input-field'
+        'price-input-field x'
+        'discount-container x';
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: min-content;
       gap: 1rem;
-  
-      & > div > article {
+
+      .name-input-field {
+        grid-area: name-input-field;
+      }
+
+      .description-input-field {
+        grid-area: description-input-field;
+
+        .input-section {
+          height: 100%;
+        }
+      }
+
+      .price-input-field {
+        grid-area: price-input-field;
+      }
+
+      .stock-input-field {
+        grid-area: stock-input-field;
+      }
+
+      .state-input-field {
+        grid-area: state-input-field;
+      }
+
+      .physical-id-input-field {
+        grid-area: physical-id-input-field;
+      }
+
+      .discount-information-container {
+        grid-area: discount-container;
+        margin-top: .5rem;
+        font-weight: 500;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
+        background-color: var(--background-secondary-color);
         gap: 1rem;
-      }
-  
-      & > header {
-        position: sticky;
-        margin-top: -2rem;
-        padding-top: 2rem;
-        background-color: var(--background-main-color);
-        width: 100%;
-        z-index: 100;
-        font-size: 1.5rem;
-        top: 3.5rem;
-      }
-  
-      & .cluster {
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        
-        article {
-          flex-basis: 50%;        
+        border-radius: .5rem;
+    
+        header {
+          display: flex;
+          flex-direction: row;
+          vertical-align: middle;
+          align-items: center;
+          justify-content: space-between;
+        }
+    
+        .discount-input-fields {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
         }
       }
-
-      .row-divider {
-        .divider {
-          margin-bottom: 0;
-          width: 100%;
-          border: none;
-          border: .1rem solid var(--background-secondary-color);
-        }
-      }
-    }
-
-    .product-tag-cluster {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-top: 1rem;
     }
   }
 
-  article {
-    display: flex;
-    flex-direction: column;
-  
-    &.product-information-fields {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    &.seller-information {
+  .product-seller-section {
+    & > main {
       width: 100%;
       flex-basis: 100% !important;
       display: grid !important;
       grid-template-areas: 'seller-search seller-description' 'seller-display seller-description';
+      gap: 1rem;
       grid-template-rows: auto 1fr;
       grid-template-columns: 1fr 1fr;
 
@@ -173,34 +177,25 @@
         }
       }
     }
-  
-    &.product-tag-management {
+  }
+
+  .tag-specifications-section {
+    & > main {
+      display: grid;
+      grid-template-areas: 
+        'search-tag-input-field x'
+        'product-tag-list x';
+
+      grid-template-rows: auto;
+      grid-template-columns: 1fr 1fr;
       gap: 1rem;
-      
-      .product-tag-cluster {
-        margin: 0;
+
+      .search-product-tag-input-field {
+        grid-area: search-tag-input-field;
       }
-    }
-  
-    .discount-information {
-      margin-top: .5rem;
-      font-weight: 500;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      background-color: var(--background-secondary-color);
-      gap: 1rem;
-      border-radius: .5rem;
-  
-      header {
-        display: flex;
-        flex-direction: row;
-        vertical-align: middle;
-        align-items: center;
-        justify-content: space-between;
-      }
-  
-      .discount-input-fields {
+
+      .product-tag-list {
+        grid-area: product-tag-list;
         display: flex;
         flex-direction: column;
         gap: 1rem;

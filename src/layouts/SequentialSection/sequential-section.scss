@@ -1,0 +1,32 @@
+.sequential-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  & > header {
+    position: sticky;
+    // Sticky header mask effect
+    margin-top: -2rem;
+    padding-top: 2rem;
+    top: 3.5rem; // Starting below the header, to hide the backdrop content
+
+    background-color: var(--background-main-color);
+    width: 100%;
+    z-index: 100;
+    font-size: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: .2rem solid var(--background-secondary-color);;
+
+    .title {
+      padding-bottom: 1rem;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  main {
+    width: 100%;
+    height: fit-content;
+  }
+}

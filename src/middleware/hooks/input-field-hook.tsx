@@ -387,4 +387,6 @@ export namespace InputField {
   export interface GenericHook<TOptions extends object, TReturn extends object, T, K> {
     (options: TOptions & InputField.ComponentOptions<T, K>): TReturn & ComponentState<T, K>;
   }
+
+  export type GetHookParameters<T extends GenericHook<any, any, any, any>> = T extends GenericHook<infer U, any, infer T, infer K> ? U & InputField.ComponentOptions<T, K> : never;
 }

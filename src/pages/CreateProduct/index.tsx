@@ -38,7 +38,7 @@ const CreateProduct: React.FC = () => {
   
   return (
     <Page id="create-product">
-      <Panel title="Create New Product" headerTools={headerTools}>
+      <Panel title="Create New Product" headerTools={headerTools} displayBackNavigation>
         { productInspector.render() }
       </Panel>
     </Page>
