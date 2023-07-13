@@ -140,27 +140,10 @@
         gap: 2rem;
       }
 
-      .avatar-wrapper {
-        overflow: hidden;
-        border-radius: 100%;
-        width: 10rem;
-        height: 10rem;
+      .avatar {
         aspect-ratio: 1;
-        border: .5rem solid transparent;
-        box-shadow: 0 0 0px .1rem var(--background-highlight-color);
-        
-        img {
-          width: 100%;
-          height: 100%;
-        }
-
-        div {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          height: 100%;
-        }
+        height: 7.5rem;
+        width: 7.5rem;
       }
 
       .inspection-container {

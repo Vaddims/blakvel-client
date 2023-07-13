@@ -74,6 +74,105 @@
       flex-direction: column;
       gap: 1rem;
     }
+
+    &.seller-information {
+      width: 100%;
+      flex-basis: 100% !important;
+      display: grid !important;
+      grid-template-areas: 'seller-search seller-description' 'seller-display seller-description';
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 1fr 1fr;
+
+      .seller-search {
+        grid-area: seller-search;
+      }
+
+      .seller-container {
+        height: fit-content;
+        display: flex;
+        flex-direction: row;
+        padding: 1rem;
+        background-color: var(--background-secondary-color);
+        justify-content: space-between;
+        border-radius: .5rem;
+        align-items: center;
+
+        &[data-seller-exist=false] {
+          .seller-info-container {
+            grid-template-areas: 'role' 'email';
+          }
+          
+          .avatar {
+            display: none;
+          }
+        }
+
+        .seller-info-container {
+          height: fit-content;
+          grid-area: seller-display;
+  
+          display: grid;
+          grid-template-areas: 'avatar role' 'avatar email';
+          column-gap: 1rem;
+          box-sizing: border-box;
+  
+          .avatar {
+            width: 2.5rem;
+            grid-area: avatar;
+          }
+  
+          h3 {
+            grid-area: role;
+            margin: 0;
+          }
+  
+          span {
+            color: grey;
+            grid-area: email;
+            margin: 0;
+          }
+        }
+  
+        .product-tag-management {
+          height: 100%;
+          height: max-content;
+          display: flex;
+          gap: .3rem;
+    
+          button {
+            background-color: transparent;
+            aspect-ratio: 1;
+            border: none;
+            transition: background-color .25s ease;
+            cursor: pointer;
+    
+            path {
+              fill: #c6c6c6;
+            }
+    
+            &:hover {
+              path {
+                fill: white;
+              }
+            }
+          }
+        }
+      }
+
+      .p {
+        margin: 0;
+        grid-area: seller-description;
+
+        li {
+          color: rgb(163, 163, 163);
+          line-height: 1.5rem;
+
+          & + li {
+            margin-top: 1rem;
+          }
+        }
+      }
+    }
   
     &.product-tag-management {
       gap: 1rem;

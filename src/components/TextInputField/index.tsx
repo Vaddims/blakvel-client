@@ -15,7 +15,7 @@ interface TextInputField extends InputFieldCommonProps, React.DetailedHTMLProps<
 const TextInputField: React.FC<TextInputField> = (props) => {
   const [ inputId ] = useState(createUUID());
   const inputElementId = `input-${inputId}`;
-  const tagDatalistElementId = `datalist-${inputElementId}`;
+  const datalistElementId = `datalist-${inputElementId}`;
 
   return (
     <InputField
@@ -26,10 +26,11 @@ const TextInputField: React.FC<TextInputField> = (props) => {
       <input
         {...props}
         id={inputElementId}
+        list={datalistElementId}
         required={props.markAsRequired}
         readOnly={props.readOnly ?? !props.onChange}
       />
-      <datalist id={tagDatalistElementId}>
+      <datalist id={datalistElementId}>
         {props.inputDatalist?.map((element) => (
           <option value={element.name} key={element.name}>{element.description}</option>
         ))}

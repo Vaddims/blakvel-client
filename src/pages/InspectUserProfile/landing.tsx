@@ -7,6 +7,7 @@ import useSelectInputField, { defaultSelectInputFieldOption } from "../../middle
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBox, faHeadset, faMoneyCheck, faUser } from "@fortawesome/free-solid-svg-icons";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
+import AvatarDisplayer from "../../components/AvatarDisplayer";
 
 const ops = [
   {
@@ -66,26 +67,12 @@ const InspectUserLandingProfile: React.FC = () => {
     return split[split.length - 1];
   }
 
+  console.log(avatar)
   return (
     <section className="inspect-user-landing-profile">
       <div className="general-info">
         <header>
-          <div className='avatar-wrapper user-appearance' data-offline-icon={!avatar}>
-            { avatar ? (
-              <img src={avatar} alt="" />
-            ) : (
-              <div>
-                <FontAwesomeIcon icon={faUser} size='6x' />
-              </div>
-            ) }
-          </div>
-          {/* <div className="avatar-wrapper">
-            { avatar ? (
-              <img src={avatar} alt="" />
-            ) : (
-              <div><FontAwesomeIcon icon={faUser} /></div>
-            )}
-          </div> */}
+          <AvatarDisplayer src={avatar} className="avatar" noUserIconSize="4x" />
           <div className="inspection-container">
             <div className="inspect-full-name">
               {firstNameInputField.render()}

@@ -1,4 +1,4 @@
-import { faBoxes, faCalendarMinus, faDollar, faHashtag, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faBoxes, faCalendarMinus, faDollar, faEdit, faHashtag, faRotateLeft, faSearch, faTrash, faUserSlash } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
 import { Product } from "../../../models/product.model";
@@ -13,6 +13,13 @@ import useInputFieldCollection, { InputFieldCollection } from "../../hooks/use-i
 import SubProductTagInspector from "./SubProductTagInspector";
 import useSearchParamState from "../../hooks/useSearchParamState";
 import './product-inspector.scss';
+import useGravatarAvatar from "../../hooks/gravatar-avatar-hook";
+import { User } from "../../../models/user.model";
+import AvatarDisplayer from "../../../components/AvatarDisplayer";
+import { useGetUsersQuery } from "../../../services/api/usersApi";
+import { useNavigate } from "react-router-dom";
+import { InputFieldDatalistElement } from "../../../components/TextInputField";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface ProductInspectorOptions {
   readonly productIds?: string[];
@@ -57,6 +64,15 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     paramCluster,
     urlSearchParams,
   } = useSearchParamState();
+  const navigate = useNavigate();
+
+  const { data: fetchedUsers = [] } = useGetUsersQuery();
+
+  // TODO Implement server data
+  const [ productSellerAnchor, setProductSellerAnchor ] = useState<User>();
+  const [ productSeller, setProductSeller ] = useState<User>();
+  useEffect(() => {
+  }, [fetchedUsers]);
 
   const productIds = paramCluster.inspect.all;
 
@@ -400,7 +416,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   });
 
   const tagSearchInput = useTextInputField<Product.Tag>({
-    placeholder: 'Search for Tag',
+    placeholder: 'Search Tag',
     labelIcon: faHashtag,
     inputIcon: faSearch,
     validationTimings: [InputField.ValidationTiming.Submit],
@@ -425,6 +441,35 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       const newDraftProductTags = [targetProductTag, ...draftProductTags];
       setDraftProductTags(newDraftProductTags);
       tagSearchInput.restoreValue()
+    }
+  });
+
+  const userDatalistElements: InputFieldDatalistElement[] = fetchedUsers.map(u => ({
+    name: u.email,
+    description: 'Vadym Iefremov',
+  }));
+
+  const searchUser = useTextInputField({
+    inputIcon: faSearch,
+    className: 'seller-search',
+    placeholder: 'Search User',
+    required: true,
+    datalist: userDatalistElements,
+    helperText: 'Only one user can be added as the seller.',
+    validationTimings: [InputField.ValidationTiming.Submit],
+    validate(input) {
+      const user = fetchedUsers.find(user => (
+        user.email === input ||
+        user.id === input
+      ));
+
+      if (!user) {
+        throw new InputFieldError(`Input didn't match with any user data (id, email)`);
+      }
+
+      setProductSeller(user);
+
+      searchUser.clearValue();
     }
   });
 
@@ -663,6 +708,13 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   });
   // for future
 
+  const productSellerAvatar = useGravatarAvatar({
+    skip: !productSeller,
+    email: productSeller?.email,
+  });
+
+  console.log(productSellerAvatar, productSeller)
+
   const discountPercent = calculateDiscountPercent();
 
   const render = () => (
@@ -700,6 +752,45 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
               { stateSelectionInput.render() }
               { physicalIdInput.render() }
               { stockInput.render() }
+            </article>
+          </div>
+        </section>
+        <section className="info-row">
+          <header className="row-divider">
+            Seller
+            <hr className="divider" />
+          </header>
+          <div className="cluster">
+            <article className="seller-information">
+              {searchUser.render()}
+              <div className="seller-container" data-seller-exist={!!productSeller}>
+                <div className="seller-info-container">
+                  {productSeller && <AvatarDisplayer src={productSellerAvatar.data} className="avatar" />}
+                  <h3>{productSeller ? productSeller.email.split('@')[0] : 'No seller applied'}</h3>
+                  <span>{productSeller ? productSeller.email : 'Search for user to change'}</span>
+                </div>
+                <div className='product-tag-management' key={productSeller?.id}>
+                  {productSeller && (
+                    <button title='Inspect User' onClick={() => navigate(`/users/${productSeller?.id}/inspect`)} key='inspect'>
+                      <FontAwesomeIcon icon={faEdit} size={"lg"} />
+                    </button>
+                  )}
+                  {(!!productSeller !== !!productSellerAnchor || productSeller?.id !== productSellerAnchor?.id) && productSellerAnchor && (
+                    <button title='Restore seller' onClick={() => setProductSeller(productSellerAnchor)} key='restore'>
+                      <FontAwesomeIcon icon={faRotateLeft} size={'lg'} />
+                    </button>
+                  )}
+                  {productSeller && (
+                    <button title='Remove seller' onClick={() => setProductSeller(undefined)} key='remove'>
+                      <FontAwesomeIcon icon={faTrash} size={"lg"} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <ul className="p">
+                <li>When a user is added as the seller, their account will display that they are the seller of the respective product. This is visible to the user and admins when inspecting the user's account.</li>
+                <li>The user's account will show all the items they are currently selling, including those in review or available to the public.</li>
+              </ul>
             </article>
           </div>
         </section>

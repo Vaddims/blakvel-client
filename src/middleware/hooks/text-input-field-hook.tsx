@@ -1,14 +1,15 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import TextInputField from "../../components/TextInputField";
+import TextInputField, { InputFieldDatalistElement } from "../../components/TextInputField";
 import useInputField, { InputField, InputFieldError, useInputFieldUnbounding } from "./input-field-hook";
 import { ArgumentTypes } from "../utils/types";
 import useFunctionDebounce from "./function-debounce-hook";
 
-export interface GenericInputOptions {
+export interface GenericTextInputOptions {
   readonly placeholder?: string;
   readonly type?: 'text' | 'datetime-local' | 'email' | 'password' | 'date';
   readonly disabled?: boolean;
   readonly allowEmptyValue?: boolean;
+  readonly datalist?: InputFieldDatalistElement[];
 }
 
 const placeholderInputTypeSwap = [
@@ -16,7 +17,7 @@ const placeholderInputTypeSwap = [
   'password',
 ]
 
-type TextInputFieldHook<T> = InputField.GenericHook<GenericInputOptions, {}, string, T>;
+type TextInputFieldHook<T> = InputField.GenericHook<GenericTextInputOptions, {}, string, T>;
 const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputFieldHook<T>>[0]): ReturnType<TextInputFieldHook<T>> {
   const valueChangeHandler = (data: string) => {
     return options.onChange?.(data)
@@ -46,7 +47,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
   });
   const placeholder = inputField.mixedValuesState ? 'Using existing values (Click to modify)' : options.placeholder; 
 
-  const [ inputType, setInputType ] = useState<GenericInputOptions['type']>((placeholder && placeholderInputTypeSwap.includes(options.type as any)) ? 'text' : (options.type ?? 'text'));
+  const [ inputType, setInputType ] = useState<GenericTextInputOptions['type']>((placeholder && placeholderInputTypeSwap.includes(options.type as any)) ? 'text' : (options.type ?? 'text'));
 
   useEffect(() => {
     const e = (placeholder && placeholderInputTypeSwap.includes(options.type as any));
@@ -150,6 +151,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       onClick={inputClickHandler}
       onKeyPress={keyPressHandler}
       onFocus={focusHandler}
+      inputDatalist={options.datalist}
     />
   )
 
