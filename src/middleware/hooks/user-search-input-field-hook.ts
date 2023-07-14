@@ -4,6 +4,7 @@ import { User } from "../../models/user.model";
 import { useGetUsersQuery } from "../../services/api/usersApi";
 import { InputField, InputFieldError } from "./input-field-hook";
 import useTextInputField, { TextInputFieldHook } from "./text-input-field-hook"
+import { useState } from "react";
 
 interface UserSearchInputFieldOptions extends InputField.GetHookParameters<TextInputFieldHook<User>> {
   readonly datalistUserIdMask?: string[]
@@ -12,14 +13,14 @@ interface UserSearchInputFieldOptions extends InputField.GetHookParameters<TextI
 const useUserSearchInputField = (options: UserSearchInputFieldOptions) => {
   const { data: fetchedUsers = [], isError, isLoading } = useGetUsersQuery();
   const { datalistUserIdMask = [] } = options;
-
+  
   const userDatalist: InputFieldDatalistElement[] = (
     fetchedUsers
   ).filter(
     user => !datalistUserIdMask.includes(user.id)
   ).map(fetchedUser => ({
     name: fetchedUser.email,
-    description: fetchedUser.email.split('@')[0], // TODO Display name
+    description:`${fetchedUser.fullname.last} ${fetchedUser.fullname.first}`,
   }))
 
   const inputField = useTextInputField({
@@ -27,6 +28,10 @@ const useUserSearchInputField = (options: UserSearchInputFieldOptions) => {
     inputIcon: faSearch,
     validationTimings: [InputField.ValidationTiming.Submit],
     ...options,
+    submitActions: {
+      blurInput: true,
+      ...options.submitActions
+    },
     datalist: userDatalist,
     disabled: isError || isLoading,
     validate(input) {

@@ -4,6 +4,7 @@ export interface CreateProductRequest extends Omit<Product.GenericInformation, '
   readonly discountExpirationDate: string | undefined;
   readonly tags: string[];
   readonly specifications: CreateProductRequest.Specification[];
+  readonly seller: string | null;
 }
 
 export namespace CreateProductRequest {

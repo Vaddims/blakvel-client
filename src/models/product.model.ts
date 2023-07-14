@@ -1,7 +1,10 @@
+import { User } from "./user.model";
+
 export interface Product extends Product.GenericInformation {
   readonly tags: Product.Tag[];
   readonly specifications: Product.Specification[];
   readonly urn: Product.URN;
+  readonly seller: User.Manifest | null;
 }
 
 export namespace Product {

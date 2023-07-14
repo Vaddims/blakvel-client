@@ -23,13 +23,14 @@ const ops = [
 const InspectUserLandingProfile: React.FC = () => {
   const { id } = useParams();
   const { user: authenticatedUser } = useAuthentication();
-  // const auth = useAuthentication();
   const { data: users = [] } = useGetUsersQuery();
   const cu = users.find(user => user.id === id) ?? authenticatedUser;
 
   const firstNameInputField = useTextInputField({
     label: 'Full Name',
     placeholder: 'Name',
+    value: cu?.fullname.first,
+    anchor: cu?.fullname.first,
     required: true,
     trackValue: true,
     className: 'r',
@@ -37,6 +38,8 @@ const InspectUserLandingProfile: React.FC = () => {
 
   const lastNameInputField = useTextInputField({
     placeholder: 'Surname',
+    value: cu?.fullname.last,
+    anchor: cu?.fullname.last,
     required: true,
     trackValue: true,
     className: 'l'
@@ -67,7 +70,6 @@ const InspectUserLandingProfile: React.FC = () => {
     return split[split.length - 1];
   }
 
-  console.log(avatar)
   return (
     <section className="inspect-user-landing-profile">
       <div className="general-info">

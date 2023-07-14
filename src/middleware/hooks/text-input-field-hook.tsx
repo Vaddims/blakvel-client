@@ -10,6 +10,9 @@ export interface GenericTextInputOptions {
   readonly disabled?: boolean;
   readonly allowEmptyValue?: boolean;
   readonly datalist?: InputFieldDatalistElement[];
+  readonly submitActions?: {
+    readonly blurInput?: boolean;
+  }
 }
 
 const placeholderInputTypeSwap = [
@@ -25,6 +28,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
 
   const debounceChange = useFunctionDebounce(valueChangeHandler, options.changeDebouncingTimeout);
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const inputField = useInputField({
     onValueChange(data) {
       debounceChange(data);
@@ -45,6 +49,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     value: options.value?.toString() ?? '',
     anchor: options.anchor?.toString() ?? '',
   });
+
   const placeholder = inputField.mixedValuesState ? 'Using existing values (Click to modify)' : options.placeholder; 
 
   const [ inputType, setInputType ] = useState<GenericTextInputOptions['type']>((placeholder && placeholderInputTypeSwap.includes(options.type as any)) ? 'text' : (options.type ?? 'text'));
@@ -86,6 +91,9 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
     }
 
     options.onSubmit?.(validatedResult.data);
+    if (options.submitActions?.blurInput) {
+      inputRef.current?.blur();
+    }
   }
 
   const changeHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -152,6 +160,7 @@ const useTextInputField = function<T = string>(options: ArgumentTypes<TextInputF
       onKeyPress={keyPressHandler}
       onFocus={focusHandler}
       inputDatalist={options.datalist}
+      inputRef={inputRef}
     />
   )
 

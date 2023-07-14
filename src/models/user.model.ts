@@ -8,6 +8,10 @@ export enum UserRole {
 
 export interface User {
   readonly id: string;
+  readonly fullname: {
+    readonly first: string;
+    readonly last: string;
+  };
   readonly email: string;
   readonly role: UserRole;
   readonly shoppingCart: {
@@ -15,4 +19,16 @@ export interface User {
     readonly quantity: number;
   }[];
   readonly orders: ClientOrder[];
+}
+
+export namespace User {
+  export interface Manifest {
+    readonly id: string;
+    readonly fullname: {
+      readonly first: string;
+      readonly last: string;
+    }
+    readonly email: string;
+    readonly role: UserRole;
+  }
 }

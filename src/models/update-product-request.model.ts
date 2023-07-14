@@ -4,6 +4,7 @@ export interface UpdateProductRequest extends Partial<Omit<Product.GenericInform
   readonly discountExpirationDate?: string | null;
   readonly tags?: string[];
   readonly specifications?: UpdateProductRequest.Specification[];
+  readonly seller?: string | null;
 }
 
 export namespace UpdateProductRequest {

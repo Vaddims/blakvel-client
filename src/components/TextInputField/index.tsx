@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import InputField, { extractInputFieldProps, InputFieldCommonProps } from '../InputField';
 import { v4 as createUUID } from 'uuid';
 import './text-input-field.scss';
@@ -10,6 +10,7 @@ export interface InputFieldDatalistElement {
 
 interface TextInputField extends InputFieldCommonProps, React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
   readonly inputDatalist?: InputFieldDatalistElement[];
+  readonly inputRef?: React.Ref<HTMLInputElement>;
 }
 
 const TextInputField: React.FC<TextInputField> = (props) => {
@@ -25,6 +26,7 @@ const TextInputField: React.FC<TextInputField> = (props) => {
     >
       <input
         {...props}
+        ref={props.inputRef}
         id={inputElementId}
         list={datalistElementId}
         required={props.markAsRequired}

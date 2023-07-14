@@ -55,9 +55,10 @@ const InspectProduct = () => {
         specifications: inputProduct.specifications.map(specification => ({
           value: specification.value,
           fieldId: specification.field.id,
-        }))
+        })),
+        seller: inputProduct.seller?.id ?? null,
       }
-
+      
       await updateProduct(updateRequestBody);
     }
 

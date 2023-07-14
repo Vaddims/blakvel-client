@@ -38,10 +38,6 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const { data: fetchedUsers = [] } = useGetUsersQuery();
   const { data: fetchedProductTags = [] } = useGetProductTagsQuery();
 
-  // TODO Implement server data
-  const [ productSellerAnchor, setProductSellerAnchor ] = useState<User>();
-  const [ productSeller, setProductSeller ] = useState<User>();
-
   const fetchSearchParams = useMemo(() => {
     const searchParams = new URLSearchParams([['format', 'admin']]);
     for (const productId of productIds) {
@@ -53,6 +49,17 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
   const { data: products = [] } = useGetProductsQuery(fetchSearchParams.toString(), { skip: productIds.length === 0 });
   const productDependencyString = products.map(product => product.id).join();
+
+  // TODO Implement server data
+  const [ productSellerAnchor, setProductSellerAnchor ] = useState<User.Manifest>();
+  const [ productSeller, setProductSeller ] = useState<User.Manifest>();
+
+  useEffect(() => {
+    if (products.length === 1 && products[0].seller) {
+      setProductSellerAnchor(products[0].seller);
+      setProductSeller(products[0].seller);
+    }
+  }, [productDependencyString]);
 
   const getInitialDraftProductTags = () => {
     if (products.length !== 1) {
@@ -462,6 +469,8 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         product.stock = validatedCluster.validationResults.stockInput.data;
       }
 
+      product.seller = productSeller || null;
+
       return product;
     }
 
@@ -486,13 +495,14 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           state: validatedCluster.validationResults.stateSelectionInput.data.value as any,
           stock: validatedCluster.validationResults.stockInput.data,
           creationDate: new Date().toString(),
+          seller: productSeller || null,
           tags: [],
           specifications: [],
           id: '',
           urn: {
             thumbnail: null,
             thumbs: [],
-          }
+          },
         }
 
         product.specifications = formatSpecification(specificationResult.successes as SuccessfulInputFieldResponse[]);
@@ -570,7 +580,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           <div className="seller-container" data-seller-exist={!!productSeller}>
             <div className="seller-info-container">
               {productSeller && <AvatarDisplayer src={productSellerAvatar.data} className="avatar" />}
-              <h3>{productSeller ? productSeller.email.split('@')[0] : 'No seller applied'}</h3>
+              <h3>{productSeller ? `${productSeller.fullname.last} ${productSeller.fullname.first}` : 'No seller applied'}</h3>
               <span>{productSeller ? productSeller.email : 'Search for user to change'}</span>
             </div>
             <div className='product-tag-management' key={productSeller?.id}>

@@ -23,7 +23,8 @@ const CreateProduct: React.FC = () => {
       specifications: prod.specifications.map(spec => ({
         value: spec.value,
         fieldId: spec.field.id,
-      }))
+      })),
+      seller: prod.seller?.id ?? null,
     } as any).unwrap();
 
     await productInspector.imageEditor.uploadImages(product.id);
