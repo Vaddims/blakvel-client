@@ -1,15 +1,17 @@
 import { useParams } from "react-router-dom";
 import useGravatarAvatar from "../../middleware/hooks/gravatar-avatar-hook";
-import useUserGravatarAvatar from "../../middleware/hooks/user-gravatar-avatar-hook";
 import { useGetUsersQuery } from "../../services/api/usersApi";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
-import useSelectInputField, { defaultSelectInputFieldOption } from "../../middleware/hooks/select-input-field-hook";
+import useSelectInputField from "../../middleware/hooks/select-input-field-hook";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBox, faHeadset, faMoneyCheck, faUser } from "@fortawesome/free-solid-svg-icons";
+import { IconDefinition, faBox, faHeadset, faMoneyCheck, faUser } from "@fortawesome/free-solid-svg-icons";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import AvatarDisplayer from "../../components/AvatarDisplayer";
+import ProductCatalog, { ProductCatalogElementSize } from "../../components/ProductCatalog";
+import SequentialSectionContainer from "../../layouts/SequentialSectionContainer";
+import SequentialSection from "../../layouts/SequentialSection";
 
-const ops = [
+const roleOptions = [
   {
     title: 'User',
     value: 'user',
@@ -55,9 +57,9 @@ const InspectUserLandingProfile: React.FC = () => {
   const roleInputField = useSelectInputField({
     required: true,
     label: 'Role',
-    value: ops.find(op => op.value === cu?.role),
+    value: roleOptions.find(roleOption => roleOption.value === cu?.role),
     trackValue: true,
-    options: ops,
+    options: roleOptions,
   })
 
   const { data: avatar } = useGravatarAvatar({
@@ -65,9 +67,44 @@ const InspectUserLandingProfile: React.FC = () => {
     email: cu?.email,
   })
 
+  if (!cu) {
+    return (
+      <div></div>
+    )
+  }
+
   const getIdLastPart = (uuid: string) => {
     const split = uuid.split('-');
     return split[split.length - 1];
+  }
+
+  const renderNoData = (icon: IconDefinition, title: string) => (
+    <div className="no-data-container">
+      <FontAwesomeIcon icon={icon} className="icon" size='3x' />
+      <div className="info">
+        <h3 className="title">{title}</h3>
+      </div>
+    </div>
+  )
+
+  const renderRecentOrdersSection = () => {
+    if (cu.orders.length === 0) {
+      return renderNoData(faBox, 'No recent orders');
+    }
+
+    return cu.orders.map(order => (
+      <div className="inline-order">
+        <div className="information">
+          <span className="id">{getIdLastPart(order.id)}</span>
+          <span className="quantity-information">{order.items.length} elements</span>
+        </div>
+        <div className="status" data-status={order.status}>
+          <div className="container">
+            { order.status }
+          </div>
+        </div>
+      </div>
+    ));
   }
 
   return (
@@ -85,76 +122,22 @@ const InspectUserLandingProfile: React.FC = () => {
           </div>
         </header>
       </div>
-      <div className="info-rows">
-        <section className="info-row">
-          <header className="row-divider">
-            <div className="h-d">
-              <span>Recent Orders</span>
-              <button className="inspect-all-orders-action">Show All</button>
-            </div>
-            <hr className="divider" />
-          </header>
-          <div className="cluster newest-orders">
-            {(cu?.orders.length ?? 0) > 0 ? cu?.orders.map(order => (
-              <div className="or">
-                <div className="or-l">
-                  <span className="or-id">{getIdLastPart(order.id)}</span>
-                  <span className="or-i">{order.items.length} elements</span>
-                </div>
-                <div className="status" data-status={order.status}>
-                  <div className="container">
-                    { order.status }
-                  </div>
-                </div>
-              </div>
-            )) : (
-              <div className="no-data-container">
-                <FontAwesomeIcon icon={faBox} className="icon" size='3x' />
-                <div className="info">
-                  <h1 className="title">There are currently no orders to display</h1>
-                  {/* <button className="action">Browse Catalog</button> */}
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-        <section className="info-row">
-          <header className="row-divider">
-            <div className="h-d">
-              <span>Recent Sales</span>
-              <button className="inspect-all-orders-action">Show All</button>
-            </div>
-            <hr className="divider" />
-          </header>
-          <div className="cluster newest-sales">
-            <div className="no-data-container">
-              <FontAwesomeIcon icon={faMoneyCheck} className="icon" size='3x' />
-              <div className="info">
-                <h1 className="title">There are currently no sales to display</h1>
-                {/* <button className="action">Sell Now</button> */}
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="info-row">
-          <header className="row-divider">
-            <div className="h-d">
-              <span>Recent Support Messages</span>
-              <button className="inspect-all-orders-action">Show All</button>
-            </div>
-            <hr className="divider" />
-          </header>
-          <div className="cluster newest-support-messages">
-            <div className="no-data-container"> 
-              <FontAwesomeIcon icon={faHeadset} className="icon" size='3x' />
-              <div className="info">
-                <h1 className="title">There are currently no support messages to display</h1>
-                {/* <button className="action">Contact support</button> */}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <SequentialSectionContainer>
+        <SequentialSection title='Recent Orders' className="recent-orders">
+          {renderRecentOrdersSection()}
+        </SequentialSection>
+        <SequentialSection title="Recent Sales" className="recent-sales">
+          <ProductCatalog 
+            products={cu?.sales ?? []}
+            productCardSize={ProductCatalogElementSize.Small}
+          >
+            {renderNoData(faMoneyCheck, 'No recent sales')}
+          </ProductCatalog>
+        </SequentialSection>
+        <SequentialSection title="Recent Support Messages" className="recent-support-messages">
+          {renderNoData(faHeadset, 'No recent support messages')}
+        </SequentialSection>
+      </SequentialSectionContainer>
     </section>
   )
 }

@@ -3,14 +3,14 @@
 .product-card {
   position: relative;
   box-sizing: border-box;
-  min-width: 10rem;
+  min-width: 3rem;
   height: auto;
   cursor: pointer;
   
   .product-image-boundary {
     @include product-image-wrapper(minmax(11rem, 1fr));
     transition: transform .25s ease;
-    z-index: 1000;
+    z-index: 10;
 
     img {
       @include wrapped-product-image()
@@ -61,9 +61,7 @@
 
   }
 
-  &:hover > .product-image-boundary {
-    transform: scale(1.05);
-  }
+  // &:hover > .product-image-boundary {
+  //   transform: scale(1.05);
+  // }
 }
-
-

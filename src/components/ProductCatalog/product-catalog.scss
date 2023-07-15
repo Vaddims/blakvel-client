@@ -1,0 +1,30 @@
+.product-catalog {
+  width: 100%;
+  display: grid;
+  // grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1rem;
+
+  &[data-product-card-size=small] {
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+
+    .catalog-product-card {
+      font-size: .75rem;
+    }
+  }
+
+  &[data-product-card-size=medium] {
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+
+    .catalog-product-card {
+      font-size: .85rem;
+    }
+  }
+
+  &[data-product-card-size=large] {
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+
+    .catalog-product-card {
+      font-size: 1rem;
+    }
+  }
+}

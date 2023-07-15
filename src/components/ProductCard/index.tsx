@@ -12,11 +12,13 @@ const ProductCard: React.FC<ProductCardProps> = (props) => {
   const discountPercent = hasDiscount ? (100 - Math.round(discountPrice / price * 100)) : 0;
   const currentPrice = hasDiscount ? discountPrice : price;
 
+  const className = ['product-card', props.className].join(' ');
+
   return (
-    <article className='product-card' {...props} title={id}>
+    <article {...props} className={className} title={id}>
       <div className='product-image-boundary'>
         {urn.thumbnail 
-          ? <img src={`api/products/${id}/thumbnail`} loading='lazy' alt='Product thumbnail' /> 
+          ? <img src={`/api/products/${id}/thumbnail`} loading='lazy' alt='Product thumbnail' /> 
           : <i className="fas fa-3x fa-image product-image-absence"/>
         }
       </div>

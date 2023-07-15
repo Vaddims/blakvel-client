@@ -16,6 +16,7 @@ import { UserRole } from "../../models/user.model";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
 import { InputField } from "../../middleware/hooks/input-field-hook";
+import ProductCatalog, { ProductCatalogElementSize } from "../../components/ProductCatalog";
 
 export interface ElementSelectorPayload {
   order: string;
@@ -38,6 +39,7 @@ export default function Catalog() {
   if (auth.user) {
     requestSearchParams.set('format', UserRole.User);
   }
+  // TODO Limit requested products to a fixed small number
   const { data: products } = useGetProductsQuery(requestSearchParams.toString());
 
   const getInitialSortOption = () => {
@@ -119,13 +121,10 @@ export default function Catalog() {
         headerCenterTools={middleTools}
         subheader={subheader}
       >
-        {products && products.map(product => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onClick={() => navigate(`/products/${product.id}`)} 
-          />
-        ))}
+        <ProductCatalog 
+          products={products ?? []} 
+          productCardSize={ProductCatalogElementSize.Large}
+        />
       </Panel>
     </Page>
   );

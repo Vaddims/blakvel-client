@@ -19,6 +19,7 @@ export interface User {
     readonly quantity: number;
   }[];
   readonly orders: ClientOrder[];
+  readonly sales: Product[];
 }
 
 export namespace User {
