@@ -1,19 +1,38 @@
-import { FetchBaseQueryMeta, createApi } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import { CreateProductRequest } from '../../models/create-product-request.model';
 import { Product } from '../../models/product.model';
 import { UpdateProductRequest } from '../../models/update-product-request.model';
 import { appBaseQuery } from './baseQuery';
+import { Login } from '../../models/login.model';
+import { User } from '../../models/user.model';
+import { PatchUser } from '../../models/patch-user.model';
+import { ClientOrder } from '../../models/order.model';
 
 enum TagTypes {
   Product = 'product',
   Tag = 'tag',
+
+  RefreshToken = "refreshToken",
+  AccessToken = "accessToken",
+
+  User = 'user',
+  Order = 'order',
 }
 
-export const productsApi = createApi({
-  reducerPath: 'productsApi',
+export const coreApi = createApi({
+  reducerPath: 'coreApi',
   baseQuery: appBaseQuery,
-  tagTypes: [TagTypes.Product, TagTypes.Tag],
+  tagTypes: [
+    TagTypes.Product,
+    TagTypes.Tag,
+    TagTypes.RefreshToken, 
+    TagTypes.AccessToken, 
+    TagTypes.User,
+    TagTypes.Order,
+  ],
   endpoints: (build) => ({
+    // ! Product
+
     getProduct: build.query<Product, string>({
       providesTags: [TagTypes.Product],
       query: (id) => `/products/${id}`,
@@ -40,7 +59,7 @@ export const productsApi = createApi({
     }),
 
     updateProduct: build.mutation<void, UpdateProductRequest>({
-      invalidatesTags: [TagTypes.Product],
+      invalidatesTags: [TagTypes.Product, TagTypes.User, TagTypes.Order],
       query: ({ id, ...product}) => ({
         method: 'PUT',
         url: `/products/${id}`,
@@ -49,7 +68,7 @@ export const productsApi = createApi({
     }),
 
     updateThumbnail: build.mutation<void, { id: string, formData: FormData }>({
-      invalidatesTags: [TagTypes.Product],
+      invalidatesTags: [TagTypes.Product, TagTypes.User, TagTypes.Order],
       query: ({ id, formData }) => ({
         method: 'PUT',
         url: `/products/${id}/thumbnail`,
@@ -58,7 +77,7 @@ export const productsApi = createApi({
     }),
 
     deleteProductThumbnail: build.mutation<void, string>({
-      invalidatesTags: [TagTypes.Product],
+      invalidatesTags: [TagTypes.Product, TagTypes.User, TagTypes.Order],
       query: (id) => ({
         method: 'DELETE',
         url: `/products/${id}/thumbnail`,
@@ -66,7 +85,7 @@ export const productsApi = createApi({
     }),
 
     patchProductThumbs: build.mutation<void, {id: string, formData: FormData}>({
-      invalidatesTags: [TagTypes.Product],
+      invalidatesTags: [TagTypes.Product, TagTypes.User, TagTypes.Order],
       query: ({ id, formData }) => ({
         method: 'PATCH',
         url: `/products/${id}/thumbs`,
@@ -75,12 +94,14 @@ export const productsApi = createApi({
     }),
 
     deleteProduct: build.mutation<void, string>({
-      invalidatesTags: [TagTypes.Product],
+      invalidatesTags: [TagTypes.Product, TagTypes.User, TagTypes.Order],
       query: (id) => ({
         method: 'DELETE',
         url: `/products/${id}`,
       }),
     }),
+
+    // ! Product Tag
 
     getProductTag: build.query<Product.Tag, string>({
       providesTags: [TagTypes.Tag],
@@ -93,7 +114,7 @@ export const productsApi = createApi({
     }),
 
     createProductTag: build.mutation<Product.Tag, Product.Unregistered.Tag>({
-      invalidatesTags: [TagTypes.Tag, TagTypes.Product],
+      invalidatesTags: [TagTypes.Tag],
       query: (productTag) => ({
         method: 'POST',
         url: `/product-tags`,
@@ -102,7 +123,7 @@ export const productsApi = createApi({
     }),
 
     updateProductTag: build.mutation<Product.Tag, Product.Tag>({
-      invalidatesTags: [TagTypes.Tag, TagTypes.Product],
+      invalidatesTags: [TagTypes.Tag, TagTypes.Product, TagTypes.User],
       query: (productTag) => ({
         method: 'PATCH',
         url: `/product-tags/${productTag.id}`,
@@ -111,11 +132,79 @@ export const productsApi = createApi({
     }),
 
     deleteProductTag: build.mutation<void, string>({
-      invalidatesTags: [TagTypes.Tag, TagTypes.Product],
+      invalidatesTags: [TagTypes.Tag, TagTypes.Product, TagTypes.User],
       query: (id) => ({
         method: 'DELETE',
         url: `/product-tags/${id}`,
       }),
+    }),
+
+    // ! Auth
+
+    login: build.mutation<void, Login>({
+      invalidatesTags: [TagTypes.RefreshToken, TagTypes.AccessToken],
+      query: (login) => ({
+        url: 'auth/login',
+        method: 'POST',
+        body: login,
+      }),
+    }),
+
+    logout: build.mutation<void, void>({
+      invalidatesTags: [TagTypes.RefreshToken, TagTypes.AccessToken],
+      query: () => ({
+        method: 'POST',
+        url: 'auth/logout',
+      }),
+    }),
+
+    // ! User
+
+    getCurrentUser: build.query<User, void>({
+      providesTags: [TagTypes.RefreshToken, TagTypes.AccessToken, TagTypes.User],
+      query: () => 'users/current',
+    }),
+
+    
+
+    getUsers: build.query<User[], void>({
+      query: () => `/users`,
+      providesTags: [TagTypes.User],
+    }),
+
+    updateUser: build.mutation<void, PatchUser>({
+      invalidatesTags: [TagTypes.User, TagTypes.Product],
+      query: ({ userId, ...body }) => ({
+        method: 'PATCH',
+        url: `users/${userId}`,
+        body,
+      })
+    }),
+
+    // ! Checkout Session
+
+    createCheckoutSession: build.mutation<any, void>({
+      query: () => ({
+        method: 'POST',
+        url: `users/current/create-checkout-session`,
+      })
+    }),
+
+    getCheckoutSession: build.query<any, void>({
+      query: () => `users/current/checkout-session`,
+      keepUnusedDataFor: 0,
+    }),
+
+    // ! Orders
+
+    getOrder: build.query<ClientOrder, string>({
+      providesTags: [TagTypes.Order],
+      query: (orderId: string) => `orders/${orderId}`,
+    }),
+
+    getOrders: build.query<ClientOrder[], void>({
+      query: () => `orders`,
+      providesTags: [TagTypes.Order],
     }),
   }),
 });
@@ -135,4 +224,14 @@ export const {
   useUpdateProductTagMutation,
   useCreateProductTagMutation,
   useDeleteProductTagMutation,
-} = productsApi;
+
+  useGetCurrentUserQuery,
+  useLoginMutation,
+  useLogoutMutation,
+  useUpdateUserMutation,
+  useCreateCheckoutSessionMutation,
+  useGetCheckoutSessionQuery,
+  useGetOrderQuery,
+  useGetOrdersQuery,
+  useGetUsersQuery,
+} = coreApi;

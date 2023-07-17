@@ -5,7 +5,7 @@ import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { UserRole } from "../../models/user.model";
 import './shopping-cart.scss';
 import { useRedirection } from "../../utils/hooks/useRedirection";
-import { useCreateCheckoutSessionMutation, useUpdateUserMutation } from "../../services/api/usersApi";
+import { useCreateCheckoutSessionMutation, useUpdateUserMutation } from "../../services/api/coreApi";
 
 const ShoppingCart: React.FC = () => {
   const { user } = useAuthentication();

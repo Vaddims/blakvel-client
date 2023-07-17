@@ -1,7 +1,7 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { InputFieldDatalistElement } from "../../components/TextInputField";
 import { Product } from "../../models/product.model";
-import { useGetProductTagsQuery } from "../../services/api/productsApi";
+import { useGetProductTagsQuery } from "../../services/api/coreApi";
 import { InputField, InputFieldError } from "./input-field-hook";
 import useTextInputField, { TextInputFieldHook } from "./text-input-field-hook";
 

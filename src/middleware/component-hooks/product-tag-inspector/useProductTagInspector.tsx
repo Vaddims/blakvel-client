@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { Product } from '../../../models/product.model';
 import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import { ProductTagFieldInspector } from './ProductTagFieldInspector';
-import { useGetProductTagQuery } from '../../../services/api/productsApi';
+import { useGetProductTagQuery } from '../../../services/api/coreApi';
 import useTextInputField from '../../hooks/text-input-field-hook';
 import { InputField } from '../../hooks/input-field-hook';
 import useInputFieldCollection, { InputFieldCollection } from '../../hooks/use-input-field-collection-hook';

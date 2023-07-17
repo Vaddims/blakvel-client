@@ -1,24 +1,21 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
-import { productsApi } from './api/productsApi';
-import { usersApi } from './api/usersApi';
+import { coreApi } from './api/coreApi';
 import { setupListeners } from '@reduxjs/toolkit/dist/query';
 // import { initiateAccessTokenGetter } from './api/getAccessToken';
 
 const store = configureStore({
   reducer: {
-    [productsApi.reducerPath]: productsApi.reducer,
-    [usersApi.reducerPath]: usersApi.reducer,
+    [coreApi.reducerPath]: coreApi.reducer,
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(
-    productsApi.middleware, 
-    usersApi.middleware,
+    coreApi.middleware, 
   ),
 });
 
 
-// initiateAccessTokenGetter(store, usersApi);
+// initiateAccessTokenGetter(store, coreApi);
 // initiateAccessTokenGetter(store);
 setupListeners(store.dispatch);
 

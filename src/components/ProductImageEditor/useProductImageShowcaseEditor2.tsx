@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
 import { Product } from "../../models/product.model";
-import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUpdateThumbnailMutation } from "../../services/api/productsApi";
+import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUpdateThumbnailMutation } from "../../services/api/coreApi";
 import * as path from 'path';
 import * as uuid from 'uuid';
 import ProductImageShowcaseEditor from './productImageShowcaseEditor';

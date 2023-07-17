@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useState, ForwardRefRenderFunction } from "react";
-import { usePatchProductThumbsMutation, useUpdateThumbnailMutation, useDeleteProductThumbnailMutation } from '../../services/api/productsApi';
+import { usePatchProductThumbsMutation, useUpdateThumbnailMutation, useDeleteProductThumbnailMutation } from '../../services/api/coreApi';
 import ProductImageWrapper from "../ProductImageWrapper";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
 import { Product } from "../../models/product.model";

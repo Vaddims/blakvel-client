@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User } from '../../models/user.model';
 import Page from "../../layouts/Page";
 import './login.scss';
-import { useLoginMutation, usersApi } from "../../services/api/usersApi";
+import { useLoginMutation, coreApi } from "../../services/api/coreApi";
 import { useAppDispatch } from "../../middleware/hooks/reduxAppHooks";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { AuthStatus, setAuthStatus } from "../../services/slices/authSlice";
@@ -49,7 +49,7 @@ export default function Login() {
     const emailResult = emailInput.validate();
     const passwordResult = passwordInput.validate();
 
-    dispatch(usersApi.util.resetApiState());
+    dispatch(coreApi.util.resetApiState());
     if (!emailResult.isValid || emailResult.isForMixedValues || !passwordResult.isValid || passwordResult.isForMixedValues) {
       return;
     }

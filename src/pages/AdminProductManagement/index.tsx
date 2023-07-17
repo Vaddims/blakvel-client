@@ -1,5 +1,5 @@
 import { useSequentialElementSelection } from '../../middleware/hooks/useSequentialElementSelection';
-import { useDeleteProductMutation, useGetProductsQuery } from '../../services/api/productsApi';
+import { useDeleteProductMutation, useGetProductsQuery } from '../../services/api/coreApi';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import AdminPanel from '../../layouts/AdminPanel';
 import Page from '../../layouts/Page';

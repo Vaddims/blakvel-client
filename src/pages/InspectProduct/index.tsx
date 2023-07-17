@@ -1,4 +1,4 @@
-import { useGetProductsQuery, useUpdateProductMutation } from "../../services/api/productsApi";
+import { useGetProductsQuery, useUpdateProductMutation } from "../../services/api/coreApi";
 import { useNavigate, useParams } from "react-router-dom";
 import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";

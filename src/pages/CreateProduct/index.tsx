@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel";
-import { useCreateProductMutation } from "../../services/api/productsApi";
+import { useCreateProductMutation } from "../../services/api/coreApi";
 import useProductInspector from "../../middleware/component-hooks/product-inspector/useProductInspector";
 import './createProduct.scss';
 

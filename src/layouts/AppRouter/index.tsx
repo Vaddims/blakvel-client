@@ -18,7 +18,7 @@ import PageNotFound from "../../pages/PageNotFound"
 import Product from "../../pages/Product"
 import { ProductInspectionRouter } from "../../pages/ProductInspectionRouter"
 import Signup from "../../pages/Signup"
-// import { useGetAccessTokenQuery } from "../../services/api/usersApi";
+// import { useGetAccessTokenQuery } from "../../services/api/coreApi";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication"
 import ShoppingCart from "../../pages/ShoppingCart"
 import Order from "../../pages/Order"

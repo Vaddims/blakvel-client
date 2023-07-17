@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useGetProductsQuery } from "../../services/api/productsApi";
+import { useGetProductsQuery } from "../../services/api/coreApi";
 // import InspectProduct from "../InspectProduct";
 
 export function ProductInspectionRouter() {

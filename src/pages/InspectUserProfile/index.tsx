@@ -4,7 +4,7 @@ import Panel from "../../layouts/Panel";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import InspectUserLandingProfile from "./landing";
 import './inspect-user-profile.scss';
-import { useGetUsersQuery } from "../../services/api/usersApi";
+import { useGetUsersQuery } from "../../services/api/coreApi";
 import useGravatarAvatar from "../../middleware/hooks/gravatar-avatar-hook";
 import { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

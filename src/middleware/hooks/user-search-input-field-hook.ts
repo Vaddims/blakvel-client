@@ -1,7 +1,7 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { InputFieldDatalistElement } from "../../components/TextInputField";
 import { User } from "../../models/user.model";
-import { useGetUsersQuery } from "../../services/api/usersApi";
+import { useGetUsersQuery } from "../../services/api/coreApi";
 import { InputField, InputFieldError } from "./input-field-hook";
 import useTextInputField, { TextInputFieldHook } from "./text-input-field-hook"
 import { useState } from "react";

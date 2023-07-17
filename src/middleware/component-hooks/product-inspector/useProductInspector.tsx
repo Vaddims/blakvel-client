@@ -2,7 +2,7 @@ import { faBoxes, faCalendarMinus, faDollar, faEdit, faHashtag, faRotateLeft, fa
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
 import { Product } from "../../../models/product.model";
-import { useGetProductTagsQuery, useGetProductsQuery } from "../../../services/api/productsApi";
+import { useGetProductTagsQuery, useGetProductsQuery } from "../../../services/api/coreApi";
 import useCheckboxField from "../../hooks/checkbox-field-hook";
 import useSelectInputField, { mixedValuesSelectInputFieldOption } from "../../hooks/select-input-field-hook";
 import statusSelections from './status.selection.json';
@@ -14,7 +14,7 @@ import SubProductTagInspector from "./SubProductTagInspector";
 import useGravatarAvatar from "../../hooks/gravatar-avatar-hook";
 import { User } from "../../../models/user.model";
 import AvatarDisplayer from "../../../components/AvatarDisplayer";
-import { useGetUsersQuery } from "../../../services/api/usersApi";
+import { useGetUsersQuery } from "../../../services/api/coreApi";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SequentialSection from "../../../layouts/SequentialSection";

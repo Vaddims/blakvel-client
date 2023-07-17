@@ -4,7 +4,7 @@ import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import Page from "../../layouts/Page"
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
-import { useGetUsersQuery } from "../../services/api/usersApi";
+import { useGetUsersQuery } from "../../services/api/coreApi";
 import './admin-user-management.scss';
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";

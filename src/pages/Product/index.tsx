@@ -3,15 +3,15 @@ import Page from "../../layouts/Page";
 import Panel from "../../layouts/Panel";
 import { useRedirection } from "../../utils/hooks/useRedirection";
 import { ProductImageShowcase } from "./ProductImageViewer";
-import { useGetProductQuery } from "../../services/api/productsApi";
+import { useGetProductQuery } from "../../services/api/coreApi";
 import { useAppSelector } from "../../middleware/hooks/reduxAppHooks";
 // import { selectUser } from "../../services/slices/userSlice";
 import "./product.scss";
 import { UserRole } from "../../models/user.model";
 import { Product as ProductModel } from "../../models/product.model";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
-import { useUpdateUserMutation } from "../../services/api/usersApi";
-// import { useGetAuthenticatedUserQuery } from "../../services/api/usersApi";
+import { useUpdateUserMutation } from "../../services/api/coreApi";
+// import { useGetAuthenticatedUserQuery } from "../../services/api/coreApi";
 
 const templateDescription = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum necessitatibus, ut hic in non ab adipisci maiores libero doloribus sit debitis quis illum. Beatae facere corporis ratione voluptate voluptates suscipit?';
 

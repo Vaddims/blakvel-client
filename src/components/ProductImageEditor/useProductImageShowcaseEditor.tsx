@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
-import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUpdateThumbnailMutation } from "../../services/api/productsApi";
+import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUpdateThumbnailMutation } from "../../services/api/coreApi";
 import * as path from 'path';
 import * as uuid from 'uuid';
 import ProductImageWrapper from "../ProductImageWrapper";

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import useGravatarAvatar from "../../middleware/hooks/gravatar-avatar-hook";
-import { useGetUsersQuery } from "../../services/api/usersApi";
+import { useGetUsersQuery } from "../../services/api/coreApi";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 import useSelectInputField from "../../middleware/hooks/select-input-field-hook";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

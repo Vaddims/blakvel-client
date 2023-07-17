@@ -2,7 +2,7 @@ import { useSequentialElementSelection } from "../../middleware/hooks/useSequent
 import AdminPanel from '../../layouts/AdminPanel';
 import Page from "../../layouts/Page";
 import { useNavigate } from "react-router-dom";
-import { useDeleteProductTagMutation, useGetProductTagsQuery } from "../../services/api/productsApi";
+import { useDeleteProductTagMutation, useGetProductTagsQuery } from "../../services/api/coreApi";
 import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import InlineTableProductTagCard from "../../components/InlineTableProductTagCard";

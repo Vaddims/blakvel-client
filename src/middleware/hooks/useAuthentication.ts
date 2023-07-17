@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { User } from "../../models/user.model";
-import { useGetCurrentUserQuery, useLogoutMutation, usersApi } from "../../services/api/usersApi";
+import { useGetCurrentUserQuery, useLogoutMutation, coreApi } from "../../services/api/coreApi";
 import { AuthStatus, logout, selectAuthStatus, selectAuthToken } from "../../services/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "./reduxAppHooks";
 
@@ -22,7 +22,7 @@ export function useAuthentication(queryOptions?: Parameters<typeof useGetCurrent
 
   const logoutUser = async () => {
     await logoutUserMutation().unwrap();
-    dispatch(usersApi.util.resetApiState());
+    dispatch(coreApi.util.resetApiState());
     dispatch(logout());
   }
 

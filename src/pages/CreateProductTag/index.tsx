@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { createContext, useContext, useState } from "react";
 import './product-tag-field-inspection.scss';
 import { useProductTagInspector } from "../../middleware/component-hooks/product-tag-inspector/useProductTagInspector";
-import { useCreateProductTagMutation } from "../../services/api/productsApi";
+import { useCreateProductTagMutation } from "../../services/api/coreApi";
 import { LocationState } from "../../models/location-state.model";
 import { StaticRoutes } from "../../middleware/utils/static-routes.enum";
 

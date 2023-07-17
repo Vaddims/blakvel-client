@@ -1,7 +1,7 @@
 import { ChangeEventHandler, KeyboardEventHandler, MouseEventHandler, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePanelExtensionCollpase } from '../../middleware/hooks/usePanelExtensionsCollapse';
-import { useGetProductsQuery } from "../../services/api/productsApi";
+import { useGetProductsQuery } from "../../services/api/coreApi";
 import ProductCard from '../../components/ProductCard';
 import sortOptions from './radioSelectorOptions/sort.options.json';
 import Panel from "../../layouts/Panel";

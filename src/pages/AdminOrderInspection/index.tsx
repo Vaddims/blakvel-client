@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom"
 import Page from "../../layouts/Page"
 import Panel from "../../layouts/Panel"
-import { useGetOrderQuery } from "../../services/api/usersApi";
+import { useGetOrderQuery } from "../../services/api/coreApi";
 import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import './admin-order-inspection.scss';

@@ -5,7 +5,7 @@ import AppTableRow from "../../layouts/AppTableRow";
 import Page from "../../layouts/Page";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
 import { ClientOrder } from "../../models/order.model";
-import { useGetOrdersQuery } from "../../services/api/usersApi";
+import { useGetOrdersQuery } from "../../services/api/coreApi";
 import './admin-order-management.scss';
 import { useRedirection } from "../../utils/hooks/useRedirection";
 import { ReactNode } from "react";
