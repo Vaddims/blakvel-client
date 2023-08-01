@@ -1,11 +1,13 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { InputFieldDatalistElement } from "../../components/TextInputField";
-import { Product } from "../../models/product.model";
 import { useGetProductTagsQuery } from "../../services/api/coreApi";
 import { InputField, InputFieldError } from "./input-field-hook";
 import useTextInputField, { TextInputFieldHook } from "./text-input-field-hook";
+import { ProductTagDto } from "../../dto/product-tag/product-tag.dto";
+import { CustomerProductTagDto } from "../../dto/product-tag/customer-product-tag.dto";
 
-interface UserSearchInputFieldOptions extends InputField.GetHookParameters<TextInputFieldHook<Product.Tag>> {
+type ProductTagSearchInputHook = TextInputFieldHook<ProductTagDto | CustomerProductTagDto>;
+interface UserSearchInputFieldOptions extends InputField.GetHookParameters<ProductTagSearchInputHook> {
   readonly datalistTagIdMask?: string[]; 
 }
 

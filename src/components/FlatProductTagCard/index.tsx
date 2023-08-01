@@ -1,9 +1,9 @@
 import type { FC, HTMLProps } from 'react';
-import { Product } from '../../models/product.model';
 import "./flat-product-tag-card.scss";
+import { ProductTagDto } from '../../dto/product-tag/product-tag.dto';
 
 interface FlatProductTagCardProps extends HTMLProps<HTMLElement> {
-  productTag: Product.Tag;
+  productTag: ProductTagDto;
 }
 
 const FlatProductTagCard: FC<FlatProductTagCardProps> = (props) => {

@@ -4,24 +4,25 @@ import { FC } from "react"
 import { useLocation, useNavigate } from "react-router-dom";
 import { InputFieldStatusDescriptor } from "..";
 import InputField from "../../../components/TextInputField";
-import { Product } from "../../../models/product.model";
-import { ProductTagField } from "../../CreateProductTag/ProductTagFieldInspection";
 // import './product-tag-representer.scss';
-import { LocationState } from "../../../models/location-state.model";
+import { LocationState } from "../../../interfaces/location-state.model";
+import { ProductTagDto } from "../../../dto/product-tag/product-tag.dto";
+import { ProductSpecificationDto } from "../../../dto/product-specification/product-specification.dto";
+import { ProductTagFieldDto } from "../../../dto/product-tag-field/product-tag-field.dto";
 
 interface ProductTagRepresenterProps {
-  targetProductTag: Product.Tag;
-  draftProductTags: Product.Tag[];
-  specifications: Product.Specification[];
-  setProductTags: React.Dispatch<React.SetStateAction<Product.Tag[]>>
-  updateSpecification: (field: Product.Tag.Field) => React.ChangeEventHandler<HTMLInputElement>;
-  blurSpecification: (field: Product.Tag.Field) => React.FocusEventHandler<HTMLInputElement>;
-  clickSpecification: (field: Product.Tag.Field) => React.MouseEventHandler<HTMLInputElement>;
+  targetProductTag: ProductTagDto;
+  draftProductTags: ProductTagDto[];
+  specifications: ProductSpecificationDto[];
+  setProductTags: React.Dispatch<React.SetStateAction<ProductTagDto[]>>
+  updateSpecification: (field: ProductTagFieldDto) => React.ChangeEventHandler<HTMLInputElement>;
+  blurSpecification: (field: ProductTagFieldDto) => React.FocusEventHandler<HTMLInputElement>;
+  clickSpecification: (field: ProductTagFieldDto) => React.MouseEventHandler<HTMLInputElement>;
   draftProductSpecificationStatusDescriptors: InputFieldStatusDescriptor[];
   restore?: () => void;
   restoreSpecification?: (specFieldId: string) => void;
   clearSpecification?: (specFieldId: string) => void
-  getProductSpecificationInitialState: (specFieldId: string) => Product.Specification | undefined; 
+  getProductSpecificationInitialState: (specFieldId: string) => ProductSpecificationDto | undefined; 
 }
 
 export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => {
@@ -61,23 +62,23 @@ export const ProductTagRepresenter: FC<ProductTagRepresenterProps> = (props) => 
     setProductTags(newTags);  
   }
 
-  const onChange = (field: Product.Tag.Field): React.ChangeEventHandler<HTMLInputElement> => (event) => {
+  const onChange = (field: ProductTagFieldDto): React.ChangeEventHandler<HTMLInputElement> => (event) => {
     updateSpecification(field)(event);
   }
 
-  const onBlur = (field: Product.Tag.Field): React.FocusEventHandler<HTMLInputElement> => (event) => {
+  const onBlur = (field: ProductTagFieldDto): React.FocusEventHandler<HTMLInputElement> => (event) => {
     blurSpecification(field)(event);
   }
 
-  const onClick = (field: Product.Tag.Field): React.MouseEventHandler<HTMLInputElement> => (event) => {
+  const onClick = (field: ProductTagFieldDto): React.MouseEventHandler<HTMLInputElement> => (event) => {
     clickSpecification(field)(event);
   }
 
-  const onRestore = (field: Product.Tag.Field): React.MouseEventHandler<HTMLButtonElement> => () => {
+  const onRestore = (field: ProductTagFieldDto): React.MouseEventHandler<HTMLButtonElement> => () => {
     restoreSpecification?.(field.id);
   }
 
-  const onClear = (field: Product.Tag.Field): React.MouseEventHandler<HTMLButtonElement> => () => {
+  const onClear = (field: ProductTagFieldDto): React.MouseEventHandler<HTMLButtonElement> => () => {
     clearSpecification?.(field.id);
   }
 

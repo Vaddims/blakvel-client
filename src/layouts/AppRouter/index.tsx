@@ -2,7 +2,6 @@ import { useEffect } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import ProtectedRoute from "../../components/ProtectedRoute"
 import { useAppDispatch } from "../../middleware/hooks/reduxAppHooks"
-import { UserRole } from "../../models/user.model"
 import AdminOverview from "../../pages/AdminOverview"
 import AdminProductManagement from "../../pages/AdminProductManagement"
 import AdminProductTagManagement from "../../pages/AdminProductTagManagement"
@@ -31,11 +30,12 @@ import InspectUserProfile from "../../pages/InspectUserProfile"
 import ItemSaleProcess from "../../pages/ItemSaleProcess"
 import UserQRCode from "../../pages/UserQRCode"
 import AdminSupportManagement from "../../pages/AdminSupportManagement"
+import { UserDto } from "../../dto/user/user.dto"
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuthentication();
 
-  const createRoleProtectedRoute = (...roles: UserRole[]) => (
+  const createRoleProtectedRoute = (...roles: UserDto.Role[]) => (
     <ProtectedRoute 
       allowed={!!user && (roles.length === 0 || roles.some((role) => user?.role === role))} 
       redirectPath='/auth/login' 
@@ -43,7 +43,7 @@ const AppRoutes: React.FC = () => {
   );
 
   const authProtectedRoute = createRoleProtectedRoute();
-  const adminProtectedRoute = createRoleProtectedRoute(UserRole.Admin);
+  const adminProtectedRoute = createRoleProtectedRoute(UserDto.Role.Admin);
 
   return (
     <BrowserRouter>

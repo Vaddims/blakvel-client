@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
-import { Product } from "../../models/product.model";
 import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUpdateThumbnailMutation } from "../../services/api/coreApi";
 import * as path from 'path';
 import * as uuid from 'uuid';
 import ProductImageShowcaseEditor from './productImageShowcaseEditor';
+import { ProductDto } from "../../dto/product/product.dto";
 
 enum ThumbnailSource {
   Uploaded,
   Downloaded,
 }
 
-export const useProductImageShowcaseEditor = (product?: Product) => {
+export const useProductImageShowcaseEditor = (product?: ProductDto) => {
   const navigate = useNavigate();
   const [ patchThumbs ] = usePatchProductThumbsMutation();
   const [ updateThumbnail ] = useUpdateThumbnailMutation();

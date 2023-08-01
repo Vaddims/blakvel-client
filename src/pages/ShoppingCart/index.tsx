@@ -2,7 +2,6 @@ import Panel from "../../layouts/Panel";
 import Page from "../../layouts/Page";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
-import { UserRole } from "../../models/user.model";
 import './shopping-cart.scss';
 import { useRedirection } from "../../utils/hooks/useRedirection";
 import { useCreateCheckoutSessionMutation, useUpdateUserMutation } from "../../services/api/coreApi";

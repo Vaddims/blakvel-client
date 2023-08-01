@@ -7,22 +7,22 @@ import AppTableRow from "../../layouts/AppTableRow";
 import './admin-order-inspection.scss';
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 import useSelectInputField from "../../middleware/hooks/select-input-field-hook";
-import { OrderStatus } from "../../models/order.model";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { OrderDto } from "../../dto/order/order.dto";
 
 const statusOptions = {
   open: {
     title: 'Open',
-    value: OrderStatus.Open,
+    value: OrderDto.Status.Open,
   },
   canceled: {
     title: 'Canceled',
-    value: OrderStatus.Canceled,
+    value: OrderDto.Status.canceled,
   },
   archive: {
     title: 'Archive',
-    value: OrderStatus.Archived,
+    value: OrderDto.Status.Archived,
   }
 }
 
@@ -116,7 +116,7 @@ const AdminOrderInspection: React.FC = () => {
             <div className="user">
               <span className="info-subrepresenter">Info</span>
               <span>{ order.author.role }</span>
-              <span>{ order.author.email }</span>
+              <span>email</span>
             </div>
           </div>
           <div className="payment-info test">

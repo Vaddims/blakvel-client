@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { User } from "../../models/user.model";
+import { UserDto } from "../../dto/user/user.dto";
 import { useGetCurrentUserQuery, useLogoutMutation, coreApi } from "../../services/api/coreApi";
 import { AuthStatus, logout, selectAuthStatus, selectAuthToken } from "../../services/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "./reduxAppHooks";
@@ -28,7 +27,7 @@ export function useAuthentication(queryOptions?: Parameters<typeof useGetCurrent
 
   return {
     authToken,
-    user: user as User | null,
+    user: user as UserDto | null,
     userIsLoading,
     userIsFetching,
     refetchUser,

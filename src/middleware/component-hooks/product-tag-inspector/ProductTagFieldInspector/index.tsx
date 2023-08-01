@@ -2,15 +2,15 @@ import { faRotateLeft, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputFieldCollection } from '../../../hooks/use-input-field-collection-hook';
 import { ProductTagFieldDescriptor } from '../useProductTagInspector';
-import { Product } from '../../../../models/product.model';
 import './product-tag-field-inspector.scss';
+import { ProductTagFieldDto } from '../../../../dto/product-tag-field/product-tag-field.dto';
 
 export interface ProductTagFieldInspectionState {
   readonly inputFieldCollection: InputFieldCollection;
   readonly fieldDescriptor: ProductTagFieldDescriptor;
-  readonly linkField?: Product.Tag.Field;
+  readonly linkField?: any;
   readonly exchangeFieldPositions: (fieldId1: string, fieldId2: string) => void
-  readonly update: (inputs?: Partial<ProductTagFieldDescriptor>, tagField?: Product.Tag.Field) => void;
+  readonly update: (inputs?: Partial<ProductTagFieldDescriptor>, tagField?: ProductTagFieldDto) => void;
   readonly remove: () => void;
 }
 

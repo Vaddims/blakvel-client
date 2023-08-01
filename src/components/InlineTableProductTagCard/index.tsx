@@ -1,9 +1,10 @@
-import { Product } from "../../models/product.model";
+import { CustomerProductTagDto } from "../../dto/product-tag/customer-product-tag.dto";
+import { ProductTagDto } from "../../dto/product-tag/product-tag.dto";
 import AppTableRow from "../../layouts/AppTableRow";
 import './inline-table-product-tag-card.scss';
 
 export interface InlineTableProductTagCardProps extends React.HTMLAttributes<HTMLTableRowElement> {
-  readonly productTag: Product.Tag;
+  readonly productTag: ProductTagDto | CustomerProductTagDto;
 }
 
 const InlineTableProductTagCard: React.FC<InlineTableProductTagCardProps> = (props) => {

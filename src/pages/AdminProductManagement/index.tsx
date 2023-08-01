@@ -8,19 +8,16 @@ import * as sortOptions from './sort.options.json';
 import { ReactNode, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition, faDollar, faEdit, faFilterCircleXmark, faMagnifyingGlassMinus, faPercent, faPercentage, faSearch, faSort, faSortDown, faSortUp, faTrash } from '@fortawesome/free-solid-svg-icons';
-import discountFilterOptions from './discount-filter.options.json';
 import stateFilterOptions from './state-filter.options.json';
-import useElementSelectorComponent from '../../middleware/component-hooks/element-selector-component/useElementSelectorComponent';
 import AppTable from '../../layouts/AppTable';
 import AppTableRow from '../../layouts/AppTableRow';
 import useSearchParamState from '../../middleware/hooks/useSearchParamState';
-import { stringToBoolean } from '../../utils/converters';
 import './product-management.scss';
 import { useAuthentication } from '../../middleware/hooks/useAuthentication';
 import useTextInputField from '../../middleware/hooks/text-input-field-hook';
 import { InputField } from '../../middleware/hooks/input-field-hook';
-import { Product } from '../../models/product.model';
 import useSelectInputField, { SelectInputFieldOption } from '../../middleware/hooks/select-input-field-hook';
+import { ProductDto } from '../../dto/product/product.dto';
 
 const expirationOptions = {
   none: {
@@ -442,7 +439,7 @@ const AdminProductManagement: React.FC = () => {
     applySearchCluster();
   }
 
-  const toggleProductCard = (product: Product): React.MouseEventHandler<HTMLButtonElement> => (event) => {
+  const toggleProductCard = (product: ProductDto): React.MouseEventHandler<HTMLButtonElement> => (event) => {
     event.stopPropagation()
     toggleAdditionalElement(product);
   }

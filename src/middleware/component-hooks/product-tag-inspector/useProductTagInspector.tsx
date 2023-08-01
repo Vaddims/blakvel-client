@@ -1,7 +1,6 @@
 import * as uuid from 'uuid';
 import { useParams } from 'react-router-dom';
 import { Fragment, useEffect, useState } from 'react';
-import { Product } from '../../../models/product.model';
 import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import { ProductTagFieldInspector } from './ProductTagFieldInspector';
 import { useGetProductTagQuery } from '../../../services/api/coreApi';
@@ -10,13 +9,17 @@ import { InputField } from '../../hooks/input-field-hook';
 import useInputFieldCollection, { InputFieldCollection } from '../../hooks/use-input-field-collection-hook';
 import { v4 as createUUID } from 'uuid';
 import './product-tag-inspector.scss';
+import { CreateProductTagDto } from '../../../dto/product-tag/create-product-tag.dto';
+import { UpdateProductTagDto } from '../../../dto/product-tag/update-product-tag.dto';
+import { ProductTagFieldDto } from '../../../dto/product-tag-field/product-tag-field.dto';
 
 export interface ProductTagInspectorOptions {
   readonly tagId?: string;
 }
 
-export interface ProductTagFieldDescriptor extends Product.Mixed.Tag.Field {
+export interface ProductTagFieldDescriptor extends UpdateProductTagDto.CreateProductTagFieldDto {
   readonly localUid: string;
+  readonly id?: string;
 }
 
 export const useProductTagInspector = (options: ProductTagInspectorOptions = {}) => {
@@ -35,7 +38,7 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
     validationTimings: [InputField.ValidationTiming.Blur]
   });
 
-  const createProductTagFieldDescriptor = (providedProductTag: Product.Mixed.Tag.Field, override?: Partial<Product.Mixed.Tag.Field>) => {
+  const createProductTagFieldDescriptor = (providedProductTag: any, override?: any) => {
     const descriptor: ProductTagFieldDescriptor = {
       localUid: createUUID(),
       ...providedProductTag,
@@ -58,7 +61,7 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
     })
   };
 
-  const updateField = (localId: string, inputs?: Partial<Product.Tag.Field>, tagField?: Product.Tag.Field) => {
+  const updateField = (localId: string, inputs?: Partial<ProductTagFieldDto>, tagField?: ProductTagFieldDto) => {
     setDraftFieldDescriptors((state) => {
       const fieldIndex = state.findIndex(descriptor => descriptor.localUid === localId);
       if (fieldIndex === -1) {
@@ -199,7 +202,7 @@ export const useProductTagInspector = (options: ProductTagInspectorOptions = {})
             inputFieldCollection={inputFieldCollection}
             fieldDescriptor={descriptor}
             exchangeFieldPositions={exchangeFieldPositions}
-            update={(inputs?: Partial<Product.Mixed.Tag.Field>, tagField?: Product.Tag.Field) => updateField(descriptor.localUid, inputs, tagField)}
+            update={(inputs?: Partial<ProductTagFieldDto>, tagField?: ProductTagFieldDto) => updateField(descriptor.localUid, inputs, tagField)}
             remove={() => removeField(descriptor.localUid)}
             linkField={getExistingTwinField(descriptor, inputFieldCollection.createFieldGroup(descriptor.localUid).fields[0]?.value as string ?? '')}
           />

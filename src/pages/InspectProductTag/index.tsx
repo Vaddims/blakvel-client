@@ -6,7 +6,7 @@ import { createContext, useEffect, useState } from "react";
 import * as uuid from 'uuid';
 import './product-tag-field-inspection.scss';
 import { useProductTagInspector } from "../../middleware/component-hooks/product-tag-inspector/useProductTagInspector";
-import { LocationState } from "../../models/location-state.model";
+import { LocationState } from "../../interfaces/location-state.model";
 import { StaticRoutes } from "../../middleware/utils/static-routes.enum";
 import { useGetProductTagQuery, useUpdateProductTagMutation } from "../../services/api/coreApi";
 

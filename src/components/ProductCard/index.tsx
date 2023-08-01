@@ -1,8 +1,8 @@
-import { Product } from "../../models/product.model";
+import { ProductDto } from "../../dto/product/product.dto";
 import './product-card.scss';
 
 interface ProductCardProps extends React.HTMLProps<HTMLElement> {
-  product: Product;
+  product: ProductDto;
 }
 
 const ProductCard: React.FC<ProductCardProps> = (props) => {

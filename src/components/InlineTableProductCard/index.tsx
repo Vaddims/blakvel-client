@@ -1,9 +1,9 @@
-import { Product } from "../../models/product.model";
+import { ProductDto } from "../../dto/product/product.dto";
 import AppTableRow from "../../layouts/AppTableRow";
 import './inline-table-product-card.scss';
 
 export interface InlineTableProductCardProps extends React.HTMLAttributes<HTMLTableRowElement> {
-  readonly product: Product;
+  readonly product: ProductDto;
   readonly onCheckboxClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 

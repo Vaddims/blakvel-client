@@ -128,7 +128,7 @@ const InspectUserLandingProfile: React.FC = () => {
         </SequentialSection>
         <SequentialSection title="Recent Sales" className="recent-sales">
           <ProductCatalog 
-            products={cu?.sales ?? []}
+            products={cu?.sales as any ?? []}
             productCardSize={ProductCatalogElementSize.Small}
           >
             {renderNoData(faMoneyCheck, 'No recent sales')}

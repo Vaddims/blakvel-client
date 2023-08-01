@@ -1,5 +1,4 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { UserRole } from "../../models/user.model";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 
 interface ProtectedRouteProps {

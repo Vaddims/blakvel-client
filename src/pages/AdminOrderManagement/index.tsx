@@ -4,7 +4,6 @@ import AppTable from "../../layouts/AppTable";
 import AppTableRow from "../../layouts/AppTableRow";
 import Page from "../../layouts/Page";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
-import { ClientOrder } from "../../models/order.model";
 import { useGetOrdersQuery } from "../../services/api/coreApi";
 import './admin-order-management.scss';
 import { useRedirection } from "../../utils/hooks/useRedirection";
@@ -12,6 +11,7 @@ import { ReactNode } from "react";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 import useSelectInputField, { SelectInputFieldOption } from "../../middleware/hooks/select-input-field-hook";
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
+import { OrderDto } from "../../dto/order/order.dto";
 
 const statusOptions: SelectInputFieldOption[] = [
   {
@@ -60,7 +60,7 @@ const AdminOrderManagement: React.FC = () => {
     handleElementBulkSelection();
   }
 
-  const orderDoubleClickHandler = (order: ClientOrder) => () => {
+  const orderDoubleClickHandler = (order: OrderDto) => () => {
     navigate(`/orders/${order.id}/inspect`);
   }
 
@@ -150,7 +150,7 @@ const AdminOrderManagement: React.FC = () => {
                 onDoubleClick={orderDoubleClickHandler(order)}
               >
                 <td>{ getIdLastPart(order.id) }</td>
-                <td>{ order.author.email }</td>
+                <td>email</td>
                 <td>{ new Date(order.creationDate).toLocaleString() }</td>
                 <td className="status" data-status={order.status}>
                   <div className="container">

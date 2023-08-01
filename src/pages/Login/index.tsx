@@ -1,6 +1,5 @@
 import { ChangeEvent, useState, ChangeEventHandler, FormEventHandler } from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from '../../models/user.model';
 import Page from "../../layouts/Page";
 import './login.scss';
 import { useLoginMutation, coreApi } from "../../services/api/coreApi";

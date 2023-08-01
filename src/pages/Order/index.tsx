@@ -74,7 +74,7 @@ const Order: React.FC = () => {
             <div className="user">
               <span className="info-subrepresenter">Info</span>
               <span>{ order.author.role }</span>
-              <span>{ order.author.email }</span>
+              <span>EMAIL</span>
             </div>
           </div>
           <div className="payment-info test">

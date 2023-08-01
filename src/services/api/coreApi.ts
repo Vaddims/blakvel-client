@@ -1,12 +1,16 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { CreateProductRequest } from '../../models/create-product-request.model';
-import { Product } from '../../models/product.model';
-import { UpdateProductRequest } from '../../models/update-product-request.model';
 import { appBaseQuery } from './baseQuery';
-import { Login } from '../../models/login.model';
-import { User } from '../../models/user.model';
-import { PatchUser } from '../../models/patch-user.model';
-import { ClientOrder } from '../../models/order.model';
+import { CustomerProductDto } from '../../dto/product/customer-product.dto';
+import { ProductDto } from '../../dto/product/product.dto';
+import { ProductTagDto } from '../../dto/product-tag/product-tag.dto';
+import { UserDto } from '../../dto/user/user.dto';
+import { CustomerUserDto } from '../../dto/user/customer-user.dto';
+import { CustomerProductTagDto } from '../../dto/product-tag/customer-product-tag.dto';
+import { OrderDto } from '../../dto/order/order.dto';
+import { CreateProductDto } from '../../dto/product/create-product.dto';
+import { UpdateProductDto } from '../../dto/product/update-product.dto';
+import { LoginDto } from '../../dto/auth/login.dto';
+import { UpdateUser } from '../../dto/user/update-user.dto';
 
 enum TagTypes {
   Product = 'product',
@@ -17,6 +21,15 @@ enum TagTypes {
 
   User = 'user',
   Order = 'order',
+}
+
+interface GetProductQueryArg {
+  id: string;
+  format?: UserDto.Role;
+}
+
+interface GetProductTagQueryArg {
+  
 }
 
 export const coreApi = createApi({
@@ -33,12 +46,21 @@ export const coreApi = createApi({
   endpoints: (build) => ({
     // ! Product
 
-    getProduct: build.query<Product, string>({
+    getProduct: build.query<ProductDto | CustomerProductDto, GetProductQueryArg>({
       providesTags: [TagTypes.Product],
-      query: (id) => `/products/${id}`,
+      query: (arg) => {
+        const {
+          id,
+          format = UserDto.Role.Customer,
+        } = arg;
+
+        const fetchURLSearchParams = new URLSearchParams();
+
+        return `/products/${id}?${fetchURLSearchParams.toString()}`;
+      },
     }),
 
-    getProducts: build.query<Product[], string | void>({
+    getProducts: build.query<ProductDto[], string | void>({
       providesTags: [TagTypes.Product],
       query: (searchParams) => {
         if (searchParams) {
@@ -49,7 +71,7 @@ export const coreApi = createApi({
       },
     }),
 
-    createProduct: build.mutation<Product, CreateProductRequest>({
+    createProduct: build.mutation<ProductDto, CreateProductDto>({
       invalidatesTags: [TagTypes.Product],
       query: (product) => ({
         method: 'POST',
@@ -58,7 +80,7 @@ export const coreApi = createApi({
       })
     }),
 
-    updateProduct: build.mutation<void, UpdateProductRequest>({
+    updateProduct: build.mutation<void, UpdateProductDto & { id: string }>({
       invalidatesTags: [TagTypes.Product, TagTypes.User, TagTypes.Order],
       query: ({ id, ...product}) => ({
         method: 'PUT',
@@ -103,17 +125,18 @@ export const coreApi = createApi({
 
     // ! Product Tag
 
-    getProductTag: build.query<Product.Tag, string>({
+    getProductTag: build.query<ProductTagDto | CustomerProductTagDto, GetProductTagQueryArg>({
       providesTags: [TagTypes.Tag],
       query: (id) => `/product-tags/${id}`
     }),
 
-    getProductTags: build.query<Product.Tag[], void>({
+    getProductTags: build.query<ProductTagDto[] | CustomerProductTagDto[], void>({
       providesTags: [TagTypes.Tag],
       query: () => `/product-tags`,
     }),
 
-    createProductTag: build.mutation<Product.Tag, Product.Unregistered.Tag>({
+    // TODO REWORK
+    createProductTag: build.mutation({
       invalidatesTags: [TagTypes.Tag],
       query: (productTag) => ({
         method: 'POST',
@@ -122,7 +145,8 @@ export const coreApi = createApi({
       })
     }),
 
-    updateProductTag: build.mutation<Product.Tag, Product.Tag>({
+    // TODO REWORK
+    updateProductTag: build.mutation({
       invalidatesTags: [TagTypes.Tag, TagTypes.Product, TagTypes.User],
       query: (productTag) => ({
         method: 'PATCH',
@@ -141,7 +165,7 @@ export const coreApi = createApi({
 
     // ! Auth
 
-    login: build.mutation<void, Login>({
+    login: build.mutation<void, LoginDto>({
       invalidatesTags: [TagTypes.RefreshToken, TagTypes.AccessToken],
       query: (login) => ({
         url: 'auth/login',
@@ -160,19 +184,17 @@ export const coreApi = createApi({
 
     // ! User
 
-    getCurrentUser: build.query<User, void>({
+    getCurrentUser: build.query<UserDto, void>({
       providesTags: [TagTypes.RefreshToken, TagTypes.AccessToken, TagTypes.User],
       query: () => 'users/current',
     }),
 
-    
-
-    getUsers: build.query<User[], void>({
+    getUsers: build.query<UserDto[], void>({
       query: () => `/users`,
       providesTags: [TagTypes.User],
     }),
 
-    updateUser: build.mutation<void, PatchUser>({
+    updateUser: build.mutation<void, UpdateUser>({
       invalidatesTags: [TagTypes.User, TagTypes.Product],
       query: ({ userId, ...body }) => ({
         method: 'PATCH',
@@ -197,12 +219,12 @@ export const coreApi = createApi({
 
     // ! Orders
 
-    getOrder: build.query<ClientOrder, string>({
+    getOrder: build.query<OrderDto, string>({
       providesTags: [TagTypes.Order],
       query: (orderId: string) => `orders/${orderId}`,
     }),
 
-    getOrders: build.query<ClientOrder[], void>({
+    getOrders: build.query<OrderDto[], void>({
       query: () => `orders`,
       providesTags: [TagTypes.Order],
     }),

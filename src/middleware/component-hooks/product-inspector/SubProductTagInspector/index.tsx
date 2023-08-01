@@ -1,21 +1,21 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import TextInputField from "../../../../components/TextInputField";
-import { Product } from "../../../../models/product.model";
-import { InputField } from "../../../hooks/input-field-hook";
 import { InputFieldCollection } from "../../../hooks/use-input-field-collection-hook";
 import './sub-product-tag-inspector.scss';
 import { faEdit, faRotateLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LocationState } from "../../../../models/location-state.model";
+import { LocationState } from "../../../../interfaces/location-state.model";
 import useSelectInputField, { defaultSelectInputFieldOption } from "../../../hooks/select-input-field-hook";
+import { ProductTagDto } from "../../../../dto/product-tag/product-tag.dto";
+import { CustomerProductTagDto } from "../../../../dto/product-tag/customer-product-tag.dto";
+import { ProductTagFieldDto } from "../../../../dto/product-tag-field/product-tag-field.dto";
 
 export interface SubProductTagInspectorProps<P> {
-  readonly productTag: Product.Tag;
+  readonly productTag: ProductTagDto | CustomerProductTagDto;
   readonly removeProductTag: () => void;
   readonly specificationGroup: InputFieldCollection.FieldGroup<P>;
 }
 
-const SubProductTagInspector: React.FC<SubProductTagInspectorProps<Product.Tag.Field>> = (props) => {
+const SubProductTagInspector: React.FC<SubProductTagInspectorProps<ProductTagFieldDto>> = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState: LocationState = location.state ?? {};

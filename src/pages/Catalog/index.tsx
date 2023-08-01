@@ -12,11 +12,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faMagnifyingGlass, faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 import './catalog.scss';
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
-import { UserRole } from "../../models/user.model";
 import useTextInputField from "../../middleware/hooks/text-input-field-hook";
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
 import { InputField } from "../../middleware/hooks/input-field-hook";
 import ProductCatalog, { ProductCatalogElementSize } from "../../components/ProductCatalog";
+import { UserDto } from "../../dto/user/user.dto";
 
 export interface ElementSelectorPayload {
   order: string;
@@ -37,7 +37,7 @@ export default function Catalog() {
 
   const requestSearchParams = new URLSearchParams(urlSearchParams);
   if (auth.user) {
-    requestSearchParams.set('format', UserRole.User);
+    requestSearchParams.set('format', UserDto.Role.Customer);
   }
   // TODO Limit requested products to a fixed small number
   const { data: products } = useGetProductsQuery(requestSearchParams.toString());

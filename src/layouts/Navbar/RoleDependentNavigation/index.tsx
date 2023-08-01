@@ -1,5 +1,5 @@
+import { UserDto } from "../../../dto/user/user.dto";
 import { useAuthentication } from "../../../middleware/hooks/useAuthentication"
-import { UserRole } from "../../../models/user.model";
 import AdminNavbarNavigation from "./admin-navigation";
 import AuthorizedNavbarNavigation from "./customer-navigation";
 import UnauthorizedNavbarNavigation from "./unauthorized-navigation";
@@ -8,12 +8,12 @@ const RoleDependentNavigation: React.FC = () => {
   const { user } = useAuthentication();
 
   switch (user?.role) {
-    case UserRole.Admin:
+    case UserDto.Role.Admin:
       return (
         <AdminNavbarNavigation />
       );
 
-    case UserRole.User:
+    case UserDto.Role.Customer:
       return (
         <AuthorizedNavbarNavigation />
       );

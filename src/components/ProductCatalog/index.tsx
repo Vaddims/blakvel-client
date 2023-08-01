@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Product } from "../../models/product.model";
 import ProductCard from "../ProductCard";
 import './product-catalog.scss';
+import { ProductDto } from "../../dto/product/product.dto";
 
 export enum ProductCatalogElementSize {
   Small = 'small',
@@ -10,7 +10,7 @@ export enum ProductCatalogElementSize {
 }
 
 interface ProductCatalogProps {
-  readonly products?: Product[];
+  readonly products?: ProductDto[];
   readonly className?: string;
   readonly productCardClassName?: string;
   readonly productCardSize?: ProductCatalogElementSize; 

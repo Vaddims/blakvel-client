@@ -2,13 +2,13 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { usePatchProductThumbsMutation, useUpdateThumbnailMutation, useDeleteProductThumbnailMutation } from '../../../services/api/coreApi';
 import ProductImageWrapper from "../../../components/ProductImageWrapper";
 import { useSequentialElementSelection } from "../../../middleware/hooks/useSequentialElementSelection";
-import { Product } from "../../../models/product.model";
 import { useNavigate } from "react-router-dom";
 import * as uuid from 'uuid';
 import * as path from 'path';
+import { ProductDto } from "../../../dto/product/product.dto";
 
 export interface IInspectProductImageGallaryProps {
-  product: Product;
+  product: ProductDto;
 }
 
 export interface IInspectProductImageGallaryPublic {

@@ -2,16 +2,16 @@ import { forwardRef, useEffect, useImperativeHandle, useState, ForwardRefRenderF
 import { usePatchProductThumbsMutation, useUpdateThumbnailMutation, useDeleteProductThumbnailMutation } from '../../services/api/coreApi';
 import ProductImageWrapper from "../ProductImageWrapper";
 import { useSequentialElementSelection } from "../../middleware/hooks/useSequentialElementSelection";
-import { Product } from "../../models/product.model";
 import { useNavigate } from "react-router-dom";
 import * as uuid from 'uuid';
 import * as path from 'path';
 import './productImageShowcaseInspector.scss';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { ProductDto } from "../../dto/product/product.dto";
 
 export interface ProductImageShowcaseInspectorProps {
-  product?: Product;
+  product?: ProductDto;
 }
 
 export interface ProductImageShowcaseInspectorRefMethods {

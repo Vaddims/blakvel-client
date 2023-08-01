@@ -6,7 +6,7 @@ import './inspect-product.scss';
 import { InputField } from "../../middleware/hooks/input-field-hook";
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
 import useProductInspector from "../../middleware/component-hooks/product-inspector/useProductInspector";
-import { UpdateProductRequest } from "../../models/update-product-request.model";
+import { UpdateProductDto } from "../../dto/product/update-product.dto";
 
 export interface InputFieldStatusDescriptor {
   readonly fieldId: string;
@@ -46,7 +46,7 @@ const InspectProduct = () => {
     }
 
     for (const inputProduct of inputProducts) {
-      const updateRequestBody: UpdateProductRequest = {
+      const updateRequestBody: UpdateProductDto & {id: string} = {
         ...inputProduct,
         discountExpirationDate: inputProduct.discountExpirationDate || null,
         id: inputProduct.id,

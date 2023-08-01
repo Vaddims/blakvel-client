@@ -1,12 +1,7 @@
 import { useEffect, useRef } from 'react';
-import logo from './logo.png';
 import { useRedirection } from '../../utils/hooks/useRedirection';
-import UnauthorizedNavbarNavigation from './RoleDependentNavigation/unauthorized-navigation';
-import AdminNavbarNavigation from './RoleDependentNavigation/admin-navigation';
 import './navbar.scss';
 import { useAuthentication } from '../../middleware/hooks/useAuthentication';
-import { UserRole } from '../../models/user.model';
-import AuthorizedNavbarNavigation from './RoleDependentNavigation/customer-navigation';
 import { ReactComponent as Logo} from './blakvel_emblem.svg';
 import RoleDependentNavigation from './RoleDependentNavigation';
 

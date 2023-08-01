@@ -1,8 +1,8 @@
-import { UserRole } from "./user.model";
+import { UserDto } from "./user.dto";
 
-export interface PatchUser {
+export interface UpdateUser {
   readonly userId: string;
-  readonly role?: UserRole;
+  readonly role?: UserDto.Role;
   readonly shoppingCart?: {
     readonly productId: string;
     readonly quantity: number;

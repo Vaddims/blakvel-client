@@ -4,12 +4,12 @@ import { useDeleteProductThumbnailMutation, usePatchProductThumbsMutation, useUp
 import * as path from 'path';
 import * as uuid from 'uuid';
 import ProductImageWrapper from "../ProductImageWrapper";
-import { Product } from "../../models/product.model";
 import "./productImageShowcaseInspector.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { ProductDto } from "../../dto/product/product.dto";
 
-export const useProductImageShowcaseEditor = (product?: Product) => {
+export const useProductImageShowcaseEditor = (product?: ProductDto) => {
   const [ patchThumbs ] = usePatchProductThumbsMutation();
   const [ updateThumbnail ] = useUpdateThumbnailMutation();
   const [ deleteThumbnail ] = useDeleteProductThumbnailMutation();

@@ -7,11 +7,10 @@ import { useGetProductQuery } from "../../services/api/coreApi";
 import { useAppSelector } from "../../middleware/hooks/reduxAppHooks";
 // import { selectUser } from "../../services/slices/userSlice";
 import "./product.scss";
-import { UserRole } from "../../models/user.model";
-import { Product as ProductModel } from "../../models/product.model";
 import { useAuthentication } from "../../middleware/hooks/useAuthentication";
 import { useUpdateUserMutation } from "../../services/api/coreApi";
-// import { useGetAuthenticatedUserQuery } from "../../services/api/coreApi";
+import { UserDto } from "../../dto/user/user.dto";
+import { MinProductSpecificationDto } from "../../dto/product-specification/min-product-specification.dto";
 
 const templateDescription = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum necessitatibus, ut hic in non ab adipisci maiores libero doloribus sit debitis quis illum. Beatae facere corporis ratione voluptate voluptates suscipit?';
 
@@ -34,7 +33,7 @@ const formatDiscountExpirationDate = (date: Date) => {
 export default function Product() {
   const { id = '' } = useParams();
   const authentication = useAuthentication();
-  const { data: product } = useGetProductQuery(id, { skip: !id });
+  const { data: product } = useGetProductQuery({ id, format: UserDto.Role.Customer }, { skip: !id });
   const [ updateUser ] = useUpdateUserMutation();
   const { user } = useAuthentication();
   const redirect = useRedirection();
@@ -142,16 +141,16 @@ export default function Product() {
   const discountPercent = hasDiscount ? (100 - Math.round(product.discountPrice! / product.price * 100)) : 0;
   const currentPrice = hasDiscount ? product.discountPrice : product.price;
 
-  const displaySpecifications = product.tags.reduce((specs, tag) => {
+  const displaySpecifications = (product.tags as any[]).reduce((specs, tag) => {
     const newSpecs = [...specs];
     for (const field of tag.fields) {
       const specification = product.specifications.find(specification => specification.field.id === field.id)
-      if (specification) {
-        newSpecs.push(specification);
+      if (specification) {  
+        newSpecs.push(specification as any);
       }
     }
     return newSpecs;
-  }, [] as ProductModel.Specification[]);
+  }, [] as any);
 
   return (
     <Page id="product">
@@ -184,7 +183,7 @@ export default function Product() {
               <h2 className="specification-cluster-title">Specifications</h2>
               <table className="specifications">
                 <tbody>
-                  { displaySpecifications.map((specification) => (
+                  { displaySpecifications.map((specification: MinProductSpecificationDto) => (
                     <tr className="specification-representer">
                       <td>{specification.field.name}</td>
                       <td>{specification.value}</td>

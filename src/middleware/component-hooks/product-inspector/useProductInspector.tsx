@@ -1,7 +1,6 @@
 import { faBoxes, faCalendarMinus, faDollar, faEdit, faHashtag, faRotateLeft, faSearch, faTrash, faUserSlash } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
-import { Product } from "../../../models/product.model";
 import { useGetProductTagsQuery, useGetProductsQuery } from "../../../services/api/coreApi";
 import useCheckboxField from "../../hooks/checkbox-field-hook";
 import useSelectInputField, { mixedValuesSelectInputFieldOption } from "../../hooks/select-input-field-hook";
@@ -12,7 +11,6 @@ import useTextInputField from "../../hooks/text-input-field-hook";
 import useInputFieldCollection, { InputFieldCollection } from "../../hooks/use-input-field-collection-hook";
 import SubProductTagInspector from "./SubProductTagInspector";
 import useGravatarAvatar from "../../hooks/gravatar-avatar-hook";
-import { User } from "../../../models/user.model";
 import AvatarDisplayer from "../../../components/AvatarDisplayer";
 import { useGetUsersQuery } from "../../../services/api/coreApi";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +23,12 @@ import { Writeable } from "../../utils/types";
 import { CrossValueUnification, getCrossValueUnificationFactory } from "../../utils/cross-value-unification-status";
 import { calculateDiscountPercent } from "../../utils/calculations.util";
 import './product-inspector.scss';
+import { MinUserDto } from "../../../dto/user/min-user.dto";
+import { ProductDto } from "../../../dto/product/product.dto";
+import { ProductTagDto } from "../../../dto/product-tag/product-tag.dto";
+import { CustomerProductTagDto } from "../../../dto/product-tag/customer-product-tag.dto";
+import { ProductTagFieldDto } from "../../../dto/product-tag-field/product-tag-field.dto";
+import { MinProductTagDto } from "../../../dto/product-tag/min-product-tag.dto";
 
 interface ProductInspectorOptions {
   readonly productIds?: string[];
@@ -51,8 +55,8 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const productDependencyString = products.map(product => product.id).join();
 
   // TODO Implement server data
-  const [ productSellerAnchor, setProductSellerAnchor ] = useState<User.Manifest>();
-  const [ productSeller, setProductSeller ] = useState<User.Manifest>();
+  const [ productSellerAnchor, setProductSellerAnchor ] = useState<MinUserDto>();
+  const [ productSeller, setProductSeller ] = useState<MinUserDto>();
 
   useEffect(() => {
     if (products.length === 1 && products[0].seller) {
@@ -70,7 +74,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   }
 
   const initialDraftProductTags = useMemo(getInitialDraftProductTags, [productDependencyString]);
-  const [ draftProductTags, setDraftProductTags ] = useState<Product.Tag[]>(initialDraftProductTags);
+  const [ draftProductTags, setDraftProductTags ] = useState<ProductTagDto[] | CustomerProductTagDto[]>(initialDraftProductTags);
 
   const crossValueUnificationFactory = () => getCrossValueUnificationFactory(products)
   const getCrossValueUnification = useMemo(crossValueUnificationFactory, [productDependencyString]);
@@ -343,7 +347,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     datalistUserIdMask: productSeller ? [productSeller.id] : void 0,
     helperText: 'Only one user can be added as the seller.',
     onSubmit(user) {
-      setProductSeller(user);
+      setProductSeller(user as any);
       userSearchInputField.restoreValue();
     }
   });
@@ -395,7 +399,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     inputFieldCollection.restore();
   }
 
-  const validateInputs = (): Product[] => {
+  const validateInputs = (): ProductDto[] => {
     const validatedCluster = validateComponentStateInputs(staticInputs);
     const discountCheckboxValidationResult = validatedCluster.validationResults.discountCheckboxInput;
     const shouldValidateDiscountInputs = discountCheckboxValidationResult.data || discountCheckboxValidationResult.isForMixedValues;
@@ -420,7 +424,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       return [];
     }
 
-    const mutateUnmixedProductFields = (product: Writeable<Product>) => {
+    const mutateUnmixedProductFields = (product: Writeable<ProductDto>) => {
       if (!validatedCluster.validationResults.nameInput.isForMixedValues) {
         product.name = validatedCluster.validationResults.nameInput.data;
       }
@@ -474,7 +478,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
       return product;
     }
 
-    type SuccessfulInputFieldResponse = InputFieldCollection.Field.Stable.ValidationResult.Success<Product.Tag.Field>;
+    type SuccessfulInputFieldResponse = InputFieldCollection.Field.Stable.ValidationResult.Success<ProductTagFieldDto>;
 
     const formatSpecification = (typedSpecifications: SuccessfulInputFieldResponse[]) => (
       typedSpecifications.map((result) => ({
@@ -485,7 +489,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
     switch (products.length) {
       case 0: {
-        const product: Writeable<Product> = {
+        const product: Writeable<ProductDto> = {
           name: validatedCluster.validationResults.nameInput.data,
           description: validatedCluster.validationResults.descriptionInput.data,
           price: validatedCluster.validationResults.priceInput.data,
@@ -506,23 +510,23 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         }
 
         product.specifications = formatSpecification(specificationResult.successes as SuccessfulInputFieldResponse[]);
-        product.tags = draftProductTags;
+        product.tags = draftProductTags as any;
         return [product];
       }
 
       case 1:
-        const updatedProduct: Writeable<Product> = {
+        const updatedProduct: Writeable<ProductDto> = {
           ...mutateUnmixedProductFields({...products[0]})
         };
 
-        updatedProduct.tags = draftProductTags;
+        updatedProduct.tags = draftProductTags as any;
         updatedProduct.specifications = formatSpecification(specificationResult.successes as SuccessfulInputFieldResponse[]);;
         return [updatedProduct];
 
       default:
-        const updatedProducts: Product[] = [];
+        const updatedProducts: ProductDto[] = [];
         for (const product of products) {
-          const updatedProduct: Writeable<Product> = {
+          const updatedProduct: Writeable<ProductDto> = {
             ...product,
           }
 
@@ -542,7 +546,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
 
   const productSellerAvatar = useGravatarAvatar({
     skip: !productSeller,
-    email: productSeller?.email,
+    // email: productSeller?.email,
   });
 
   const discountPercent = getRelevantDiscountPercent();
@@ -581,7 +585,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
             <div className="seller-info-container">
               {productSeller && <AvatarDisplayer src={productSellerAvatar.data} className="avatar" />}
               <h3>{productSeller ? `${productSeller.fullname.last} ${productSeller.fullname.first}` : 'No seller applied'}</h3>
-              <span>{productSeller ? productSeller.email : 'Search for user to change'}</span>
+              <span>{productSeller ? /* productSeller.email */ '' : 'Search for user to change'}</span>
             </div>
             <div className='product-tag-management' key={productSeller?.id}>
               {productSeller && (
@@ -641,7 +645,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
     });
   }
 
-  function getFieldSpecificationDescriptor(field: Product.Tag.Field): CrossValueUnification<string> {
+  function getFieldSpecificationDescriptor(field: ProductTagFieldDto): CrossValueUnification<string> {
     if (products.length === 1) {
       return {
         unified: true,
@@ -657,13 +661,13 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   }
 
   function getInputFieldCollectionDescriptors() {
-    return draftProductTags.map<InputFieldCollection.Field.Descriptor<Product.Tag.Field>[]>(
-      (tag) => tag.fields.map((field) => getDescriptor(tag, field))
+    return draftProductTags.map<InputFieldCollection.Field.Descriptor<ProductTagFieldDto>[]>(
+      (tag) => tag.fields.map((field) => getDescriptor(tag, field as ProductTagFieldDto))
     ).flat();
 
-    function getDescriptor(tag: Product.Tag, field: Product.Tag.Field) {
+    function getDescriptor(tag: MinProductTagDto, field: ProductTagFieldDto) {
       const unificationStatusResult = getFieldSpecificationDescriptor(field);
-      const inputFieldDescriptor: InputFieldCollection.Field.Descriptor<Product.Tag.Field> = {
+      const inputFieldDescriptor: InputFieldCollection.Field.Descriptor<ProductTagFieldDto> = {
         fieldType: InputFieldCollection.FieldType.Text,
         mixedValuesState: shouldActLikeMixedValues(unificationStatusResult),
         identifier: field.id,

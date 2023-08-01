@@ -2,13 +2,13 @@ import { faRedo, faRotateLeft, faTrash } from '@fortawesome/free-solid-svg-icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ChangeEventHandler, FC, useState } from 'react';
 import TextInputField from '../../../components/TextInputField';
-import { Product } from '../../../models/product.model';
 import './product-tag-field-inspection.scss';
 import useCheckboxField from '../../../middleware/hooks/checkbox-field-hook';
 import { InputField } from '../../../middleware/hooks/input-field-hook';
+import { ProductTagFieldDto } from '../../../dto/product-tag-field/product-tag-field.dto';
 
-export interface ProductTagFieldBundle extends Omit<Product.Tag.Field, 'id'> {
-  initialField?: Omit<Product.Tag.Field, 'id'>;
+export interface ProductTagFieldBundle extends Omit<ProductTagFieldDto, 'id'> {
+  initialField?: Omit<ProductTagFieldDto, 'id'>;
 }
 
 export interface ProductTagFieldInspectionState {
