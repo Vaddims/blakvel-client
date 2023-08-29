@@ -15,6 +15,7 @@ import { UpdateUser } from '../../dto/user/update-user.dto';
 enum TagTypes {
   Product = 'product',
   Tag = 'tag',
+  Snapshot = 'snapshot',
 
   RefreshToken = "refreshToken",
   AccessToken = "accessToken",
@@ -37,6 +38,7 @@ export const coreApi = createApi({
   baseQuery: appBaseQuery,
   tagTypes: [
     TagTypes.Product,
+    TagTypes.Snapshot,
     TagTypes.Tag,
     TagTypes.RefreshToken, 
     TagTypes.AccessToken, 
@@ -58,6 +60,11 @@ export const coreApi = createApi({
 
         return `/products/${id}?${fetchURLSearchParams.toString()}`;
       },
+    }),
+
+    getProductSnapshots: build.query<any[], string>({
+      providesTags: [TagTypes.Snapshot],
+      query: (id) => `products/${id}/snapshots`,
     }),
 
     getProducts: build.query<ProductDto[], string | void>({
@@ -234,6 +241,7 @@ export const coreApi = createApi({
 export const { 
   useGetProductQuery, 
   useGetProductsQuery,
+  useGetProductSnapshotsQuery,
   useUpdateProductMutation,
   useUpdateThumbnailMutation,
   useCreateProductMutation,

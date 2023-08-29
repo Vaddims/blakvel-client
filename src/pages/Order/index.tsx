@@ -59,7 +59,7 @@ const Order: React.FC = () => {
                 </td>
                 <td>
                   <div className="item-info">
-                    <span className="price">${ item.archivedPrice }</span>
+                    <span className="price">${ item.productSnapshot.price }</span>
                     <span className="qty">Qty: { item.quantity }</span>
                   </div>
                 </td>

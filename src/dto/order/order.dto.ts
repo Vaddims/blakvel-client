@@ -1,3 +1,4 @@
+import { ProductSnapshotDto } from "../product-snapshot/product-snapshot.dto";
 import { MinProductDto } from "../product/min-product.dto";
 import { MinUserDto } from "../user/min-user.dto";
 
@@ -13,8 +14,8 @@ export interface OrderDto {
 export namespace OrderDto {
   export interface ItemDto {
     readonly product: MinProductDto; // Product snapshot
+    readonly productSnapshot: ProductSnapshotDto;
     readonly quantity: number;
-    readonly archivedPrice: number;
   }
 
   export enum Status {

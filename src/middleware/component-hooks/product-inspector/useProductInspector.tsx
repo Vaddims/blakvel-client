@@ -1,7 +1,7 @@
-import { faBoxes, faCalendarMinus, faDollar, faEdit, faHashtag, faRotateLeft, faSearch, faTrash, faUserSlash } from "@fortawesome/free-solid-svg-icons";
+import { faBook, faBoxes, faCalendarMinus, faDollar, faEdit, faFileArchive, faHashtag, faInfo, faListUl, faRotateLeft, faSearch, faTrash, faUserSlash, faUserTie } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useProductImageShowcaseEditor } from "../../../components/ProductImageEditor/useProductImageShowcaseEditor";
-import { useGetProductTagsQuery, useGetProductsQuery } from "../../../services/api/coreApi";
+import { useGetProductSnapshotsQuery, useGetProductTagsQuery, useGetProductsQuery } from "../../../services/api/coreApi";
 import useCheckboxField from "../../hooks/checkbox-field-hook";
 import useSelectInputField, { mixedValuesSelectInputFieldOption } from "../../hooks/select-input-field-hook";
 import statusSelections from './status.selection.json';
@@ -29,6 +29,7 @@ import { ProductTagDto } from "../../../dto/product-tag/product-tag.dto";
 import { CustomerProductTagDto } from "../../../dto/product-tag/customer-product-tag.dto";
 import { ProductTagFieldDto } from "../../../dto/product-tag-field/product-tag-field.dto";
 import { MinProductTagDto } from "../../../dto/product-tag/min-product-tag.dto";
+import SubProductSnapshotInspector from "./SubProductSnapshotInspector";
 
 interface ProductInspectorOptions {
   readonly productIds?: string[];
@@ -42,17 +43,20 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
   const { data: fetchedUsers = [] } = useGetUsersQuery();
   const { data: fetchedProductTags = [] } = useGetProductTagsQuery();
 
+  
   const fetchSearchParams = useMemo(() => {
     const searchParams = new URLSearchParams([['format', 'admin']]);
     for (const productId of productIds) {
       searchParams.append('target', productId);
     }
-
+    
     return searchParams;
   }, [productIds.join()]);
-
+  
   const { data: products = [] } = useGetProductsQuery(fetchSearchParams.toString(), { skip: productIds.length === 0 });
   const productDependencyString = products.map(product => product.id).join();
+  
+  const { data: productSnapshots = []} = useGetProductSnapshotsQuery(products[0]?.id, { skip: products.length !== 1 || !products[0] })
 
   // TODO Implement server data
   const [ productSellerAnchor, setProductSellerAnchor ] = useState<MinUserDto>();
@@ -557,7 +561,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
         {imageEditor.render()}
       </article>
       <SequentialSectionContainer>
-        <SequentialSection title="General Information" className='general-information-section'>
+        <SequentialSection title="General Information" className='general-information-section' icon={faBook}>
           { nameInput.render() }
           { descriptionInput.render() }
           { priceInput.render() }
@@ -579,7 +583,7 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           { physicalIdInput.render() }
           { stockInput.render() }
         </SequentialSection>
-        <SequentialSection title='Item Seller' className="product-seller-section">
+        <SequentialSection title='Item Seller' className="product-seller-section" icon={faUserTie}>
           {userSearchInputField.render()}
           <div className="seller-container" data-seller-exist={!!productSeller}>
             <div className="seller-info-container">
@@ -611,7 +615,12 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
           </ul>
         </SequentialSection>
         { productIds.length <= 1 && (
-          <SequentialSection title='Tag Specifications' className="tag-specifications-section">
+          <SequentialSection 
+            title='Tags & Specifications'
+            description="Enchance product description and upgrade client search results"
+            className="tag-specifications-section"
+            icon={faListUl}
+          >
             { productTagSearchInputField.render() }
             <div className="product-tag-list">
               { draftProductTags.map(draftProductTag => (
@@ -622,11 +631,26 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
                 />
               )) }
             </div>
-            <span>[Unique specifications]</span>
+            <ul className="p">
+              <li>You can add tags for your product to categorize and describe it effectively.</li>
+              <li>Customize tags with specification fields that provide additional product details. These fields enhance the product's information and improve its searchability.</li>
+              <li>Tags and fields improve your product's visibility in the search engine, helping potential buyers find it easily.</li>
+            </ul>
           </SequentialSection>
         )}
-        <SequentialSection title="Snapshots">
-        </SequentialSection>
+        {products.length === 1 && (
+          <SequentialSection 
+            title="Snapshots"
+            icon={faFileArchive}
+            description="Archived information of the product and their appearances in the system"  
+          >
+            <div className="snapshot-list">
+              {[...productSnapshots].reverse().map(snapshot => (
+                <SubProductSnapshotInspector snapshot={snapshot} />
+              ))}
+            </div>
+          </SequentialSection>
+        )}
       </SequentialSectionContainer>
     </div>
   );

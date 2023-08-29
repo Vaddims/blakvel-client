@@ -101,7 +101,7 @@ const AdminOrderInspection: React.FC = () => {
                 </td>
                 <td>
                   <div className="item-info">
-                    <span className="price">${ (item.archivedPrice * item.quantity).toFixed(2) }</span>
+                    <span className="price">${ ((item.productSnapshot.discountPrice ?? item.productSnapshot.price) * item.quantity).toFixed(2) }</span>
                     <span className="qty">Qty: { item.quantity }</span>
                   </div>
                 </td>
