@@ -82,6 +82,7 @@
         cursor: pointer;
         text-decoration: none;
         font-weight: 500;
+        background-color: var(--background-main-color);
 
         &.highlight {
           background-color: var(--sub-highlight-color);
@@ -93,7 +94,6 @@
         // }
 
         &.outline-highlight {
-          background-color: transparent;
           color: var(--background-highlight-color) !important;
           border: .1rem solid var(--background-highlight-color);
         }
@@ -115,7 +115,8 @@
     gap: 1rem;
 
     span {
-      font-size: .9rem;
+      font-size: .8rem;
+      font-weight: 600;
       color: grey;
     }
 

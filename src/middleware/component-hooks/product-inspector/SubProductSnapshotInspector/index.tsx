@@ -8,21 +8,24 @@ export interface SubProductSnapshotInspectorProps {
   readonly snapshot: any;
 }
 
+const conditionalWordFix = (number: number, multi = '', single = '') => number === 1 ? single : multi;
+
 const SubProductSnapshotInspector: React.FC<SubProductSnapshotInspectorProps> = (props) => {
   const { snapshot } = props;
   
   const dependents = [...snapshot.dependents.orders];
-
+  console.log(snapshot)
   return (
     <div className="snapshot">
       <div className="information">
         <header>
+          {snapshot.active && (<span className="active-box"><span className="active">Active</span><span className="desc">- Will be used in next appearances</span></span>)}
           <span className="snapshot-creation-date">Created at <span>{new Date(snapshot.snaspshotCreationDate).toDateString()}</span> • {timeAgo(new Date(snapshot.snaspshotCreationDate))}</span>
-          <span className="desc">Found <span>{dependents.length} Apearance{dependents.length === 1 ? '' : 's'}</span>, which are at:</span>
+          <span className="desc">Found <span>{dependents.length} Apearance{conditionalWordFix(dependents.length, 's')}</span>, which {conditionalWordFix(dependents.length, 'are', 'is')} at:</span>
         </header>
         <div className="dependencies">
           <div className="orders">
-            <span className="t">{snapshot.dependents.orders.length} Orders</span>
+            <span className="t">{snapshot.dependents.orders.length} Order{conditionalWordFix(snapshot.dependents.orders.length, 's')}</span>
             <div className="dep-list">
               {snapshot.dependents.orders.map((order: string) => (
                 <li>
@@ -46,7 +49,7 @@ const SubProductSnapshotInspector: React.FC<SubProductSnapshotInspectorProps> = 
 
 export default SubProductSnapshotInspector;
 
-function timeAgo(date: Date) {
+export function timeAgo(date: Date) {
   const formatter = new Intl.RelativeTimeFormat('en');
   const ranges = {
     years: 3600 * 24 * 365,

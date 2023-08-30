@@ -7,6 +7,7 @@ import { InputField } from "../../middleware/hooks/input-field-hook";
 import useSearchParamState from "../../middleware/hooks/useSearchParamState";
 import useProductInspector from "../../middleware/component-hooks/product-inspector/useProductInspector";
 import { UpdateProductDto } from "../../dto/product/update-product.dto";
+import { timeAgo } from "../../middleware/component-hooks/product-inspector/SubProductSnapshotInspector";
 
 export interface InputFieldStatusDescriptor {
   readonly fieldId: string;
@@ -25,16 +26,20 @@ const InspectProduct = () => {
   
   const [ updateProduct ] = useUpdateProductMutation();
 
-  const querySearchParams = new URLSearchParams(urlSearchParams);
+  const querySearchParams = new URLSearchParams();
   querySearchParams.set('format', 'admin');
-  const { data: products } = useGetProductsQuery(querySearchParams.toString());
+  for (const inspectingProductId of paramCluster.inspect.all) {
+    querySearchParams.append('target', inspectingProductId);
+  }
+
+  const { data: products = [] } = useGetProductsQuery(querySearchParams.toString());
 
   const productInspector = useProductInspector({
     productIds: paramCluster.inspect.all,
   });
   
   const requestProductUpdate = async () => {
-    if (!products) {
+    if (products.length < 1) {
       return;
     }
 
@@ -88,19 +93,20 @@ const InspectProduct = () => {
 
   const panelSubheader = [];
 
-  if (products?.length === 1) {
+  if (products.length === 1) {
     const prod = products[0];
     panelSubheader.push(
       (
         <span>ID: <span className="highlight">{ prod.id }</span></span>
       ),
       (
-        <span>Creation Date: <span className="highlight">{ new Date(prod.creationDate).toLocaleString() }</span></span>
-      )
+        <span>Created at <span className="highlight">{ new Date(prod.creationDate).toDateString() }</span> • {timeAgo(new Date(prod.creationDate))}</span>
+      ),
     );
   }
 
   const inspectingProductIds = paramCluster.inspect.all;
+
   return (
     <Page id="inspect-product">
       <Panel

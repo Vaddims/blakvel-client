@@ -188,7 +188,7 @@
         'search-tag-input-field description' 
         'product-tag-list description';
 
-      grid-template-rows: auto;
+      grid-template-rows: auto 1fr;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
 
@@ -207,6 +207,7 @@
 
   .snapshot-list {
     display: grid;
+    gap: 1rem;
 
     & > :nth-child(2n - 1) {
       & > hr {
@@ -228,5 +229,41 @@
     top: 5.5rem;
     width: min-content;
     height: min-content;
+  }
+
+  .snapshots-empty {
+    padding-inline: 1rem;
+
+    h3 {
+      margin: 0;
+      margin-bottom: .5rem;
+    }
+
+    .t {
+      color: grey;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 2rem;
+
+      li {
+        color: grey;
+      }
+    }
+
+
+  }
+
+  .tags-empty {
+    padding-left: 1rem;
+    h3 {
+      margin: 0;
+      margin-top: 1rem;
+    }
+
+    .t {
+      color: grey;
+    }
   }
 }

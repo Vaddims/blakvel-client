@@ -622,15 +622,27 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
             icon={faListUl}
           >
             { productTagSearchInputField.render() }
-            <div className="product-tag-list">
-              { draftProductTags.map(draftProductTag => (
-                <SubProductTagInspector
-                  productTag={draftProductTag}
-                  removeProductTag={() => removeDraftProductTag(draftProductTag.id)}
-                  specificationGroup={inputFieldCollection.createFieldGroup(draftProductTag.id)}
-                />
-              )) }
-            </div>
+            { draftProductTags.length > 0 ? (
+              <div className="product-tag-list">
+                { draftProductTags.map(draftProductTag => (
+                  <SubProductTagInspector
+                    productTag={draftProductTag}
+                    removeProductTag={() => removeDraftProductTag(draftProductTag.id)}
+                    specificationGroup={inputFieldCollection.createFieldGroup(draftProductTag.id)}
+                  />
+                )) }
+              </div>
+            ) : (
+              <div className="tags-empty">
+                <div>
+                  <h3>No tags applied</h3>
+                  <span className="t">Search for product tag to apply</span>
+                </div>
+                <div>
+
+                </div>
+              </div>
+            )}
             <ul className="p">
               <li>You can add tags for your product to categorize and describe it effectively.</li>
               <li>Customize tags with specification fields that provide additional product details. These fields enhance the product's information and improve its searchability.</li>
@@ -644,11 +656,23 @@ export const useProductInspector = (options?: ProductInspectorOptions) => {
             icon={faFileArchive}
             description="Archived information of the product and their appearances in the system"  
           >
-            <div className="snapshot-list">
-              {[...productSnapshots].reverse().map(snapshot => (
-                <SubProductSnapshotInspector snapshot={snapshot} />
-              ))}
-            </div>
+            {productSnapshots.length > 0 ? (
+              <div className="snapshot-list">
+                {[...productSnapshots].reverse().map(snapshot => (
+                  <SubProductSnapshotInspector snapshot={snapshot} />
+                ))}
+              </div>
+            ) : (
+              <div className="snapshots-empty">
+                <div>
+                  <h3>No snapshots archived</h3>
+                  <span className="t">Snapshots are created when:</span>
+                  <ul>
+                    <li>An Order with this product have been created</li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </SequentialSection>
         )}
       </SequentialSectionContainer>
