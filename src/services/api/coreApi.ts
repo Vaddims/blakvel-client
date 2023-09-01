@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { appBaseQuery } from './baseQuery';
+import { apiBaseQuery, appBaseQuery } from './baseQuery';
 import { CustomerProductDto } from '../../dto/product/customer-product.dto';
 import { ProductDto } from '../../dto/product/product.dto';
 import { ProductTagDto } from '../../dto/product-tag/product-tag.dto';
